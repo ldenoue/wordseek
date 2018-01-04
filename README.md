@@ -1,3 +1,5 @@
+![wordseek on an iPhone in landscape mode](wordseek.jpg)
+
 # WordSeek
 A word search game implemented using modern web technologies, especially CSS flex box and SVG.
 
@@ -26,4 +28,4 @@ A neat CSS animation shows the number of words found in the current round.
 Again, the CSS pointer-events:none is used to prevent stealing events destined to the grid
 element underneath.
 
-
+The CSS is responsive using media queries to detect device orientation and width.
