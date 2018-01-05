@@ -58,9 +58,10 @@ text{pointer-events:none}/*important because svg text appear above the svg recta
 #win{
   pointer-events:none;/* would steal events from grid without */
   opacity:0;
-  position:fixed;
+  /*position:fixed;
   left:calc(50% - 64px);
-  top:calc(50% - 64px);
+  top:calc(50% - 64px);*/
+  position:absolute;
   width:128px;
   height:128px;
   background-color:white;
@@ -69,7 +70,7 @@ text{pointer-events:none}/*important because svg text appear above the svg recta
   font-size:48px;
   color:white;
   background-color:yellow;
-  margin-left:auto;margin-right:auto;
+  /*margin-left:auto;margin-right:auto;*/
   text-align:center;
   line-height:128px;
 }
@@ -89,7 +90,7 @@ transition: opacity 1s ease-in-out;
 .rounded{border-radius:16px;}
 
 #container{
-width:100vw;/*height:100%;*/
+width:100vw;height:100%;
 display:flex;
 flex-direction:column;
 align-items: center;
@@ -99,16 +100,8 @@ justify-content: space-evenly;
 
 .item{align-self:center}
 
-#big{
-  display: grid;
-  align-items: stretch;
-  height: 100%;
-  grid-template-rows: min-content auto;
-}
-
 @media only screen and (orientation:landscape) {
   #container{flex-direction:row}
-  #big{flex-direction:row}
   .word{display:block;}
   .wordicon{font-size:48px;}
   .realword{font-size:20px;}
@@ -123,7 +116,7 @@ justify-content: space-evenly;
 
 }
 
-#header{text-align:right;margin:8px;font-weight:bold;font-size:22px;text-align:center}
+#header{position:fixed;width:calc(100vw - 16px);top:4px;left:0;text-align:right;margin-left:8px;margin-right:8px;font-weight:bold;font-size:22px;text-align:center}
 #totalwordsdiv{float:left;font-size:22px;}
 #highscorediv{float:right;font-size:22px;}
 
@@ -140,14 +133,12 @@ justify-content: space-evenly;
 </head>
 <body onload='init()'>
 <div id='win'>1</div>
-<div id='big'>
-  <div id='header'><div id='totalwordsdiv'>0 words</div>WordSeek<div id='highscorediv'>0 points</div></div>
-  <div id='container'>
-    <div class='item' id='questions1'></div>
-    <svg class='item' version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" id='grid'></svg>
-    <div class='item' id='questions2'></div>
-  </div>
+<div id='container'>
+  <div class='item' id='questions1'></div>
+  <svg class='item' version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" id='grid'></svg>
+  <div class='item' id='questions2'></div>
 </div>
+<div id='header'><div id='totalwordsdiv'>0 words</div><div id='highscorediv'>0 points</div></div>
 <script>
 'use strict';
 
@@ -310,8 +301,13 @@ function highlightSelection(x1,x2,row,showCategories)
   selectionrect.setAttribute('width',(x2-x1+1)*48);
 }
 
-function showWin(n)
+function showWin(n,x1,y1,x2,y2)
 {
+  var pos = getPosition((x1+x2)/2,y1);
+  pos.x -= win.offsetWidth / 2;
+  pos.y -= win.offsetHeight / 2;
+  win.style.left = pos.x + 'px';
+  win.style.top = pos.y + 'px';
   win.textContent = '+' + n;
   win.classList.add('zoom');
   setTimeout(function () { win.classList.remove('zoom')},1000);
@@ -356,7 +352,7 @@ function checkWord(x1,y1,x2,y2)
     var points = pointsForWord(textselection);
     score += points;
     setScore(score);
-    showWin(points);
+    showWin(points,x1,y1,x2,y2);
     totalWords++;
     setTotalWords(totalWords);
     if (nFound === nQuestions)
@@ -525,19 +521,13 @@ if ('ontouchstart' in document.documentElement)
   moveEvent = 'touchmove';
 }
 
-/*function getPosition(e) {
+function getPosition(x,y) {
   var rect = grid.getBoundingClientRect();
-  var pos = null;
-  if (e.touches)
-    pos = [e.touches[0].clientX - rect.left,e.touches[0].clientY - rect.top];
-  else
-    pos = [e.clientX - rect.left,e.clientY - rect.top];
-  pos[0] *= (48*gamew) / rect.width;
-  pos[1] *= (48*gameh) / rect.height;
-  pos[0] = Math.ceil(pos[0] /48) - 1;
-  pos[1] = Math.ceil(pos[1] / 48) - 1;
-  return pos;
-}*/
+  return {
+    x:rect.left + rect.width * x / gamew,
+    y:rect.top + rect.height * y / gameh
+  };
+}
 
 document.body.addEventListener(startEvent,function (){init();});
 
