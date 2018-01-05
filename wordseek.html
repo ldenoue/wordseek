@@ -47,7 +47,7 @@ background-size: cover;
 .realword{font-size:22px}
 
 .crossed {opacity:0.5;color:#555;}
-text{pointer-events:none}
+text{pointer-events:none}/*important because svg text appear above the svg rectangles*/
 
 @keyframes flickerAnimation { /* flame pulses */
   0%   { opacity:0; transform:scale(0.3)}
@@ -56,7 +56,7 @@ text{pointer-events:none}
 }
 
 #win{
-  pointer-events:none;
+  pointer-events:none;/* would steal events from grid without */
   opacity:0;
   position:fixed;
   left:calc(50% - 64px);
@@ -66,7 +66,7 @@ text{pointer-events:none}
   background-color:white;
   border-radius:50%;
   border:0px solid white;
-  font-size:96px;
+  font-size:48px;
   color:white;
   background-color:yellow;
   margin-left:auto;margin-right:auto;
@@ -99,8 +99,16 @@ justify-content: space-evenly;
 
 .item{align-self:center}
 
+#big{
+  display: grid;
+  align-items: stretch;
+  height: 100%;
+  grid-template-rows: min-content auto;
+}
+
 @media only screen and (orientation:landscape) {
   #container{flex-direction:row}
+  #big{flex-direction:row}
   .word{display:block;}
   .wordicon{font-size:48px;}
   .realword{font-size:20px;}
@@ -119,35 +127,26 @@ justify-content: space-evenly;
   #grid{height:400px;max-width:calc(100vw-32px);max-height:calc(100vw-32px))}
 }
 
-#triangle {
-  fill: #2FABF9;
-  stroke: #2FABF9;
-  stroke-width: 32;
-  stroke-linejoin: round;
-  cursor: pointer;
-  opacity:0.9;
-}
-#triangle:hover{opacity:1.0}
-#playtext{
-  display:none;
-  transform:translate(24px,110px);
-  font-size:36px;
-  font-family:Ubuntu;
-  fill:white;
-}
-#playbutton,#overlay{display:none}
 .solutionrect { transition: fill-opacity 1s ease-in-out}
+#header{text-align:right;margin:8px;font-size:22px;text-align:center}
+#totalwordsdiv{float:left;font-size:16px;}
+#highscorediv{float:right;font-size:16px;}
 </style>
 </head>
 <body onload='init()'>
 <div id='win'>1</div>
-<div id='container'>
-  <div class='item' id='questions1'></div>
-  <svg class='item' version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" id='grid'></svg>
-  <div class='item' id='questions2'></div>
+<div id='big'>
+  <div id='header'><div id='totalwordsdiv'>0 words</div>WordSeek<div id='highscorediv'>0 points</div></div>
+  <div id='container'>
+    <div class='item' id='questions1'></div>
+    <svg class='item' version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" id='grid'></svg>
+    <div class='item' id='questions2'></div>
+  </div>
 </div>
 <script>
 'use strict';
+
+// full list at https://emojipedia.org/nature/
 var emojis={All:{
   Grapes:"🍇",Melon:"🍈",Watermelon:"🍉",Tangerine:"🍊",Lemon:"🍋",Banana:"🍌",Pineapple:"🍍",
   Apple:"🍎",Apple:"🍏",Pear:"🍐",Peach:"🍑",Cherries:"🍒",
@@ -157,8 +156,7 @@ var emojis={All:{
   Pretzel:"🥨",Pancakes:"🥞",Cheese:"🧀",Meat:"🍖",Poultry:"🍗",Meat:"🥩",Bacon:"🥓",Hamburger:"🍔",
   Fries:"🍟",Pizza:"🍕","Hot Dog":"🌭",Sandwich:"🥪",Taco:"🌮",Burrito:"🌯",Cooking:"🍳",Pot:"🍲",Bowl:"🥣",
   Salad:"🥗",Popcorn:"🍿",Can:"🥫",Bento:"🍱",Cracker:"🍘",Rice:"🍚",Curry:"🍛",Bowl:"🍜",Spaghetti:"🍝",
-  Potato:"🍠",Sushi:"🍣",Shrimp:"🍤",Dumpling:"🥟",Cookie:"🥠",Box:"🥡","Ice Cream":"🍦",
-  //"Ice Cream":"🍨",
+  Potato:"🍠",Sushi:"🍣",Shrimp:"🍤",Dumpling:"🥟",Cookie:"🥠",Box:"🥡","IceCream":"🍦",
   Doughnut:"🍩",Cookie:"🍪",Cake:"🎂",Shortcake:"🍰",Pie:"🥧",Chocolate:"🍫",
   Candy:"🍬",Lollipop:"🍭",Custard:"🍮",Honey:"🍯",Bottle:"🍼",
   Milk:"🥛",Beverage:"☕",Teacup:"🍵",Sake:"🍶",Cork:"🍾",Wine:"🍷",Cocktail:"🍸",Drink:"🍹",Beer:"🍺",
@@ -178,15 +176,12 @@ var emojis={All:{
   Seedling:"🌱",Tree:"🌲",Deciduous:"🌳",Palm:"🌴",Cactus:"🌵",Rice:"🌾",Herb:"🌿",Shamrock:"☘",
   Clover:"🍀",Maple:"🍁",Leaf:"🍂",Leaf:"🍃",Mushroom:"🍄",Chestnut:"🌰",Moon:"🌕",Moon:"🌜",Sun:"🌞",
   Star:"⭐",Cloud:"⛅",Tornado:"🌪",Fog:"🌫",Wind:"🌬",Rainbow:"🌈",Umbrella:"☂",Drops:"☔",
-  //Voltage:"⚡",Snowflake:"❄",
   Snowman:"⛄",Comet:"☄",Fire:"🔥",Droplet:"💧",
-  //Wave:"🌊",
   Tree:"🎄",Sparkles:"✨",Tanabata:"🎋",Pine:"🎍",Baby:"👶",Angel:"👼",SantaClaus:"🎅",Elf:"🧝",
-  //Family:"👪",
   Socks:"🧦",Deer:"🦌",Cookie:"🍪",Milk:"🥛",Wine:"🍷",Fork:"🍴",Church:"⛪",Star:"🌟",Snowflake:"❄",
   Snowman:"⛄",Fire:"🔥",Tree:"🎄",Gift:"🎁",Bell:"🔔",Notes:"🎶",Candle:"🕯",Smiling:"😁",Snowboarder:"🏂",
   Evergreen:"🌲",Mountain:"🏔",
-  //Foggy:"🌁",Wind:"🌬",
+  Wind:"🌬",
   Umbrella:"🌂",
   Rain:"☔",Snowflake:"❄",Snowman:"⛄",Skis:"🎿",Horse:"🏇",Skier:"⛷",Snowboarder:"🏂",
   Surfing:"🏄",Rowing:"🚣",Boat:"🚣",Swimming:"🏊",Bouncing:"⛹",Weights:"🏋",Biking:"🚴",
@@ -208,7 +203,6 @@ var emojis={All:{
   Tram:"🚊",Monorail:"🚝",Railway:"🚞",Tram:"🚋",Bus:"🚌",Trolleybus:"🚎",Minibus:"🚐",Ambulance:"🚑",
   Fire:"🚒",Police:"🚓",Taxi:"🚕",Taxi:"🚖",Automobile:"🚗",Automobile:"🚘",Truck:"🚚",Lorry:"🚛",Tractor:"🚜",
   Bicycle:"🚲",Scooter:"🛴",Scooter:"🛵",
-  //Track:"🛤",
   Fuel:"⛽",Light:"🚦",Construction:"🚧",Anchor:"⚓",Sailboat:"⛵",Speedboat:"🚤",Ship:"🛳",Ferry:"⛴",Boat:"🛥",
   Ship:"🚢",Airplane:"🛩",Seat:"💺",Helicopter:"🚁",Cableway:"🚠",Tramway:"🚡",Satellite:"🛰",Rocket:"🚀",
   Saucer:"🛸",
@@ -231,7 +225,7 @@ var emojis={All:{
   Joystick:"🕹",Picture:"🖼",Microphone:"🎙",Radio:"📻",Phone:"📱",Telephone:"📞",Pager:"📟",Fax:"📠",
   Battery:"🔋",Plug:"🔌",Laptop:"💻",Computer:"🖥",Printer:"🖨",Keyboard:"⌨",Mouse:"🖱",Trackball:"🖲",Disk:"💽",
   Floppy:"💾",DVD:"📀",Camera:"🎥",Projector:"📽",Television:"📺",Camera:"📷",
-  //Videocassette:"📼",
+  Videocassette:"📼",
   Magnifying:"🔍",Candle:"🕯",Bulb:"💡",Flashlight:"🔦",Lantern:"🏮",Notebook:"📔",Book:"📕",Books:"📚",Notebook:"📓",
   Page:"📃",Scroll:"📜",Newspaper:"🗞",Bookmark:"🔖",Label:"🏷",Money:"💰",
   CreditCard:"💳",Envelope:"📩",Package:"📦",Mailbox:"📫",Postbox:"📮",Pencil:"✏",Pen:"🖊",Paintbrush:"🖌",Crayon:"🖍",
@@ -242,27 +236,27 @@ var emojis={All:{
   Key:"🔑",Hammer:"🔨",Pick:"⛏",Dagger:"🗡",Pistol:"🔫",Shield:"🛡",Wrench:"🔧",Bolt:"🔩",Gear:"⚙",Clamp:"🗜",
   Scale:"⚖",Link:"🔗",Chains:"⛓",Alembic:"⚗",Microscope:"🔬",Telescope:"🔭",Satellite:"📡",Syringe:"💉",Pill:"💊",
   Door:"🚪",Bed:"🛏",Couch:"🛋",Toilet:"🚽",Shower:"🚿",Bathtub:"🛁",Cigarette:"🚬",
-  //Coffin:"⚰",Urn:"⚱",
   Moai:"🗿",Flag:"🏁",
   Golfing:"🏌"
   }
-};var wallPapers = '11,12,15,16,17,19,2,20,3,5,6,7,8,9'.split(',');
-var touchAvailable = false;
+};
+var score = 0;
+var totalWords = 0;
 var startEvent = 'mousedown';
 var endEvent = 'mouseup';
 var moveEvent = 'mousemove';
 var isMouseDown = false;
 var lastElement = null;
-
+var backColor = null;
 var isNewGame = false;
 var bgColors = '#2FABF9,#F2C03A,#DB2E29,#9280F9'.split(',');
 var hiColors = 'yellow,#3BDB29,#2FABF9,#F2C03A,#DB2E29,#9280F9'.split(',');
 var currentColor = 0;
 var letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-//http://www.google.com/Top/Recreation/Humor/Quotations/
+var points = {"a":1,"b":3,"c":3,"d":2,"e":1,"f":4,"g":2,"h":4,"i":1,"j":8,"k":5,"l":1,"m":3,"n":1,"o":1,"p":3,"q":10,"r":1,"s":1,"t":1,"u":1,"v":4,"w":4,"x":8,"y":4,"z":10};
 var words_emojis = [];
-var gamew = 9;//11;
-var gameh = 9;//11;
+var gamew = 9;
+var gameh = 9;
 var nQuestions = 6;
 var nFound = 0;
 var matrix = new Array(gameh);
@@ -270,13 +264,9 @@ var first = null;
 var solution = new Array();
 
 var categories = Object.keys(emojis);
-//console.log(categories);
 var words = [];
 var category = categories[0];
-//console.log(category);
-//from https://emojipedia.org/nature/
-//var names = {};document.querySelector('.emoji-list').querySelectorAll('li').forEach(a => {var name=a.textContent.substring(3);names[name]=[...a.textContent][0]});
-//
+
 function $(id)
 {
 	return document.getElementById(id);
@@ -317,7 +307,7 @@ function highlightSelection(x1,x2,row,showCategories)
 
 function showWin(n)
 {
-  win.textContent = n;
+  win.textContent = '+' + n;
   win.classList.add('zoom');
   setTimeout(function () { win.classList.remove('zoom')},1000);
 }
@@ -359,7 +349,12 @@ function checkWord(x1,y1,x2,y2)
       }
     }
     nFound++;
-    showWin(nFound);
+    var points = pointsForWord(textselection);
+    score += points;
+    setScore(score);
+    showWin(points);
+    totalWords++;
+    setTotalWords(totalWords);
     if (nFound === nQuestions)
     {
       var rects = document.querySelectorAll('.solutionrect');
@@ -373,18 +368,33 @@ function checkWord(x1,y1,x2,y2)
   }
 }
 
-function playClicked()
+function setScore(s)
 {
-  playbutton.style.visibility = 'hidden';
-  overlay.style.visibility = 'hidden';
-  if (isNewGame)
-  {
-    isNewGame = false;
-    init();
-  }
+  window.localStorage.score = s;
+  highscorediv.textContent = score + ' pts';
 }
 
-var backColor = null;
+function setTotalWords(s)
+{
+  window.localStorage.totalWords = s;
+  totalwordsdiv.textContent = totalWords + ' words';
+}
+
+function pointsForWord(textselection)
+{
+  var pts = 0;
+  if (!textselection)
+    return 0;
+  var letters = textselection.trim().toLowerCase().split('');
+  for (var i=0;i<letters.length;i++)
+  {
+    var val = points[letters[i]];
+    if (val)
+      pts += val;
+  }
+  return pts;
+}
+
 function init()
 {
   nFound = 0;
@@ -484,18 +494,12 @@ function initReal()
 	}
 	//html += '<rect fill="yellow" x=' + (size/2) + ' y=' + (size/2) + ' width="256" height="256"/>';
 	//html += '<path rotate="45deg" d="M 6.7 1.14 l 2.8 4.7 s 1.3 3 -1.82 3.22 l -5.4 0 s -3.28 -.14 -1.74 -3.26 l 2.76 -4.7 s 1.7 -2.3 3.4 0 z" transform="scale(5)" fill="crimson">';
-	var cx = size/2 - 150/2;
-	var cy = size/2 - 200/2;
-	html += '<rect id="overlay" width="100%" height="100%" fill="rgba(255,255,255,0.1)"/><g id="playbutton" transform="translate(' + cx + ',' + cy + ')"><polygon id="triangle" points="0,0 150,100 0,200"></polygon><text x=0 y=0 id=playtext>PLAY</text></g>';
+	//var cx = size/2 - 150/2;
+	//var cy = size/2 - 200/2;
+	//html += '<rect id="overlay" width="100%" height="100%" fill="rgba(255,255,255,0.1)"/><g id="playbutton" transform="translate(' + cx + ',' + cy + ')"><polygon id="triangle" points="0,0 150,100 0,200"></polygon><text x=0 y=0 id=playtext>PLAY</text></g>';
 	grid.innerHTML = html;
 	grid.setAttribute('viewBox','0 0 ' + size + ' ' + size);
-	
-	playbutton.addEventListener(startEvent, function (e) {
-    playClicked();
-  });
 
-  triangle.style.fill = backColor;
-  triangle.style.stroke = backColor;
   win.style.backgroundColor = backColor;
 
 	html = '';
@@ -586,6 +590,19 @@ grid.addEventListener(startEvent, function (e) {
     highlightSelection(first.x,first.x,first.y);
   }
 });
+
+score = 0;
+if (window.localStorage.score)
+{
+  score = +window.localStorage.score;
+  setScore(score);
+}
+totalWords = 0;
+if (window.localStorage.totalWords)
+{
+  totalWords = +window.localStorage.totalWords;
+  setTotalWords(totalWords);
+}
 
 </script>
 </body>
