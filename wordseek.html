@@ -303,7 +303,7 @@ function highlightSelection(x1,x2,row,showCategories)
 
 function showWin(n,x1,y1,x2,y2)
 {
-  var pos = getPosition((x1+x2)/2,y1);
+  var pos = getPosition((x1+x2+1)/2,y1-1);
   pos.x -= win.offsetWidth / 2;
   pos.y -= win.offsetHeight / 2;
   win.style.left = pos.x + 'px';
