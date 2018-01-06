@@ -6,6 +6,7 @@ A word search game implemented using modern web technologies, especially CSS fle
 ## Usage
 
     Open wordseek.html in your favorite browser
+    or try the [online demo](http://www.appblit.com/static/wordseek.html)
 
 ## History
 
