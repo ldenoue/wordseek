@@ -1,4 +1,4 @@
-![wordseek screenshot](wordseek.jpg)
+![wordseek screenshot](screenshot.jpg)
 
 # WordSeek
 A word search game implemented using modern web technologies, especially CSS flex box and SVG.
