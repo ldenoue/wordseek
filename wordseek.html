@@ -57,8 +57,8 @@ text{
 
 @keyframes flickerAnimation { /* flame pulses */
   0%   { opacity:0; transform:scale(0.3)}
-  50%  { opacity:0.6; transform:scale(1.0)}
-  100% { opacity:0; transform:scale(1.0)}
+  50%  { opacity:0.5; transform:scale(1.0)}
+  100% { opacity:0; transform:scale(1.3)}
 }
 
 #win{
@@ -143,6 +143,8 @@ justify-content: space-evenly;
 <div id='header'><div id='totalwordsdiv'>0 words</div><div id='highscorediv'>0 points</div></div>
 <script>
 'use strict';
+var HORIZONTAL = 0;
+var VERTICAL = 1;
 
 // full list at https://emojipedia.org/nature/
 var emojis={All:{
@@ -278,55 +280,101 @@ function rnd(n)
 	return Math.floor(Math.random()*n);
 }
 
-function goodPos(x,y,word)
+function goodPos(x,y,word,direction)
 {
-	for (var i=x;i<x+word.length;i++)
-	{
-		if (matrix[y][i] != ' ')
-			return false;
-	}
-	return true;
+  if (direction === HORIZONTAL)
+  {
+    for (var i=x;i<x+word.length;i++)
+    {
+      if (matrix[y][i] != ' ')
+        return false;
+    }
+  	return true;
+  }
+  else if (direction === VERTICAL)
+  {
+    for (var j=y;j<y+word.length;j++)
+    {
+      if (matrix[j][x] != ' ')
+        return false;
+    }
+  	return true;
+  }
 }
 
-function placeWord(x,y,w)
+function placeWord(x,y,w,direction)
 {
-	for (var i=x;i<x+w.length;i++)
-	{
-		matrix[y][i] = w.charAt(i-x);
-	}
-	solution[w] = {x:x,y:y};
+  if (direction === HORIZONTAL)
+  {
+    for (var i=x;i<x+w.length;i++)
+    {
+      matrix[y][i] = w.charAt(i-x);
+    }
+  	solution[w] = {x1:x,y1:y,x2:x+w.length-1,y2:y};
+  }
+  else if (direction === VERTICAL)
+  {
+    for (var j=y;j<y+w.length;j++)
+    {
+      matrix[j][x] = w.charAt(j-y);
+    }
+    solution[w] = {x1:x,y1:y,x2:x,y2:y+w.length-1};
+  }
 }
 
-function highlightSelection(x1,x2,row,showCategories)
+//function highlightSelection(x1,x2,row,showCategories)
+function highlightSelection(x1,y1,x2,y2)
 {
-  if (x1 > x2)
+  /*if (x1 > x2)
     return highlightSelection(x2,x1,row);
   selectionrect.setAttribute('x',x1*48);
   selectionrect.setAttribute('y',row*48);
-  selectionrect.setAttribute('width',(x2-x1+1)*48);
+  selectionrect.setAttribute('width',(x2-x1+1)*48);*/
+  selectionline.setAttribute('x1',x1*48+24);
+  selectionline.setAttribute('y1',y1*48+24);
+  selectionline.setAttribute('x2',x2*48+24);
+  selectionline.setAttribute('y2',y2*48+24);
 }
 
 function showWin(n,x1,y1,x2,y2)
 {
-  var pos = getPosition((x1+x2+1)/2,y1-1);
+  var pos = getPosition((x1+x2+1)/2,(y1+y2)/2);
   pos.x -= win.offsetWidth / 2;
   pos.y -= win.offsetHeight / 2;
   win.style.left = pos.x + 'px';
   win.style.top = pos.y + 'px';
   win.textContent = '+' + n;
   win.classList.add('zoom');
-  setTimeout(function () { win.classList.remove('zoom')},1000);
+  setTimeout(function () { win.classList.remove('zoom')},2900);
 }
 
 function checkWord(x1,y1,x2,y2)
 {
   if (x1 > x2)
     return checkWord(x2,y2,x1,y1);
-  selectionrect.setAttribute('width',0);
+  //selectionrect.setAttribute('width',0);
+  selectionline.style.visibility = 'hidden';
   first = null;
   var textselection = '';
-  for (var x=x1;x<=x2;x++)
-    textselection += matrix[y1][x];
+  if (y1 === y2)
+  {
+    for (var x=x1;x<=x2;x++)
+      textselection += matrix[y1][x];
+  }
+  else if (x1 === x2)
+  {
+    for (var y=y1;y<=y2;y++)
+      textselection += matrix[y][x1];
+  }
+  else
+  {
+    var y = y1;
+    for (var x=x1;x<=x2;x++)
+    {
+      textselection += matrix[y][x];
+      y++;
+    }
+  }
   var found = -1;
   for (var i=0;i<words.length;i++)
   {
@@ -338,10 +386,17 @@ function checkWord(x1,y1,x2,y2)
   }
   if (found >= 0)
   {
-    var rectSolution = document.querySelector('#solutionrect' + found);
-    rectSolution.setAttribute('x',x1*48);
-    rectSolution.setAttribute('y',y1*48);
-    rectSolution.style.visibility = 'visible';
+    //var rectSolution = document.querySelector('#solutionrect' + found);
+    //rectSolution.setAttribute('x',x1*48);
+    //rectSolution.setAttribute('y',y1*48);
+    //rectSolution.style.visibility = 'visible';
+    var lineSolution = document.querySelector('#solutionrect' + found);
+    lineSolution.setAttribute('x1',x1*48+24);
+    lineSolution.setAttribute('y1',y1*48+24);
+    lineSolution.setAttribute('x2',x2*48+24);
+    lineSolution.setAttribute('y2',y2*48+24);
+    lineSolution.style.visibility = 'visible';
+
     first = null;
     var elem = null
     for (var i=0;i<words.length;i++)
@@ -448,11 +503,22 @@ function initReal()
 		{
 			ntries++;
 			var word = words[i];
-			var x = rnd(gamew-word.length);
-			var y = rnd(gameh);
-			if (goodPos(x,y,word))
+			var direction = rnd(2);
+			var x = 0
+			var y = 0;
+			if (direction === HORIZONTAL)
 			{
-				placeWord(x,y,word);
+			  x = rnd(gamew-word.length);
+			  y = rnd(gameh);
+			}
+			else
+			{
+			  x = rnd(gamew);
+			  y = rnd(gameh-word.length);
+			}
+			if (goodPos(x,y,word,direction))
+			{
+				placeWord(x,y,word,direction);
 				done = true;
 			}
 		}
@@ -464,7 +530,7 @@ function initReal()
 	{
 		for (var i=0;i<gamew;i++)
 		{
-			if (matrix[j][i] == ' ')
+			if (matrix[j][i] === ' ')
 				matrix[j][i] = letters[rnd(26)];
 		}
 	}
@@ -472,20 +538,22 @@ function initReal()
   var size = gamew * 48;
   
 	var html = '';
-	html += '<rect id="selectionrect" rx="24" fill="yellow" x="0" y="0" width="0" height="48" />';
+	//html += '<line id="selectionline" x1="0" y1="0" x2="200" y2="200" stroke-linecap="round" style="visibility:hidden;stroke:rgb(255,255,0);stroke-width:48" />';
   var color = 0;
   var solutionid = 0;
 	for (var w in solution)
 	{
-	  var left = 48 * solution[w].x;
-	  var top = 48 * solution[w].y;
-	  var width = 48 * w.length;
+	  var x1 = 48 * solution[w].x1+24;
+	  var y1 = 48 * solution[w].y1+24;
+    var x2 = 48 * solution[w].x2+24;
+    var y2 = 48 * solution[w].y2+24;
 	  var fillColor = hiColors[color%hiColors.length];
-    html += '<rect class="solutionrect" style="visibility:hidden" id=solutionrect' + solutionid + ' rx=24 fill=' + fillColor + ' x=' + left + ' y=' + top + ' width=' + width + ' height=48 />';
+    //html += '<rect class="solutionrect" style="visibility:hidden" id=solutionrect' + solutionid + ' rx=24 fill=' + fillColor + ' x=' + left + ' y=' + top + ' width=' + width + ' height=48 />';
+    html += '<line class="solutionrect" id=solutionrect' + solutionid + ' stroke-linecap="round" style="visibility:hidden;stroke:' + fillColor + ';stroke-width:48" x1=' + x1 + ' y1=' + y1 + ' x2=' + x2 + ' y2=' + y2 + ' />';
 	  color++;
 	  solutionid++;
 	}
-
+html += '<line id="selectionline" x1="0" y1="0" x2="200" y2="200" stroke-linecap="round" style="visibility:hidden;stroke:rgb(255,255,0);stroke-width:48" />';
 	for (var j=0;j<gameh;j++)
 	{
 		for (var i=0;i<gamew;i++)
@@ -513,10 +581,8 @@ function initReal()
 
 function solve()
 {
-	for (var w in solution)
-	{
-		highlightSelection(solution[w].x,solution[w].x+w.length-1,solution[w].y,true);
-	}
+  var solutions = document.querySelectorAll('.solutionrect');
+  solutions.forEach(s => s.style.visibility = 'visible');
 }
 
 if ('ontouchstart' in document.documentElement)
@@ -538,6 +604,8 @@ document.body.addEventListener(startEvent,function (){init();});
 
 grid.addEventListener(moveEvent, function (e) {
   e.preventDefault();
+  if (first === null)
+    return;
   var elem = null;
   if (moveEvent === 'mousemove')
   {
@@ -554,9 +622,21 @@ grid.addEventListener(moveEvent, function (e) {
   if (first && elem.classList.contains('letter') && elem.dataset.done !== 'true')
   {
     lastElement = elem;
-    if (first !== null && first.y !== +elem.dataset.j)
-      return;
-    highlightSelection(first.x,+elem.dataset.i,first.y);
+    //if (first !== null && first.y !== +elem.dataset.j)
+    //  return;
+    //highlightSelection(first.x,+elem.dataset.i,first.y);
+    var x1 = first.x;
+    var y1 = first.y;
+    var x2 = +elem.dataset.i;
+    var y2 = +elem.dataset.j;
+    var dx = Math.abs(x2 - x1);
+    var dy = Math.abs(y2 - y1);
+    if (dx > dy && dy <= 2)
+      highlightSelection(x1,y1,x2,y1); // horizontal
+    else if (dy > dx && dx <= 2)
+      highlightSelection(x1,y1,x1,y2); // vertical
+    else if (dx === dy)
+      highlightSelection(x1,y1,x2,y2); // diagonal
   }
 });
 
@@ -577,8 +657,10 @@ grid.addEventListener(startEvent, function (e) {
   if (cell.classList.contains('letter') && cell.dataset.done !== 'true')
   {
     first = {x:+cell.dataset.i,y:+cell.dataset.j}; 
-    lastElement = cell; 
-    highlightSelection(first.x,first.x,first.y);
+    lastElement = cell;
+    selectionline.style.visibility = 'visible';
+    //highlightSelection(first.x,first.x,first.y);
+    highlightSelection(first.x,first.y,first.x,first.y);
   }
 });
 
