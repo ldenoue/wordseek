@@ -5,7 +5,7 @@ A word search game implemented using modern web technologies, especially CSS fle
 
 ## Usage
 
-    Just open the file on Chrome
+    Open wordseek.html in your favorite browser
 
 ## History
 
