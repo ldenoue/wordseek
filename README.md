@@ -1,4 +1,4 @@
-![wordseek on an iPhone in landscape mode](wordseek.jpg)
+![wordseek screenshot](wordseek.jpg)
 
 # WordSeek
 A word search game implemented using modern web technologies, especially CSS flex box and SVG.
