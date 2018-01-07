@@ -130,7 +130,48 @@ justify-content: space-evenly;
   #grid{height:400px;max-width:calc(100vw-32px);max-height:calc(100vw-32px))}
 }
 
-.solutionrect { transition: opacity 1s ease-in-out}
+.solutionrect { opacity:0.9; transition: opacity 1s ease-in-out}
+#help{cursor:pointer;font-size:26px;position:fixed;right:8;bottom:8}
+#reset{cursor:pointer;font-size:26px;position:fixed;left:8;bottom:8}
+#overlay{
+  display:none;
+  align-items:center;
+  justify-content: space-evenly;
+  flex-direction:column;
+  width:100vw;
+  height:100vh;
+  background-color:rgba(0,0,0,0.8);
+  position:fixed;
+  left:0;
+  top:0;
+}
+
+#confirmbox{
+  align-self:center;
+  text-align:center;
+  min-height:128px;
+  min-width:50%;
+  background-color:white;
+  border-radius:16px;
+  line-height:48px;
+}
+
+#confirmbox > div {
+  margin:8px;
+  font-size:22px
+}
+
+button{
+  cursor:pointer;
+  padding:8px;
+  margin:0px 16px 0 16px;
+  border-radius:8px;
+  border:1px solid gray;
+  outline:none;
+  background-color:transparent;
+  font-size:20px;
+}
+
 </style>
 </head>
 <body onload='init()'>
@@ -141,6 +182,15 @@ justify-content: space-evenly;
   <div class='item' id='questions2'></div>
 </div>
 <div id='header'><div id='totalwordsdiv'>0 words</div><div id='highscorediv'>0 points</div></div>
+<div title='Help' id='help'>️🤔</div>
+<div title='Reset' id='reset'>️⚙️</div>
+<div id='overlay'>
+  <div id='confirmbox'>
+    <div>Reset score?</div>
+    <button onclick='resetScore(true)'>YES</button> <button onclick='resetScore(false)'>NO</button>
+    <p></p>
+  </div>
+</div>
 <script>
 'use strict';
 var HORIZONTAL = 0;
@@ -375,7 +425,8 @@ function checkWord(x1,y1,x2,y2)
 {
   if (x1 > x2)
     return checkWord(x2,y2,x1,y1);
-  //selectionrect.setAttribute('width',0);
+  if (y1 > y2)
+    return checkWord(x2,y2,x1,y1);
   selectionline.style.visibility = 'hidden';
   first = null;
   var textselection = '';
@@ -415,6 +466,7 @@ function checkWord(x1,y1,x2,y2)
   {
     found_words.push(textselection);
     var lineSolution = document.querySelector('#solutionrect' + found);
+    lineSolution.dataset.done = 'true';
     lineSolution.setAttribute('x1',x1*48+24);
     lineSolution.setAttribute('y1',y1*48+24);
     lineSolution.setAttribute('x2',x2*48+24);
@@ -619,6 +671,12 @@ function solve()
   solutions.forEach(s => s.style.visibility = 'visible');
 }
 
+function unsolve()
+{
+  var solutions = document.querySelectorAll('.solutionrect');
+  solutions.forEach(s => {if (!s.dataset.done) s.style.visibility = 'hidden'});
+}
+
 if ('ontouchstart' in document.documentElement)
 {
   startEvent = 'touchstart';
@@ -711,6 +769,40 @@ if (window.localStorage.totalWords)
   setTotalWords(totalWords);
 }
 
+help.addEventListener(startEvent,function(e){
+  e.preventDefault();
+  e.stopPropagation();
+  solve();
+});
+
+help.addEventListener(endEvent,function(e){
+  e.preventDefault();
+  e.stopPropagation();
+  unsolve();
+});
+
+reset.addEventListener(startEvent,function(e){
+  e.preventDefault();
+  e.stopPropagation();
+  overlay.style.display = 'flex';
+});
+
+function resetScore(yes)
+{
+  overlay.style.display = 'none';
+  if (yes)
+  {
+    totalWords = 0;
+    score = 0;
+    setScore(score);
+    setTotalWords(totalWords);
+  }
+}
+
+overlay.addEventListener(startEvent,function(e){
+  e.preventDefault();
+  e.stopPropagation();
+});
 </script>
 </body>
 </html>
