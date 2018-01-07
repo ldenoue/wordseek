@@ -49,10 +49,15 @@ background-size: cover;
 .realword{font-size:22px}
 
 .crossed {opacity:0.5;color:#555;}
+
 text{
   pointer-events:none;/*important because svg text appear above the svg rectangles*/
   font-size:36px;
   fill:black;
+}
+
+line{
+  stroke-width:48;
 }
 
 @keyframes flickerAnimation { /* flame pulses */
@@ -64,9 +69,6 @@ text{
 #win{
   pointer-events:none;/* would steal events from grid without */
   opacity:0;
-  /*position:fixed;
-  left:calc(50% - 64px);
-  top:calc(50% - 64px);*/
   position:absolute;
   width:128px;
   height:128px;
@@ -76,11 +78,12 @@ text{
   font-size:48px;
   color:white;
   background-color:yellow;
-  /*margin-left:auto;margin-right:auto;*/
   text-align:center;
   line-height:128px;
 }
+
 .zoom{animation: flickerAnimation 0.9s ease-out}
+
 #grid{
 padding:4px;
 height:400px;
@@ -91,9 +94,6 @@ border-radius:24px;
 background-color:white;
 transition: opacity 1s ease-in-out;
 }
-.left{border-radius:16px 0 0 16px;}
-.right{border-radius:0 16px 16px 0;}
-.rounded{border-radius:16px;}
 
 #container{
 width:100vw;height:100%;
@@ -130,7 +130,7 @@ justify-content: space-evenly;
   #grid{height:400px;max-width:calc(100vw-32px);max-height:calc(100vw-32px))}
 }
 
-.solutionrect { transition: fill-opacity 1s ease-in-out}
+.solutionrect { transition: opacity 1s ease-in-out}
 </style>
 </head>
 <body onload='init()'>
@@ -145,6 +145,7 @@ justify-content: space-evenly;
 'use strict';
 var HORIZONTAL = 0;
 var VERTICAL = 1;
+var DIAGONAL = 2;
 
 // full list at https://emojipedia.org/nature/
 var emojis={All:{
@@ -268,6 +269,7 @@ var solution = new Array();
 
 var categories = Object.keys(emojis);
 var words = [];
+var found_words = [];
 var category = categories[0];
 
 function $(id)
@@ -300,6 +302,17 @@ function goodPos(x,y,word,direction)
     }
   	return true;
   }
+  else if (direction === DIAGONAL)
+  {
+    var top = y;
+    for (var i=x;i<x+word.length;i++)
+    {
+      if (matrix[top][i] != ' ')
+        return false;
+      top++;
+    }
+  	return true;
+  }
 }
 
 function placeWord(x,y,w,direction)
@@ -319,6 +332,16 @@ function placeWord(x,y,w,direction)
       matrix[j][x] = w.charAt(j-y);
     }
     solution[w] = {x1:x,y1:y,x2:x,y2:y+w.length-1};
+  }
+  else if (direction === DIAGONAL)
+  {
+    var left = x;
+    for (var j=y;j<y+w.length;j++)
+    {
+      matrix[j][left] = w.charAt(j-y);
+      left++;
+    }
+    solution[w] = {x1:x,y1:y,x2:x+w.length-1,y2:y+w.length-1};
   }
 }
 
@@ -345,7 +368,7 @@ function showWin(n,x1,y1,x2,y2)
   win.style.top = pos.y + 'px';
   win.textContent = '+' + n;
   win.classList.add('zoom');
-  setTimeout(function () { win.classList.remove('zoom')},2900);
+  setTimeout(function () { win.classList.remove('zoom')},900);
 }
 
 function checkWord(x1,y1,x2,y2)
@@ -376,9 +399,13 @@ function checkWord(x1,y1,x2,y2)
     }
   }
   var found = -1;
+  if (found_words.indexOf(textselection) !== -1)
+  {
+    return;
+  }
   for (var i=0;i<words.length;i++)
   {
-    if (textselection == words[i])
+    if (textselection === words[i])
     {
       found = i;
       break;
@@ -386,10 +413,7 @@ function checkWord(x1,y1,x2,y2)
   }
   if (found >= 0)
   {
-    //var rectSolution = document.querySelector('#solutionrect' + found);
-    //rectSolution.setAttribute('x',x1*48);
-    //rectSolution.setAttribute('y',y1*48);
-    //rectSolution.style.visibility = 'visible';
+    found_words.push(textselection);
     var lineSolution = document.querySelector('#solutionrect' + found);
     lineSolution.setAttribute('x1',x1*48+24);
     lineSolution.setAttribute('y1',y1*48+24);
@@ -418,7 +442,7 @@ function checkWord(x1,y1,x2,y2)
     if (nFound === nQuestions)
     {
       var rects = document.querySelectorAll('.solutionrect');
-      rects.forEach(r => r.style.fillOpacity = 0);
+      rects.forEach(r => r.style.opacity = 0);
       isNewGame = true;
       setTimeout(function () {init()},1000);
     }
@@ -465,6 +489,7 @@ function init()
   backColor = bgColors[new Date%bgColors.length];
   document.body.style.backgroundColor = backColor;
 	words = [];
+	found_words = [];
 	words_emojis = [];
 	var names = Object.keys(emojis[category]);
 	while (words.length < nQuestions)
@@ -495,6 +520,7 @@ function initReal()
 	}
 
 	var maxtries = 500;
+	var ndiagonals = 0;
 	for (var i=0;i<words.length;i++)
 	{
 		var done = false;
@@ -503,7 +529,11 @@ function initReal()
 		{
 			ntries++;
 			var word = words[i];
-			var direction = rnd(2);
+			var direction = 0;
+			if (ndiagonals >= 2)
+			  direction = rnd(2);
+			else
+			  direction = rnd(3);
 			var x = 0
 			var y = 0;
 			if (direction === HORIZONTAL)
@@ -511,9 +541,15 @@ function initReal()
 			  x = rnd(gamew-word.length);
 			  y = rnd(gameh);
 			}
-			else
+			else if (direction === VERTICAL)
 			{
 			  x = rnd(gamew);
+			  y = rnd(gameh-word.length);
+			}
+			else
+			{
+			  ndiagonals++;
+			  x = rnd(gamew-word.length);
 			  y = rnd(gameh-word.length);
 			}
 			if (goodPos(x,y,word,direction))
@@ -538,7 +574,6 @@ function initReal()
   var size = gamew * 48;
   
 	var html = '';
-	//html += '<line id="selectionline" x1="0" y1="0" x2="200" y2="200" stroke-linecap="round" style="visibility:hidden;stroke:rgb(255,255,0);stroke-width:48" />';
   var color = 0;
   var solutionid = 0;
 	for (var w in solution)
@@ -548,12 +583,11 @@ function initReal()
     var x2 = 48 * solution[w].x2+24;
     var y2 = 48 * solution[w].y2+24;
 	  var fillColor = hiColors[color%hiColors.length];
-    //html += '<rect class="solutionrect" style="visibility:hidden" id=solutionrect' + solutionid + ' rx=24 fill=' + fillColor + ' x=' + left + ' y=' + top + ' width=' + width + ' height=48 />';
-    html += '<line class="solutionrect" id=solutionrect' + solutionid + ' stroke-linecap="round" style="visibility:hidden;stroke:' + fillColor + ';stroke-width:48" x1=' + x1 + ' y1=' + y1 + ' x2=' + x2 + ' y2=' + y2 + ' />';
+    html += '<line class="solutionrect" id=solutionrect' + solutionid + ' stroke-linecap="round" style="visibility:hidden;stroke:' + fillColor + '" x1=' + x1 + ' y1=' + y1 + ' x2=' + x2 + ' y2=' + y2 + ' />';
 	  color++;
 	  solutionid++;
 	}
-html += '<line id="selectionline" x1="0" y1="0" x2="200" y2="200" stroke-linecap="round" style="visibility:hidden;stroke:rgb(255,255,0);stroke-width:48" />';
+  html += '<line id="selectionline" x1="0" y1="0" x2="200" y2="200" stroke-linecap="round" style="visibility:hidden;stroke:rgb(255,255,0)" />';
 	for (var j=0;j<gameh;j++)
 	{
 		for (var i=0;i<gamew;i++)
