@@ -5,7 +5,7 @@ A word search game implemented using modern web technologies, especially CSS fle
 
 ## Usage
 
-Open wordseek.html in your favorite browser or try the [online demo](http://www.appblit.com/static/wordseek.html)
+Open wordseek.html in your favorite browser or try the [live demo](http://www.appblit.com/static/wordseek.html)
 
 ## History
 
@@ -23,6 +23,9 @@ Underneath each text, a small rectangle captures the mouse or touch events.
 Text elements are removed from the event loop using the CSS  rule pointer-events:none.
 Without the rectangles behind each character, the event would not fire unless the mouse
 or finger was touching the glyph.
+
+Solutions are added as invisible SVG lines under the text grid (so they appear below the text).
+When the user has found a word, CSS turns the visibility to 'visible'.
 
 A neat CSS animation shows the number of words found in the current round.
 Again, the CSS pointer-events:none is used to prevent stealing events destined to the grid
