@@ -131,15 +131,30 @@ justify-content: space-evenly;
 }
 
 .solutionrect { opacity:0.9; transition: opacity 1s ease-in-out}
-#help{cursor:pointer;font-size:26px;position:fixed;right:8;bottom:8}
-#reset{cursor:pointer;font-size:26px;position:fixed;left:8;bottom:8}
+
+#help{
+  cursor:pointer;
+  font-size:22px;
+  position:fixed;
+  right:2;
+  bottom:2;
+}
+
+#reset{
+  cursor:pointer;
+  font-size:22px;
+  position:fixed;
+  left:2;
+  bottom:2;
+}
+
 #overlay{
   display:none;
   align-items:center;
   justify-content: space-evenly;
   flex-direction:column;
   width:100vw;
-  height:100vh;
+  height:100%;
   background-color:rgba(0,0,0,0.8);
   position:fixed;
   left:0;
@@ -182,12 +197,12 @@ button{
   <div class='item' id='questions2'></div>
 </div>
 <div id='header'><div id='totalwordsdiv'>0 words</div><div id='highscorediv'>0 points</div></div>
-<div title='Help' id='help'>️🤔</div>
-<div title='Reset' id='reset'>️⚙️</div>
+<div id='help'>&#x1f914;</div>
+<div id='reset'>&#x2699;</div>
 <div id='overlay'>
   <div id='confirmbox'>
     <div>Reset score?</div>
-    <button onclick='resetScore(true)'>YES</button> <button onclick='resetScore(false)'>NO</button>
+    <button id='yesreset'>YES</button> <button id='noreset'>NO</button>
     <p></p>
   </div>
 </div>
@@ -802,7 +817,21 @@ function resetScore(yes)
 overlay.addEventListener(startEvent,function(e){
   e.preventDefault();
   e.stopPropagation();
+  resetScore(false);
 });
+
+yesreset.addEventListener(startEvent,function(e){
+  e.preventDefault();
+  e.stopPropagation();
+  resetScore(true);
+});
+
+noreset.addEventListener(startEvent,function(e){
+  e.preventDefault();
+  e.stopPropagation();
+  resetScore(false);
+});
+
 </script>
 </body>
 </html>
