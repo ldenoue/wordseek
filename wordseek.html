@@ -1,7 +1,7 @@
 <html lang='en' manifest='wordseek.appcache'>
 <head>
 <meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1, minimum-scale=1, user-scalable=no'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1, minimum-scale=1, user-scalable=0'>
 <meta name='apple-mobile-web-app-capable' content='yes'>
 <meta name='mobile-web-app-capable' content='yes'>
 <meta name='apple-mobile-web-app-status-bar-style' content='black-translucent'>
@@ -16,12 +16,6 @@
   font-weight: 400;
   src: local('Ubuntu Regular'), local('Ubuntu-Regular'), url('ubuntu.woff2') format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2212, U+2215;
-}
-::selection {
-  background: transparent;
-}
-::-moz-selection {
-  background: transparent;
 }
 
 * {
@@ -39,6 +33,8 @@ font-family:'Ubuntu',Helvetica,monospace;
 body{
 background-color:#294;
 user-select:none;
+-webkit-touch-callout: none; /* iOS Safari */
+-webkit-user-select: none; /* Safari */
 background-repeat: no-repeat;
 background-size: cover;
 }
@@ -97,6 +93,7 @@ transition: opacity 1s ease-in-out;
 
 #container{
 width:100vw;height:100%;
+position:fixed;left:0;top:0;
 display:flex;
 flex-direction:column;
 align-items: center;
@@ -107,7 +104,7 @@ justify-content: space-evenly;
 .item{align-self:center}
 
 @media only screen and (orientation:landscape) {
-  #container{flex-direction:row}
+  #container{flex-direction:row;}
   .word{display:block;}
   .wordicon{font-size:48px;}
   .realword{font-size:20px;}
@@ -120,9 +117,17 @@ justify-content: space-evenly;
 
 }
 
-#header{position:fixed;width:calc(100vw - 16px);top:4px;left:0;text-align:right;margin-left:8px;margin-right:8px;font-weight:bold;font-size:22px;text-align:center}
-#totalwordsdiv{float:left;}
-#highscorediv{float:right;}
+#header{
+  position:fixed;
+  width:100vw;
+  top:0px;
+  left:0px;
+  margin:0px;
+  padding:0;
+  font-size:22px;
+}
+#totalwordsdiv{float:left;padding:8px;}
+#highscorediv{float:right;padding:8px;}
 
 @media only screen and (max-width:400px) {
   .wordicon{font-size:40px}
@@ -148,64 +153,16 @@ justify-content: space-evenly;
   bottom:2;
 }
 
-#overlay{
-  display:none;
-  align-items:center;
-  justify-content: space-evenly;
-  flex-direction:column;
-  width:100vw;
-  height:100%;
-  background-color:rgba(0,0,0,0.8);
-  position:fixed;
-  left:0;
-  top:0;
-}
-
-#confirmbox{
-  align-self:center;
-  text-align:center;
-  min-height:128px;
-  min-width:50%;
-  background-color:white;
-  border-radius:16px;
-  line-height:48px;
-}
-
-#confirmbox > div {
-  margin:8px;
-  font-size:22px
-}
-
-button{
-  cursor:pointer;
-  padding:8px;
-  margin:0px 16px 0 16px;
-  border-radius:8px;
-  border:1px solid gray;
-  outline:none;
-  background-color:transparent;
-  font-size:20px;
-}
-
 </style>
 </head>
 <body onload='init()'>
-<div id='win'>1</div>
 <div id='container'>
   <div class='item' id='questions1'></div>
   <svg class='item' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xml:space='preserve' id='grid'></svg>
   <div class='item' id='questions2'></div>
 </div>
+<div id='win'>1</div>
 <div id='header'><div id='totalwordsdiv'>0 words</div><div id='highscorediv'>0 points</div></div>
-<div id='help'>&#x1f914;</div>
-<div id='reset'>&#x2699;</div>
-<div id='overlay'>
-  <div id='confirmbox'>
-    <div>Reset score?</div>
-    <button id='yesreset'>YES</button> <button id='noreset'>NO</button>
-    <p></p>
-  </div>
-</div>
 <script>
 'use strict';
 var HORIZONTAL = 0;
@@ -429,6 +386,8 @@ function showWin(n,x1,y1,x2,y2)
   var pos = getPosition((x1+x2+1)/2,(y1+y2)/2);
   pos.x -= win.offsetWidth / 2;
   pos.y -= win.offsetHeight / 2;
+  pos.x |= 0;
+  pos.y |= 0;
   win.style.left = pos.x + 'px';
   win.style.top = pos.y + 'px';
   win.textContent = '+' + n;
@@ -506,7 +465,7 @@ function checkWord(x1,y1,x2,y2)
     showWin(points,x1,y1,x2,y2);
     totalWords++;
     setTotalWords(totalWords);
-    if (nFound === nQuestions)
+    if (nFound === words.length/*nQuestions*/)
     {
       var rects = document.querySelectorAll('.solutionrect');
       rects.forEach(r => r.style.opacity = 0);
@@ -521,13 +480,17 @@ function checkWord(x1,y1,x2,y2)
 
 function setScore(s)
 {
-  window.localStorage.score = s;
-  highscorediv.textContent = score + ' pts';
+  try {
+    window.localStorage.score = s;
+  } catch (e) {}
+  highscorediv.textContent = score + ' points';
 }
 
 function setTotalWords(s)
 {
-  window.localStorage.totalWords = s;
+  try {
+    window.localStorage.totalWords = s;
+  } catch (e) {}
   totalwordsdiv.textContent = totalWords + ' words';
 }
 
@@ -588,6 +551,7 @@ function initReal()
 
 	var maxtries = 500;
 	var ndiagonals = 0;
+	var missing = [];
 	for (var i=0;i<words.length;i++)
 	{
 		var done = false;
@@ -626,9 +590,16 @@ function initReal()
 			}
 		}
 		if (!done)
-			console.error(words[i] + ' not placed');
+			missing.push(words[i]);
 	}
-	
+	if (missing.length > 0)
+    console.log('some words not placed',missing);
+  for (var i=0;i<words.length;i++)
+  {
+    if (missing.indexOf(words[i]) !== -1)
+      words[i] = null;
+  }
+  words = words.filter(w => w !== null);
 	for (var j=0;j<gameh;j++)
 	{
 		for (var i=0;i<gamew;i++)
@@ -669,11 +640,11 @@ function initReal()
   win.style.backgroundColor = backColor;
 
 	html = '';
-	for (var i=0;i<nQuestions/2;i++)
+	for (var i=0;i<words.length/2;i++)
 		html += '<div id=word' + i + ' class=word><div class="wordicon">' + words_emojis[i] + '</div><div class=realword>' + words[i] + '</div></div> ';
 	questions1.innerHTML = html;
 	html = '';
-	for (var i=nQuestions/2;i<nQuestions;i++)
+	for (var i=nQuestions/2;i<words.length;i++)
 		html += '<div id=word' + i + ' class=word><div class="wordicon">' + words_emojis[i] + '</div><div class=realword>' + words[i] + '</div></div> ';
   questions2.innerHTML = html;
   
@@ -771,67 +742,41 @@ grid.addEventListener(startEvent, function (e) {
   }
 });
 
-score = 0;
-if (window.localStorage.score)
-{
-  score = +window.localStorage.score;
-  setScore(score);
-}
-totalWords = 0;
-if (window.localStorage.totalWords)
-{
-  totalWords = +window.localStorage.totalWords;
-  setTotalWords(totalWords);
-}
-
-help.addEventListener(startEvent,function(e){
+totalwordsdiv.addEventListener(startEvent,function(e){
   e.preventDefault();
   e.stopPropagation();
   solve();
 });
 
-help.addEventListener(endEvent,function(e){
+totalwordsdiv.addEventListener(endEvent,function(e){
   e.preventDefault();
   e.stopPropagation();
   unsolve();
 });
 
-reset.addEventListener(startEvent,function(e){
+highscorediv.addEventListener(endEvent,function(e){
   e.preventDefault();
   e.stopPropagation();
-  overlay.style.display = 'flex';
+  score = 0;
+  totalWords = 0;
+  setScore(score);
+  setTotalWords(totalWords);
 });
 
-function resetScore(yes)
-{
-  overlay.style.display = 'none';
-  if (yes)
-  {
-    totalWords = 0;
-    score = 0;
-    setScore(score);
-    setTotalWords(totalWords);
-  }
-}
-
-overlay.addEventListener(startEvent,function(e){
+highscorediv.addEventListener(startEvent,function(e){
   e.preventDefault();
   e.stopPropagation();
-  resetScore(false);
 });
 
-yesreset.addEventListener(startEvent,function(e){
-  e.preventDefault();
-  e.stopPropagation();
-  resetScore(true);
-});
+try {
+  if (window.localStorage && window.localStorage.score)
+    score = +window.localStorage.score;
+  if (window.localStorage && window.localStorage.totalWords)
+    totalWords = +window.localStorage.totalWords;
+} catch (e) {}
 
-noreset.addEventListener(startEvent,function(e){
-  e.preventDefault();
-  e.stopPropagation();
-  resetScore(false);
-});
-
+setScore(score);
+setTotalWords(totalWords);
 </script>
 </body>
 </html>
