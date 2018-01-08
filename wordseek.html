@@ -501,7 +501,10 @@ function setScore(s)
   try {
     window.localStorage.score = s;
   } catch (e) {}
-  highscorediv.textContent = score + ' points';
+  if (s > 1)
+    highscorediv.textContent = score + ' points';
+  else
+    highscorediv.textContent = score + ' point';
 }
 
 function setTotalWords(s)
@@ -509,7 +512,10 @@ function setTotalWords(s)
   try {
     window.localStorage.totalWords = s;
   } catch (e) {}
-  totalwordsdiv.textContent = totalWords + ' words';
+  if (s > 1)
+    totalwordsdiv.textContent = totalWords + ' words';
+  else
+    totalwordsdiv.textContent = totalWords + ' word';
 }
 
 function pointsForWord(textselection)
