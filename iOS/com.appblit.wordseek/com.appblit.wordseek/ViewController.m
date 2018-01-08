@@ -12,11 +12,25 @@
 
 @end
 
+@import WebKit;
 @implementation ViewController
+
+- (BOOL)prefersStatusBarHidden {
+    return YES;
+}
 
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view, typically from a nib.
+    CGRect rect = self.view.frame;
+    WKWebView *web = [[WKWebView alloc] initWithFrame:rect];
+    [self.view addSubview:web];
+    NSString *path = [[NSBundle mainBundle] pathForResource:@"wordseek" ofType:@"html"];
+    NSURL *url = [NSURL fileURLWithPath:path];
+    [web loadFileURL:url allowingReadAccessToURL:url];
+    web.scrollView.bounces = false;
+    web.allowsBackForwardNavigationGestures = false;
+    web.contentMode = UIViewContentModeScaleToFill;
+    web.autoresizingMask = UIViewAutoresizingFlexibleHeight | UIViewAutoresizingFlexibleWidth;
 }
 
 
