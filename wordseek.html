@@ -47,7 +47,7 @@ background-size: cover;
 .crossed {opacity:0.5;color:#555;}
 
 text{
-  pointer-events:none;/*important because svg text appear above the svg rectangles*/
+  pointer-events:none;/* prevents it from stealing events from rects */
   font-size:36px;
   fill:black;
 }
@@ -168,6 +168,7 @@ justify-content: space-evenly;
 var HORIZONTAL = 0;
 var VERTICAL = 1;
 var DIAGONAL = 2;
+var lastSelection = null;
 
 // full list at https://emojipedia.org/nature/
 var emojis={All:{
@@ -272,7 +273,6 @@ var startEvent = 'mousedown';
 var endEvent = 'mouseup';
 var moveEvent = 'mousemove';
 var isMouseDown = false;
-var lastElement = null;
 var backColor = null;
 var isNewGame = false;
 var bgColors = '#2FABF9,#F2C03A,#DB2E29,#9280F9'.split(',');
@@ -367,14 +367,9 @@ function placeWord(x,y,w,direction)
   }
 }
 
-//function highlightSelection(x1,x2,row,showCategories)
 function highlightSelection(x1,y1,x2,y2)
 {
-  /*if (x1 > x2)
-    return highlightSelection(x2,x1,row);
-  selectionrect.setAttribute('x',x1*48);
-  selectionrect.setAttribute('y',row*48);
-  selectionrect.setAttribute('width',(x2-x1+1)*48);*/
+  lastSelection = [x1,y1,x2,y2];
   selectionline.setAttribute('x1',x1*48+24);
   selectionline.setAttribute('y1',y1*48+24);
   selectionline.setAttribute('x2',x2*48+24);
@@ -395,13 +390,16 @@ function showWin(n,x1,y1,x2,y2)
   setTimeout(function () { win.classList.remove('zoom')},900);
 }
 
-function checkWord(x1,y1,x2,y2)
+function checkWord(coords)
 {
+  var x1 = coords[0];
+  var y1 = coords[1];
+  var x2 = coords[2];
+  var y2 = coords[3];
   if (x1 > x2)
     return checkWord(x2,y2,x1,y1);
   if (y1 > y2)
     return checkWord(x2,y2,x1,y1);
-  selectionline.style.visibility = 'hidden';
   first = null;
   var textselection = '';
   if (y1 === y2)
@@ -465,7 +463,7 @@ function checkWord(x1,y1,x2,y2)
     showWin(points,x1,y1,x2,y2);
     totalWords++;
     setTotalWords(totalWords);
-    if (nFound === words.length/*nQuestions*/)
+    if (nFound === words.length)
     {
       var rects = document.querySelectorAll('.solutionrect');
       rects.forEach(r => r.style.opacity = 0);
@@ -699,10 +697,6 @@ grid.addEventListener(moveEvent, function (e) {
   }
   if (first && elem.classList.contains('letter') && elem.dataset.done !== 'true')
   {
-    lastElement = elem;
-    //if (first !== null && first.y !== +elem.dataset.j)
-    //  return;
-    //highlightSelection(first.x,+elem.dataset.i,first.y);
     var x1 = first.x;
     var y1 = first.y;
     var x2 = +elem.dataset.i;
@@ -720,11 +714,16 @@ grid.addEventListener(moveEvent, function (e) {
 
 grid.addEventListener(endEvent,function(e) {
   isMouseDown = false;
-  var elem = lastElement;
-  if (first && elem && elem.classList.contains('letter'))
-  { 
-    checkWord(first.x,first.y,+elem.dataset.i,+elem.dataset.j);
-  }
+  if (lastSelection)
+    checkWord(lastSelection);
+  selectionline.style.visibility = 'hidden';
+  lastSelection = null;
+});
+
+grid.addEventListener('mouseleave',function(e) {
+  isMouseDown = false;
+  selectionline.style.visibility = 'hidden';
+  lastSelection = null;
 });
 
 grid.addEventListener(startEvent, function (e) {
@@ -735,9 +734,7 @@ grid.addEventListener(startEvent, function (e) {
   if (cell.classList.contains('letter') && cell.dataset.done !== 'true')
   {
     first = {x:+cell.dataset.i,y:+cell.dataset.j}; 
-    lastElement = cell;
     selectionline.style.visibility = 'visible';
-    //highlightSelection(first.x,first.x,first.y);
     highlightSelection(first.x,first.y,first.x,first.y);
   }
 });
