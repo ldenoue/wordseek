@@ -578,18 +578,7 @@ function init()
       words.push(name.toUpperCase());
       if (useTwitterEmoji)
       {
-        var code = emoji.charCodeAt(0);
-        if (emoji.length > 2)
-          console.error('emoji > 3',emoji);
-        if (emoji.length === 2)
-        {
-          code = (
-                  0x10000
-                  | ((emoji.charCodeAt(0) - 0xD800) << 10)
-                  | (emoji.charCodeAt(1) - 0xDC00)
-              );
-        }
-        var hexcode = code.toString(16);
+        var hexcode = hexCodeFromEmoji(emoji);
         //words_emojis.push('<img src="https://abs.twimg.com/emoji/v2/svg/' + hexcode + '.svg">');
         words_emojis.push('<img src="svg/' + hexcode + '.svg">');
       }
@@ -599,6 +588,23 @@ function init()
 	}
 	solution = [];
 	initReal();
+}
+
+function hexCodeFromEmoji(emoji)
+{
+  var code = emoji.charCodeAt(0);
+  if (emoji.length > 2)
+    console.error('emoji > 3',emoji);
+  if (emoji.length === 2)
+  {
+    code = (
+            0x10000
+            | ((emoji.charCodeAt(0) - 0xD800) << 10)
+            | (emoji.charCodeAt(1) - 0xDC00)
+        );
+  }
+  var hexcode = code.toString(16);
+  return hexcode;
 }
 
 function initReal()
