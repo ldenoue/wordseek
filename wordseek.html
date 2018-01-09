@@ -43,7 +43,7 @@ background-size: cover;
 .word{display:inline-block;margin:8px;}
 .wordicon{font-size:60px}
 .wordicon > img {padding:8px}
-.wordicon > img {width:60px;height:auto}
+.wordicon > img {width:80px;height:80px}
 .realword{font-size:20px}
 
 .crossed {opacity:0.5;color:#555;}
@@ -160,7 +160,7 @@ justify-content: space-evenly;
   #container{flex-direction:row;}
   .word{display:block;}
   .wordicon{font-size:48px;}
-  .wordicon > img {width:48px}
+  .wordicon > img {width:48px;height:48px}
   .realword{font-size:18px;}
   #grid{
     max-height:calc(100vh - 64px);
@@ -172,14 +172,14 @@ justify-content: space-evenly;
 
 @media only screen and (max-width:400px) {
   .wordicon{font-size:40px}
-  .wordicon > img {width:40px}
+  .wordicon > img {width:40px;height:40px}
   .realword{font-size:16px}
   #grid{height:400px;max-width:calc(100vw-32px);max-height:calc(100vw-32px))}
 }
 
 @media only screen and (min-width:800px) and (min-height:800px) {
     .wordicon{font-size:120px}
-    .wordicon > img {width:120px}
+    .wordicon > img {width:120px;height:120px}
     .realword{font-size:32px}
     #totalwordsdiv,#highscorediv{font-size:32px;}
     #grid{height:640px;max-width:calc(100vw-32px);max-height:calc(100vw-32px))}
@@ -579,7 +579,6 @@ function init()
       if (useTwitterEmoji)
       {
         var hexcode = hexCodeFromEmoji(emoji);
-        //words_emojis.push('<img src="https://abs.twimg.com/emoji/v2/svg/' + hexcode + '.svg">');
         words_emojis.push('<img src="svg/' + hexcode + '.svg">');
       }
       else
