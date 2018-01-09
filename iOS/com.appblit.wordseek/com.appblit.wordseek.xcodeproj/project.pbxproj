@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F951D4762005135D001511F7 /* svg in Resources */ = {isa = PBXBuildFile; fileRef = F951D4752005135D001511F7 /* svg */; };
 		F985371D2003B63D008D5EA3 /* wordseek.html in Resources */ = {isa = PBXBuildFile; fileRef = F98537192003B63C008D5EA3 /* wordseek.html */; };
 		F985371E2003B63D008D5EA3 /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = F985371A2003B63C008D5EA3 /* icon.png */; };
 		F985371F2003B63D008D5EA3 /* wordseek.appcache in Resources */ = {isa = PBXBuildFile; fileRef = F985371B2003B63D008D5EA3 /* wordseek.appcache */; };
@@ -20,6 +21,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		F951D4752005135D001511F7 /* svg */ = {isa = PBXFileReference; lastKnownFileType = folder; name = svg; path = ../../../svg; sourceTree = "<group>"; };
 		F98537192003B63C008D5EA3 /* wordseek.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; name = wordseek.html; path = ../../../wordseek.html; sourceTree = "<group>"; };
 		F985371A2003B63C008D5EA3 /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icon.png; path = ../../../icon.png; sourceTree = "<group>"; };
 		F985371B2003B63D008D5EA3 /* wordseek.appcache */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = wordseek.appcache; path = ../../../wordseek.appcache; sourceTree = "<group>"; };
@@ -75,6 +77,7 @@
 				F9F05A962003B43B000D5CD4 /* ViewController.h */,
 				F9F05A972003B43B000D5CD4 /* ViewController.m */,
 				F9F05A992003B43B000D5CD4 /* Main.storyboard */,
+				F951D4752005135D001511F7 /* svg */,
 				F9F05A9C2003B43B000D5CD4 /* Assets.xcassets */,
 				F9F05A9E2003B43B000D5CD4 /* LaunchScreen.storyboard */,
 				F9F05AA12003B43B000D5CD4 /* Info.plist */,
@@ -144,6 +147,7 @@
 				F985371F2003B63D008D5EA3 /* wordseek.appcache in Resources */,
 				F985371D2003B63D008D5EA3 /* wordseek.html in Resources */,
 				F985371E2003B63D008D5EA3 /* icon.png in Resources */,
+				F951D4762005135D001511F7 /* svg in Resources */,
 				F9F05AA02003B43B000D5CD4 /* LaunchScreen.storyboard in Resources */,
 				F9F05A9D2003B43B000D5CD4 /* Assets.xcassets in Resources */,
 				F98537202003B63D008D5EA3 /* ubuntu.woff2 in Resources */,

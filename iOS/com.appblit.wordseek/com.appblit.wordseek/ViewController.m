@@ -26,7 +26,8 @@
     [self.view addSubview:web];
     NSString *path = [[NSBundle mainBundle] pathForResource:@"wordseek" ofType:@"html"];
     NSURL *url = [NSURL fileURLWithPath:path];
-    [web loadFileURL:url allowingReadAccessToURL:url];
+    NSURL *urlroot = [[NSBundle mainBundle] resourceURL];
+    [web loadFileURL:url allowingReadAccessToURL:urlroot];
     web.scrollView.bounces = false;
     web.allowsBackForwardNavigationGestures = false;
     web.contentMode = UIViewContentModeScaleToFill;

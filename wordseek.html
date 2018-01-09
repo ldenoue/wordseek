@@ -243,8 +243,6 @@ var emojis={All:{
   Seedling:"🌱",Tree:"🌲",Deciduous:"🌳",Palm:"🌴",Cactus:"🌵",Rice:"🌾",Herb:"🌿",Shamrock:"☘",
   Clover:"🍀",Maple:"🍁",Leaf:"🍂",Leaf:"🍃",Mushroom:"🍄",Chestnut:"🌰",Moon:"🌕",Moon:"🌜",Sun:"🌞",
   Star:"⭐",Cloud:"⛅",Tornado:"🌪",
-  //Fog:"🌫",
-  //Wind:"🌬",
   Rainbow:"🌈",Umbrella:"☂",Drops:"☔",
   Snowman:"⛄",Comet:"☄",Fire:"🔥",Droplet:"💧",
   Tree:"🎄",Sparkles:"✨",Tanabata:"🎋",Pine:"🎍",Baby:"👶",Angel:"👼",SantaClaus:"🎅",Elf:"🧝",
@@ -265,7 +263,9 @@ var emojis={All:{
   Saxophone:"🎷",Guitar:"🎸",Keyboard:"🎹",Trumpet:"🎺",Violin:"🎻",Drum:"🥁",Clapper:"🎬",Bow:"🏹",
   Rowing:"🚣",Racing:"🏎",Motorcycle:"🏍",Mountain:"🏔",Fountain:"⛲",Volcano:"🌋",Fuji:"🗻",
   Camping:"🏕",Beach:"🏖",Desert:"🏜",Island:"🏝",
-  Stadium:"🏟",Building:"🏛",Construction:"🏗",Houses:"🏘",House:"🏚",House:"🏠",Office:"🏢","Post Office":"🏤",
+  Stadium:"🏟",Building:"🏛",Construction:"🏗",Houses:"🏘",
+  House:"🏠",
+  Office:"🏢","Post Office":"🏤",
   Hospital:"🏥",Bank:"🏦",Hotel:"🏨",Store:"🏪",School:"🏫",Factory:"🏭",Castle:"🏰",Wedding:"💒",
   Liberty:"🗽",Church:"⛪",Mosque:"🕌",Synagogue:"🕍",Kaaba:"🕋",Tent:"⛺",
   Carousel:"🎠","Wheel":"🎡",Roller:"🎢",
@@ -577,10 +577,10 @@ function init()
 	words_emojis = [];
 	while (words.length < nQuestions)
 	{
-	  var idx = parseInt(Math.random()*names.length);
+    var idx = parseInt(Math.random()*names.length);
 	  
 	  var name = names[idx];
-	  var emoji = emojis[category][name];
+      var emoji = emojis[category][name];
 	  if (name.length < gamew && name.length < gameh && name.indexOf(' ') === -1 && name.indexOf('-') !== 0 && words.indexOf(name.toUpperCase()) === -1)
 	  {
       words.push(name.toUpperCase());
