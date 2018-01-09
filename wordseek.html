@@ -48,13 +48,12 @@ background-size: cover;
 
 .crossed {opacity:0.5;color:#555;}
 
-path{
-  filter: drop-shadow( -5px -5px 5px #000 );
-}
 text{
   pointer-events:none;/* prevents it from stealing events from rects */
   font-size:36px;
   fill:black;
+  opacity:0;
+  transition: opacity 0.2s ease-out;
 }
 
 line{
@@ -512,6 +511,7 @@ function checkWord(coords)
       var rects = document.querySelectorAll('.solutionrect');
       rects.forEach(r => r.style.opacity = 0);
       isNewGame = true;
+      showGrid(false);
       setTimeout(function () {init()},1000);
     }
   }
@@ -727,6 +727,20 @@ function initReal()
   grid.style.opacity = 1.0;
   
   reHint();
+  
+  showGrid(true);
+}
+
+function showGrid(yes)
+{
+  var opacity = 0.0;
+  if (yes)
+    opacity = 1;
+  setTimeout(function() {
+    var ts = document.querySelectorAll('text');
+    ts.forEach(t => {t.style.transitionDelay=rnd(30)/100+'s'; t.style.opacity = opacity});
+  },200);
+
 }
 
 function solve()
