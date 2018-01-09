@@ -42,6 +42,8 @@ background-size: cover;
 .highlighted { background-color: yellow;}
 .word{display:inline-block;margin:8px;}
 .wordicon{font-size:60px}
+.wordicon > img {padding:8px}
+.wordicon > img {width:80px;height:80px}
 .realword{font-size:20px}
 
 .crossed {opacity:0.5;color:#555;}
@@ -158,6 +160,7 @@ justify-content: space-evenly;
   #container{flex-direction:row;}
   .word{display:block;}
   .wordicon{font-size:48px;}
+  .wordicon > img { width:68px;height:68px }
   .realword{font-size:18px;}
   #grid{
     max-height:calc(100vh - 64px);
@@ -169,6 +172,7 @@ justify-content: space-evenly;
 
 @media only screen and (max-width:400px) {
   .wordicon{font-size:40px}
+  .wordicon > img { width:60px;height:60px }
   .realword{font-size:16px}
   #grid{height:400px;max-width:calc(100vw-32px);max-height:calc(100vw-32px))}
 }
@@ -194,6 +198,7 @@ justify-content: space-evenly;
 <div id='hint'></div>
 <script>
 'use strict';
+var useTwitterEmoji = true;
 var HORIZONTAL = 0;
 var VERTICAL = 1;
 var DIAGONAL = 2;
@@ -322,6 +327,7 @@ var categories = Object.keys(emojis);
 var words = [];
 var found_words = [];
 var category = categories[0];
+var names = Object.keys(emojis[category]);
 
 function $(id)
 {
@@ -560,7 +566,6 @@ function init()
 	words = [];
 	found_words = [];
 	words_emojis = [];
-	var names = Object.keys(emojis[category]);
 	while (words.length < nQuestions)
 	{
 	  var idx = parseInt(Math.random()*names.length);
@@ -570,7 +575,25 @@ function init()
 	  if (name.length < gamew && name.length < gameh && name.indexOf(' ') === -1 && name.indexOf('-') !== 0 && words.indexOf(name.toUpperCase()) === -1)
 	  {
       words.push(name.toUpperCase());
-      words_emojis.push(emoji);
+      if (useTwitterEmoji)
+      {
+        var code = emoji.charCodeAt(0);
+        if (emoji.length > 2)
+          console.error('emoji > 3',emoji);
+        if (emoji.length === 2)
+        {
+          code = (
+                  0x10000
+                  | ((emoji.charCodeAt(0) - 0xD800) << 10)
+                  | (emoji.charCodeAt(1) - 0xDC00)
+              );
+        }
+        var hexcode = code.toString(16);
+        //words_emojis.push('<img src="https://abs.twimg.com/emoji/v2/svg/' + hexcode + '.svg">');
+        words_emojis.push('<img src="svg/' + hexcode + '.svg">');
+      }
+      else
+        words_emojis.push(emoji);
     }
 	}
 	solution = [];
