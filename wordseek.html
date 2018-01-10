@@ -52,8 +52,8 @@ text{
   pointer-events:none;/* prevents it from stealing events from rects */
   font-size:36px;
   fill:black;
-  opacity:0;
-  transition: opacity 0.2s ease-out;
+  opacity:1.0;
+  /*transition: opacity 0.2s ease-out;*/
 }
 
 line{
@@ -314,6 +314,7 @@ var totalWords = 0;
 var startEvent = 'mousedown';
 var endEvent = 'mouseup';
 var moveEvent = 'mousemove';
+var outEvent = 'mouseleave';
 var isMouseDown = false;
 var backColor = null;
 var isNewGame = false;
@@ -707,6 +708,7 @@ function initReal()
 		for (var i=0;i<gamew;i++)
 		{
       html += '<rect fill="transparent" id=cell' + j + '_'+ i + ' data-i='+ i + ' data-j=' + j + ' class="letter" width="50px" height="48px" x="' + (i * 48) + '" y="' + (j * 48) + '" />';
+      //html += '<text style="transition: opacity ' + rnd(30)/50+'s ease-out;" text-anchor="middle" alignment-baseline="middle" x="' + (i * 48+24) + '" y="' + (j * 48+24) + '">' + matrix[j][i] + '</text>';
       html += '<text text-anchor="middle" alignment-baseline="middle" x="' + (i * 48+24) + '" y="' + (j * 48+24) + '">' + matrix[j][i] + '</text>';
 		}
 	}
@@ -733,13 +735,13 @@ function initReal()
 
 function showGrid(yes)
 {
-  var opacity = 0.0;
+  /*var opacity = 0.0;
   if (yes)
     opacity = 1;
   setTimeout(function() {
     var ts = document.querySelectorAll('text');
-    ts.forEach(t => {t.style.transitionDelay=rnd(30)/100+'s'; t.style.opacity = opacity});
-  },200);
+    ts.forEach(t => {t.style.transitionDelay=rnd(10)/100+'s'; t.style.opacity = opacity});
+  },200);*/
 
 }
 
@@ -759,6 +761,7 @@ if ('ontouchstart' in document.documentElement)
 {
   startEvent = 'touchstart';
   endEvent = 'touchend';
+  outEvent = 'touchleave';
   moveEvent = 'touchmove';
 }
 
@@ -840,6 +843,12 @@ totalwordsdiv.addEventListener(startEvent,function(e){
 });
 
 totalwordsdiv.addEventListener(endEvent,function(e){
+  e.preventDefault();
+  e.stopPropagation();
+  unsolve();
+});
+
+totalwordsdiv.addEventListener(outEvent,function(e){
   e.preventDefault();
   e.stopPropagation();
   unsolve();
