@@ -1,0 +1,829 @@
+<html lang='en'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover'>
+<meta name='apple-mobile-web-app-capable' content='yes'>
+<meta name='mobile-web-app-capable' content='yes'>
+<meta name='apple-mobile-web-app-status-bar-style' content='black-translucent'>
+<meta name='apple-mobile-web-app-title' content='WordSeek'>
+<link rel='apple-touch-icon' sizes='192x192' href='icon.png'>
+<link rel='icon' href='icon.png'>
+<title>Cross Word Emoji</title>
+<style>
+@font-face {
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Ubuntu Regular'), local('Ubuntu-Regular'), url('ubuntu.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2212, U+2215;
+}
+
+* {
+overflow:hidden;
+box-sizing:content-box;
+margin:0;
+padding:0;
+font-size:16px;
+font-weight:normal;
+font-family:'Ubuntu',Helvetica,monospace;
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
+
+}
+
+body{
+background-color:#294;
+user-select:none;
+-webkit-touch-callout: none; /* iOS Safari */
+-webkit-user-select: none; /* Safari */
+background-repeat: no-repeat;
+background-size: cover;
+}
+
+.highlighted { background-color: yellow;}
+.word{display:inline-block;margin:8px;}
+.wordicon{font-size:60px}
+.wordicon > img {padding:8px}
+.wordicon > img {width:80px;height:80px}
+.realword{font-size:20px}
+
+.crossed {opacity:0.5;color:#555;}
+
+rect{
+	stroke-width:0;stroke:rgb(0,0,0);
+}
+
+text{
+  pointer-events:none;/* prevents it from stealing events from rects */
+  font-size:36px;
+  fill:black;
+  opacity:1.0;
+}
+
+line{
+  stroke-width:48;
+}
+
+@keyframes winAnimation {
+  0%   { opacity:0; transform:scale(0.3)}
+  50%  { opacity:0.5; transform:scale(1.0)}
+  100% { opacity:0; transform:scale(1.3)}
+}
+
+@keyframes hintAnimation {
+  0%   { opacity:0; transform:scale(0.3)}
+  50%  { opacity:0.2; transform:scale(1.0)}
+  100% { opacity:0; transform:scale(0.3)}
+}
+
+#hint{
+  pointer-events:none;
+  opacity:0;
+  position:absolute;
+  width:56px;height:56px;
+  background-color:#2FABF9;
+  border-radius:50%;
+  left:8px;top:-8px;
+  animation: hintAnimation 0.5s ease-out;
+  animation-iteration-count: 2;
+  animation-delay:0.3s;
+}
+
+#win{
+  pointer-events:none;/* would steal events from grid without */
+  opacity:0;
+  position:absolute;
+  width:128px;
+  height:128px;
+  background-color:white;
+  border-radius:50%;
+  border:0px solid white;
+  font-size:48px;
+  color:white;
+  background-color:yellow;
+  text-align:center;
+  line-height:128px;
+}
+
+.zoom{animation: winAnimation 0.9s ease-out}
+
+#grid{
+padding:0px;
+height:400px;
+max-height:calc(100vw - 64px);
+max-width:calc(100vw - 64px);
+border:0px solid blue;
+border-radius:0px;
+background-color:transparent;
+transition: opacity 1s ease-in-out;
+}
+
+#container{
+width:100vw;height:100%;
+position:fixed;
+left:0px;
+top:0px;
+display:flex;
+flex-direction:column;
+align-items: center;
+text-align:center;
+justify-content: space-evenly;
+}
+
+.item{align-self:center}
+
+#header{
+  position:fixed;
+  width:100vw;
+  top:0px;
+  left:0px;
+  margin:0px;
+  padding:0;
+  font-size:22px;
+}
+#totalwordsdiv{float:left;padding:8px;}
+#highscorediv{float:right;padding:8px;}
+
+.solutionrect { opacity:0.9; transition: opacity 1s ease-in-out}
+
+#help{
+  cursor:pointer;
+  font-size:22px;
+  position:fixed;
+  right:2;
+  bottom:2;
+}
+
+#reset{
+  cursor:pointer;
+  font-size:22px;
+  position:fixed;
+  left:2;
+  bottom:2;
+}
+
+@media only screen and (orientation:landscape) {
+  #container{flex-direction:row;}
+  .word{display:block;}
+  .wordicon{font-size:48px;}
+  .wordicon > img {width:48px;height:48px}
+  .realword{font-size:18px;}
+  #grid{
+    max-height:calc(100vh - 64px);
+    height:400px;
+    max-width:calc(100vh - 64px);
+  }
+}
+
+@media only screen and (orientation:landscape) and (min-width:800px) {
+  .wordicon{font-size:80px;}
+  .wordicon > img {width:80px;height:80px}
+}
+
+@media only screen and (max-width:400px) {
+  .wordicon{font-size:40px}
+  .wordicon > img {width:40px;height:40px}
+  .realword{font-size:16px}
+  #grid{height:400px;max-width:calc(100vw-32px);max-height:calc(100vw-32px))}
+}
+
+@media only screen and (min-width:800px) and (min-height:800px) {
+    .wordicon{font-size:120px}
+    .wordicon > img {width:120px;height:120px}
+    .realword{font-size:32px}
+    #totalwordsdiv,#highscorediv{font-size:32px;}
+    #grid{height:640px;max-width:calc(100vw-32px);max-height:calc(100vw-32px))}
+}
+
+</style>
+</head>
+<body onload='init()'>
+<div id='container'>
+  <svg class='item' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xml:space='preserve' id='grid'></svg>
+</div>
+<div id='win'>1</div>
+<div id='header'><div id='totalwordsdiv'>0 words</div><div id='highscorediv'>0 points</div></div>
+<div id='hint'></div>
+<script>
+'use strict';
+var useTwitterEmoji = false;
+var HORIZONTAL = 0;
+var VERTICAL = 1;
+var lastSelection = null;
+
+// full list at https://emojipedia.org/nature/
+var emojis={All:{
+  Grapes:"🍇",Melon:"🍈",Watermelon:"🍉",Tangerine:"🍊",Lemon:"🍋",Banana:"🍌",Pineapple:"🍍",
+  Apple:"🍎",Apple:"🍏",Pear:"🍐",Peach:"🍑",Cherries:"🍒",
+  Strawberry:"🍓",Kiwi:"🥝",Tomato:"🍅",Coconut:"🥥",Avocado:"🥑",Eggplant:"🍆",
+  Potato:"🥔",Carrot:"🥕",Corn:"🌽",Pepper:"🌶",Cucumber:"🥒",Broccoli:"🥦",
+  Mushroom:"🍄",Peanuts:"🥜",Chestnut:"🌰",Bread:"🍞",Croissant:"🥐",Baguette:"🥖",
+  Pretzel:"🥨",Pancakes:"🥞",Cheese:"🧀",Meat:"🍖",Poultry:"🍗",Meat:"🥩",Bacon:"🥓",Hamburger:"🍔",
+  Fries:"🍟",Pizza:"🍕","Hot Dog":"🌭",Sandwich:"🥪",Taco:"🌮",Burrito:"🌯",Cooking:"🍳",Pot:"🍲",Bowl:"🥣",
+  Salad:"🥗",Popcorn:"🍿",Can:"🥫",Bento:"🍱",Cracker:"🍘",Rice:"🍚",Curry:"🍛",Bowl:"🍜",Spaghetti:"🍝",
+  Potato:"🍠",Sushi:"🍣",Shrimp:"🍤",Dumpling:"🥟",Cookie:"🥠",Box:"🥡","IceCream":"🍦",
+  Doughnut:"🍩",Cookie:"🍪",Cake:"🎂",Shortcake:"🍰",Pie:"🥧",Chocolate:"🍫",
+  Candy:"🍬",Lollipop:"🍭",Custard:"🍮",Honey:"🍯",Bottle:"🍼",
+  Milk:"🥛",Beverage:"☕",Teacup:"🍵",Sake:"🍶",Cork:"🍾",Wine:"🍷",Cocktail:"🍸",Drink:"🍹",Beer:"🍺",
+  Mug:"🍻",Glasses:"🥂",Glass:"🥃",Straw:"🥤",Chopsticks:"🥢",Plate:"🍽",Fork:"🍴",Spoon:"🥄",
+  Monkey:"🙉",Collision:"💥",Droplets:"💦",Dizzy:"💫",Monkey:"🐵",Monkey:"🐒",Gorilla:"🦍",Dog:"🐶",Dog:"🐕",
+  Poodle:"🐩",Wolf:"🐺",Fox:"🦊",Cat:"🐱",Cat:"🐈",Lion:"🦁",Tiger:"🐯",Tiger:"🐅",Leopard:"🐆",
+  Horse:"🐴",Horse:"🐎",Unicorn:"🦄",Zebra:"🦓",Cow:"🐮",Ox:"🐂",Buffalo:"🐃",Cow:"🐄",Pig:"🐷",
+  Pig:"🐖",Boar:"🐗",Pig:"🐽",Ram:"🐏",Ewe:"🐑",Goat:"🐐",Camel:"🐪",Camel:"🐫",Giraffe:"🦒",
+  Elephant:"🐘",Rhinoceros:"🦏",Mouse:"🐭",Mouse:"🐁",Rat:"🐀",Hamster:"🐹",Rabbit:"🐰",
+  Rabbit:"🐇",Chipmunk:"🐿",Hedgehog:"🦔",Bat:"🦇",Bear:"🐻",Koala:"🐨",Panda:"🐼",Paw:"🐾",
+  Turkey:"🦃",Chicken:"🐔",Rooster:"🐓",Chick:"🐣",Chick:"🐤",Chick:"🐥",Bird:"🐦",Penguin:"🐧",Dove:"🕊",
+  Eagle:"🦅",Duck:"🦆",Owl:"🦉",Frog:"🐸",Crocodile:"🐊",Turtle:"🐢",Lizard:"🦎",Snake:"🐍",Dragon:"🐲",
+  Dragon:"🐉",Sauropod:"🦕",Trex:"🦖",Whale:"🐳",Whale:"🐋",Dolphin:"🐬",Fish:"🐟",Fish:"🐠",Blowfish:"🐡",
+  Shark:"🦈",Octopus:"🐙",Shell:"🐚",Crab:"🦀",Shrimp:"🦐",Squid:"🦑",Snail:"🐌",Butterfly:"🦋",
+  Bug:"🐛",Ant:"🐜",Honeybee:"🐝",Beetle:"🐞",Cricket:"🦗",Spider:"🕷",Web:"🕸",Scorpion:"🦂",
+  Bouquet:"💐",Blossom:"🌸",Rosette:"🏵",Rose:"🌹",Flower:"🥀",Hibiscus:"🌺",Flower:"🌼",Tulip:"🌷",
+  Seedling:"🌱",Tree:"🌲",Deciduous:"🌳",Palm:"🌴",Cactus:"🌵",Rice:"🌾",Herb:"🌿",Shamrock:"☘",
+  Clover:"🍀",Maple:"🍁",Leaf:"🍂",Leaf:"🍃",Mushroom:"🍄",Chestnut:"🌰",Moon:"🌕",Moon:"🌜",Sun:"🌞",
+  Star:"⭐",Cloud:"⛅",Tornado:"🌪",
+  Rainbow:"🌈",Umbrella:"☂",Drops:"☔",
+  Snowman:"⛄",Comet:"☄",Fire:"🔥",Droplet:"💧",
+  Tree:"🎄",Sparkles:"✨",Tanabata:"🎋",Pine:"🎍",Baby:"👶",Angel:"👼",SantaClaus:"🎅",Elf:"🧝",
+  Socks:"🧦",Deer:"🦌",Cookie:"🍪",Milk:"🥛",Wine:"🍷",Fork:"🍴",Church:"⛪",Star:"🌟",Snowflake:"❄",
+  Snowman:"⛄",Fire:"🔥",Tree:"🎄",Gift:"🎁",Bell:"🔔",Notes:"🎶",Candle:"🕯",Smiling:"😁",Snowboarder:"🏂",
+  Evergreen:"🌲",Mountain:"🏔",
+  Wind:"🌬",
+  Umbrella:"🌂",
+  Rain:"☔",Snowflake:"❄",Snowman:"⛄",Skis:"🎿",Horse:"🏇",Skier:"⛷",Snowboarder:"🏂",
+  Surfing:"🏄",Rowing:"🚣",Boat:"🚣",Swimming:"🏊",Bouncing:"⛹",Weights:"🏋",Biking:"🚴",
+  Wrestling:"🤼",
+  Handball:"🤾",Juggling:"🤹",Circus:"🎪",Ribbon:"🎗",Ticket:"🎫",Medal:"🎖",
+  Trophy:"🏆",Medal:"🏅",Soccer:"⚽",Basketball:"🏀",Volleyball:"🏐",Football:"🏈",Rugby:"🏉",Tennis:"🎾",
+  Bowling:"🎳",Cricket:"🏏",Hockey:"🏑",Hockey:"🏒","Ping Pong":"🏓",Badminton:"🏸",Boxing:"🥊",
+  Skating:"⛸",
+  Fishing:"🎣",
+  Skis:"🎿",Sled:"🛷",Pool:"🎱",Die:"🎲",Palette:"🎨",Score:"🎼",Microphone:"🎤",Headphone:"🎧",
+  Saxophone:"🎷",Guitar:"🎸",Keyboard:"🎹",Trumpet:"🎺",Violin:"🎻",Drum:"🥁",Clapper:"🎬",Bow:"🏹",
+  Rowing:"🚣",Racing:"🏎",Motorcycle:"🏍",Mountain:"🏔",Fountain:"⛲",Volcano:"🌋",Fuji:"🗻",
+  Camping:"🏕",Beach:"🏖",Desert:"🏜",Island:"🏝",
+  Stadium:"🏟",Building:"🏛",Construction:"🏗",Houses:"🏘",
+  House:"🏠",
+  Office:"🏢","Post Office":"🏤",
+  Hospital:"🏥",Bank:"🏦",Hotel:"🏨",Store:"🏪",School:"🏫",Factory:"🏭",Castle:"🏰",Wedding:"💒",
+  Liberty:"🗽",Church:"⛪",Mosque:"🕌",Synagogue:"🕍",Kaaba:"🕋",Tent:"⛺",
+  Carousel:"🎠","Wheel":"🎡",Roller:"🎢",
+  Locomotive:"🚂",Railway:"🚃",Train:"🚄",Train:"🚅",Train:"🚆",Metro:"🚇",Rail:"🚈",
+  Tram:"🚊",Monorail:"🚝",Railway:"🚞",Tram:"🚋",Bus:"🚌",Trolleybus:"🚎",Minibus:"🚐",Ambulance:"🚑",
+  Fire:"🚒",Police:"🚓",Taxi:"🚕",Taxi:"🚖",Automobile:"🚗",Automobile:"🚘",Truck:"🚚",Lorry:"🚛",Tractor:"🚜",
+  Bicycle:"🚲",Scooter:"🛴",Scooter:"🛵",
+  Fuel:"⛽",Light:"🚦",Construction:"🚧",Anchor:"⚓",Sailboat:"⛵",Speedboat:"🚤",Ship:"🛳",Ferry:"⛴",Boat:"🛥",
+  Ship:"🚢",Airplane:"🛩",Seat:"💺",Helicopter:"🚁",Cableway:"🚠",Tramway:"🚡",Satellite:"🛰",Rocket:"🚀",
+  Saucer:"🛸",
+  Umbrella:"⛱",
+  Yen:"💴",Dollar:"💵",Euro:"💶",Pound:"💷",Moai:"🗿",
+  "Smiling":"😀","Joy":"😂","Laughing":"🤣","Sweat":"😅","Squinting":"😆","Winking":"😉",
+  Savoring:"😋",Sunglasses:"😎",Kiss:"😘",Hugging:"🤗",Thinking:"🤔",Eyebrow:"🤨",Rolling:"🙄",Smirking:"😏",
+  Persevering:"😣",Relieved:"😥",Sleepy:"😪",Tired:"😫",Sleeping:"😴",Relieved:"😌",Tongue:"😛",
+  Drooling:"🤤",Pensive:"😔",Confused:"😕",Astonished:"😲",Disappointed:"😞",Worried:"😟",
+  Ogre:"👹",Goblin:"👺",Skull:"💀",Ghost:"👻",Alien:"👽",Robot:"🤖",Poo:"💩",
+  Biceps:"💪",Index:"👈",Horns:"🤘",Hand:"✋",OK:"👌",Thumbs:"👍",Fist:"✊",Waving:"👋",Clapping:"👏",
+  Handshake:"🤝",Nail:"💅",Ear:"👂",Nose:"👃",Footprints:"👣",Eyes:"👀",Eye:"👁",Brain:"🧠",Tongue:"👅",Mouth:"👄",
+  Glasses:"👓",Sunglasses:"🕶",Necktie:"👔",TShirt:"👕",Jeans:"👖",Scarf:"🧣",Gloves:"🧤",Coat:"🧥",Socks:"🧦",
+  Dress:"👗",Kimono:"👘",Bikini:"👙",Purse:"👛",Handbag:"👜",Backpack:"🎒",Shoe:"👞",Shoe:"👟",
+  Sandal:"👡",Boot:"👢",Crown:"👑",Hat:"👒",Cap:"🎓",Helmet:"⛑",Lipstick:"💄",Ring:"💍",Umbrella:"🌂",
+  Briefcase:"💼",
+  Bath:"🛀",Bed:"🛌",Bomb:"💣",Hole:"🕳",Bags:"🛍",Gem:"💎",Knife:"🔪",
+  Amphora:"🏺",Map:"🗺",Drum:"🛢",Bell:"🛎",Hourglass:"⌛",Watch:"⌚",Alarm:"⏰",Stopwatch:"⏱",Timer:"⏲",
+  Thermometer:"🌡",Umbrella:"⛱",Balloon:"🎈",Popper:"🎉",Dolls:"🎎",Ribbon:"🎀",Gift:"🎁",Crystal:"🔮",
+  Joystick:"🕹",Picture:"🖼",Microphone:"🎙",Radio:"📻",Phone:"📱",Telephone:"📞",Pager:"📟",Fax:"📠",
+  Battery:"🔋",Plug:"🔌",Laptop:"💻",Computer:"🖥",Printer:"🖨",Keyboard:"⌨",Mouse:"🖱",Trackball:"🖲",Disk:"💽",
+  Floppy:"💾",DVD:"📀",Camera:"🎥",Projector:"📽",Television:"📺",Camera:"📷",
+  Videocassette:"📼",
+  Magnifying:"🔍",Candle:"🕯",Bulb:"💡",Flashlight:"🔦",Lantern:"🏮",Notebook:"📔",Book:"📕",Books:"📚",Notebook:"📓",
+  Page:"📃",Scroll:"📜",Newspaper:"🗞",Bookmark:"🔖",Label:"🏷",Money:"💰",
+  CreditCard:"💳",Envelope:"📩",Package:"📦",Mailbox:"📫",Postbox:"📮",Pencil:"✏",Pen:"🖊",Paintbrush:"🖌",Crayon:"🖍",
+  Memo:"📝",
+  Folder:"📁",Calendar:"📅",Notepad:"🗒",Chart:"📈",BarChart:"📊",Clipboard:"📋",
+  Pushpin:"📌",
+  Paperclip:"📎",Ruler:"📏",Scissors:"✂",Cabinet:"🗄",Wastebasket:"🗑",Locked:"🔒",Unlocked:"🔓",
+  Key:"🔑",Hammer:"🔨",Pick:"⛏",Dagger:"🗡",Pistol:"🔫",Shield:"🛡",Wrench:"🔧",Bolt:"🔩",Gear:"⚙",Clamp:"🗜",
+  Scale:"⚖",Link:"🔗",Chains:"⛓",Alembic:"⚗",Microscope:"🔬",Telescope:"🔭",Satellite:"📡",Syringe:"💉",Pill:"💊",
+  Door:"🚪",Bed:"🛏",Couch:"🛋",Toilet:"🚽",Shower:"🚿",Bathtub:"🛁",Cigarette:"🚬",
+  Moai:"🗿",Flag:"🏁",
+  Golfing:"🏌"
+  }
+};
+var score = 0;
+var totalWords = 0;
+var startEvent = 'mousedown';
+var endEvent = 'mouseup';
+var moveEvent = 'mousemove';
+var outEvent = 'mouseleave';
+var isMouseDown = false;
+var backColor = null;
+var isNewGame = false;
+var bgColors = '#2FABF9,#F2C03A,#DB2E29,#9280F9'.split(',');
+var hiColors = 'yellow,#3BDB29,#2FABF9,#F2C03A,#DB2E29,#9280F9'.split(',');
+var currentColor = 0;
+var letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+var points = {"a":1,"b":3,"c":3,"d":2,"e":1,"f":4,"g":2,"h":4,"i":1,"j":8,"k":5,"l":1,"m":3,"n":1,"o":1,"p":3,"q":10,"r":1,"s":1,"t":1,"u":1,"v":4,"w":4,"x":8,"y":4,"z":10};
+var words_emojis = [];
+var gamew = 9;
+var gameh = 9;
+var nQuestions = 6;
+var nFound = 0;
+var matrix = new Array(gameh);
+var first = null;
+var solution = new Array();
+
+var categories = Object.keys(emojis);
+var words = [];
+var found_words = [];
+var category = categories[0];
+var names = Object.keys(emojis[category]);
+
+function $(id)
+{
+	return document.getElementById(id);
+}
+
+function rnd(n)
+{
+	return Math.floor(Math.random()*n);
+}
+
+function goodPos(x,y,word,direction)
+{
+  if (direction === HORIZONTAL)
+  {
+    for (var i=x;i<x+word.length+1;i++)
+    {
+      if (matrix[y][i] != ' ')
+        return false;
+    }
+  	return true;
+  }
+  else if (direction === VERTICAL)
+  {
+    for (var j=y;j<y+word.length+1;j++)
+    {
+      if (matrix[j][x] != ' ')
+        return false;
+    }
+  	return true;
+  }
+}
+
+function placeWord(x,y,w,emoji,direction)
+{
+  if (direction === HORIZONTAL)
+  {
+  	matrix[y][x] = emoji;
+    for (var i=x;i<x+w.length;i++)
+    {
+      matrix[y][i+1] = w.charAt(i-x);
+    }
+  	solution[w] = {x1:x,y1:y,x2:x+w.length-1,y2:y};
+  }
+  else if (direction === VERTICAL)
+  {
+  	matrix[y][x] = emoji;
+    for (var j=y;j<y+w.length;j++)
+    {
+      matrix[j+1][x] = w.charAt(j-y);
+    }
+    solution[w] = {x1:x,y1:y,x2:x,y2:y+w.length-1};
+  }
+}
+
+function highlightSelection(x1,y1,x2,y2)
+{
+  lastSelection = [x1,y1,x2,y2];
+  selectionline.setAttribute('x1',x1*48+24);
+  selectionline.setAttribute('y1',y1*48+24);
+  selectionline.setAttribute('x2',x2*48+24);
+  selectionline.setAttribute('y2',y2*48+24);
+}
+
+function showWin(n,x1,y1,x2,y2)
+{
+  var pos = getPosition((x1+x2+1)/2,(y1+y2)/2);
+  pos.x -= win.offsetWidth / 2;
+  pos.y -= win.offsetHeight / 2;
+  pos.x |= 0;
+  pos.y |= 0;
+  win.style.left = pos.x + 'px';
+  win.style.top = pos.y + 'px';
+  win.textContent = '+' + n;
+  win.classList.add('zoom');
+  setTimeout(function () { win.classList.remove('zoom')},900);
+}
+
+function checkWord(coords)
+{
+  var x1 = coords[0];
+  var y1 = coords[1];
+  var x2 = coords[2];
+  var y2 = coords[3];
+  if (x1 > x2)
+    return checkWord([x2,y2,x1,y1]);
+  if (y1 > y2)
+    return checkWord([x2,y2,x1,y1]);
+  first = null;
+  var textselection = '';
+  if (y1 === y2)
+  {
+    for (var x=x1;x<=x2;x++)
+      textselection += matrix[y1][x];
+  }
+  else if (x1 === x2)
+  {
+    for (var y=y1;y<=y2;y++)
+      textselection += matrix[y][x1];
+  }
+  else
+  {
+    var y = y1;
+    for (var x=x1;x<=x2;x++)
+    {
+      textselection += matrix[y][x];
+      y++;
+    }
+  }
+  var found = -1;
+  if (found_words.indexOf(textselection) !== -1)
+  {
+    return;
+  }
+  for (var i=0;i<words.length;i++)
+  {
+    if (textselection === words[i])
+    {
+      found = i;
+      break;
+    }
+  }
+  if (found >= 0)
+  {
+    found_words.push(textselection);
+    var lineSolution = document.querySelector('#solutionrect' + found);
+    lineSolution.dataset.done = 'true';
+    lineSolution.setAttribute('x1',x1*48+24);
+    lineSolution.setAttribute('y1',y1*48+24);
+    lineSolution.setAttribute('x2',x2*48+24);
+    lineSolution.setAttribute('y2',y2*48+24);
+    lineSolution.style.visibility = 'visible';
+
+    first = null;
+    nFound++;
+    var points = pointsForWord(textselection);
+    score += points;
+    setScore(score);
+    showWin(points,x1,y1,x2,y2);
+    totalWords++;
+    setTotalWords(totalWords);
+    if (nFound === words.length)
+    {
+      var rects = document.querySelectorAll('.solutionrect');
+      rects.forEach(r => r.style.opacity = 0);
+      isNewGame = true;
+      setTimeout(function () {init()},1000);
+    }
+  }
+  else
+  {
+  }
+}
+
+function setScore(s)
+{
+  try {
+    window.localStorage.score = s;
+  } catch (e) {}
+  if (s > 1)
+    highscorediv.textContent = score + ' points';
+  else
+    highscorediv.textContent = score + ' point';
+}
+
+function setTotalWords(s)
+{
+  try {
+    window.localStorage.totalWords = s;
+  } catch (e) {}
+  if (s > 1)
+    totalwordsdiv.textContent = totalWords + ' words';
+  else
+    totalwordsdiv.textContent = totalWords + ' word';
+}
+
+function pointsForWord(textselection)
+{
+  var pts = 0;
+  if (!textselection)
+    return 0;
+  var letters = textselection.trim().toLowerCase().split('');
+  for (var i=0;i<letters.length;i++)
+  {
+    var val = points[letters[i]];
+    if (val)
+      pts += val;
+  }
+  return pts;
+}
+
+function reHint()
+{
+  var newone = hint.cloneNode(true);
+  hint.parentNode.replaceChild(newone, hint);
+}
+
+function init()
+{
+  nFound = 0;
+  var elems = document.querySelectorAll('.letter');
+  elems.forEach(a => delete a.dataset.done);
+
+  currentColor = parseInt(Math.random() * hiColors.length);
+  backColor = bgColors[new Date%bgColors.length];
+  document.body.style.backgroundColor = backColor;
+	words = [];
+	found_words = [];
+	words_emojis = [];
+	while (words.length < nQuestions)
+	{
+    var idx = parseInt(Math.random()*names.length);
+	  
+	  var name = names[idx];
+      var emoji = emojis[category][name];
+	  if (name.length < gamew && name.length < gameh && name.indexOf(' ') === -1 && name.indexOf('-') !== 0 && words.indexOf(name.toUpperCase()) === -1)
+	  {
+      words.push(name.toUpperCase());
+      if (useTwitterEmoji)
+      {
+        var hexcode = hexCodeFromEmoji(emoji);
+        words_emojis.push('<img src="svg/' + hexcode + '.svg">');
+      }
+      else
+        words_emojis.push(emoji);
+    }
+	}
+	solution = [];
+	initReal();
+}
+
+function hexCodeFromEmoji(emoji)
+{
+  var code = emoji.charCodeAt(0);
+  if (emoji.length > 2)
+    console.error('emoji > 3',emoji);
+  if (emoji.length === 2)
+  {
+    code = (
+            0x10000
+            | ((emoji.charCodeAt(0) - 0xD800) << 10)
+            | (emoji.charCodeAt(1) - 0xDC00)
+        );
+  }
+  var hexcode = code.toString(16);
+  return hexcode;
+}
+
+function initReal()
+{
+	for (var j=0;j<gameh;j++)
+	{
+		matrix[j] = new Array(gamew);
+		for (var i=0;i<gamew;i++)
+		{
+			matrix[j][i] = ' ';
+		}
+	}
+
+	var maxtries = 500;
+	var missing = [];
+	for (var i=0;i<words.length;i++)
+	{
+		var done = false;
+		var ntries = 0;
+		while (ntries<maxtries && !done)
+		{
+			ntries++;
+			var word = words[i];
+			var emoji = words_emojis[i];
+			var direction = rnd(2);
+			var x = 0
+			var y = 0;
+			if (direction === HORIZONTAL)
+			{
+			  x = rnd(gamew-word.length-1);
+			  y = rnd(gameh);
+			}
+			else if (direction === VERTICAL)
+			{
+			  x = rnd(gamew);
+			  y = rnd(gameh-word.length-1);
+			}
+			if (goodPos(x,y,word,direction))
+			{
+				placeWord(x,y,word,emoji,direction);
+				done = true;
+			}
+		}
+		if (!done)
+			missing.push(words[i]);
+	}
+	if (missing.length > 0)
+    console.log('some words not placed',missing);
+  for (var i=0;i<words.length;i++)
+  {
+    if (missing.indexOf(words[i]) !== -1)
+      words[i] = null;
+  }
+  words = words.filter(w => w !== null);
+	/*for (var j=0;j<gameh;j++)
+	{
+		for (var i=0;i<gamew;i++)
+		{
+			if (matrix[j][i] === ' ')
+				matrix[j][i] = letters[rnd(26)];
+		}
+	}*/
+
+  var size = gamew * 48;
+  
+	var html = '';
+  var color = 0;
+  var solutionid = 0;
+	for (var w in solution)
+	{
+	  var x1 = 48 * solution[w].x1+24;
+	  var y1 = 48 * solution[w].y1+24;
+    var x2 = 48 * solution[w].x2+24;
+    var y2 = 48 * solution[w].y2+24;
+	  var fillColor = hiColors[color%hiColors.length];
+    html += '<line class="solutionrect" id=solutionrect' + solutionid + ' stroke-linecap="round" style="visibility:hidden;stroke:' + fillColor + '" x1=' + x1 + ' y1=' + y1 + ' x2=' + x2 + ' y2=' + y2 + ' />';
+	  color++;
+	  solutionid++;
+	}
+  html += '<line id="selectionline" x1="0" y1="0" x2="200" y2="200" stroke-linecap="round" style="visibility:hidden;stroke:rgb(255,255,0)" />';
+	for (var j=0;j<gameh;j++)
+	{
+		for (var i=0;i<gamew;i++)
+		{
+			if (matrix[j][i] === ' ')
+				continue;
+			var letter = (matrix[j][i] >= 'A' && matrix[j][i] <= 'Z');
+			
+      if (letter)
+      {
+				html += '<rect fill="white" id=cell' + j + '_'+ i + ' data-i='+ i + ' data-j=' + j + ' class="letter" width="46px" height="46px" x="' + (i * 48+1) + '" y="' + (j * 48+1) + '" />';
+	      html += '<text text-anchor="middle" alignment-baseline="middle" x="' + (i * 48+24) + '" y="' + (j * 48+28) + '">' + matrix[j][i] + '</text>';
+	    }
+	    else
+	    {
+		    html += '<rect fill="transparent" id=cell' + j + '_'+ i + ' data-i='+ i + ' data-j=' + j + ' class="letter" width="46px" height="46px" x="' + (i * 48) + '" y="' + (j * 48) + '" />';
+	    	html += '<text style="font-size:44px" text-anchor="middle" alignment-baseline="middle" x="' + (i * 48+24) + '" y="' + (j * 48+28) + '">' + matrix[j][i] + '</text>';
+	    }
+		}
+	}
+	grid.innerHTML = html;
+	grid.setAttribute('viewBox','0 0 ' + size + ' ' + size);
+
+  win.style.backgroundColor = backColor;
+
+  grid.style.opacity = 1.0;
+  reHint();
+}
+
+
+function solve()
+{
+  var solutions = document.querySelectorAll('.solutionrect');
+  solutions.forEach(s => s.style.visibility = 'visible');
+}
+
+function unsolve()
+{
+  var solutions = document.querySelectorAll('.solutionrect');
+  solutions.forEach(s => {if (!s.dataset.done) s.style.visibility = 'hidden'});
+}
+
+if ('ontouchstart' in document.documentElement)
+{
+  startEvent = 'touchstart';
+  endEvent = 'touchend';
+  outEvent = 'touchleave';
+  moveEvent = 'touchmove';
+}
+
+function getPosition(x,y) {
+  var rect = grid.getBoundingClientRect();
+  return {
+    x:rect.left + rect.width * x / gamew,
+    y:rect.top + rect.height * y / gameh
+  };
+}
+
+document.body.addEventListener(startEvent,function (){init();});
+
+grid.addEventListener(moveEvent, function (e) {
+  e.preventDefault();
+  if (first === null)
+    return;
+  var elem = null;
+  if (moveEvent === 'mousemove')
+  {
+    if (!isMouseDown)
+      return;
+    elem = document.elementFromPoint(e.clientX,e.clientY);
+  }
+  else
+  {
+    var clientX = e.touches[0].clientX;
+    var clientY = e.touches[0].clientY;
+    elem = document.elementFromPoint(clientX,clientY);  
+  }
+  if (first && elem.classList.contains('letter') && elem.dataset.done !== 'true')
+  {
+    var x1 = first.x;
+    var y1 = first.y;
+    var x2 = +elem.dataset.i;
+    var y2 = +elem.dataset.j;
+    var dx = Math.abs(x2 - x1);
+    var dy = Math.abs(y2 - y1);
+    if (dx > dy && dy <= 2)
+      highlightSelection(x1,y1,x2,y1); // horizontal
+    else if (dy > dx && dx <= 2)
+      highlightSelection(x1,y1,x1,y2); // vertical
+    else if (dx === dy)
+      highlightSelection(x1,y1,x2,y2); // diagonal
+  }
+});
+
+grid.addEventListener(endEvent,function(e) {
+  isMouseDown = false;
+  if (lastSelection)
+    checkWord(lastSelection);
+  selectionline.style.visibility = 'hidden';
+  lastSelection = null;
+});
+
+grid.addEventListener('mouseleave',function(e) {
+  isMouseDown = false;
+  selectionline.style.visibility = 'hidden';
+  lastSelection = null;
+});
+
+grid.addEventListener(startEvent, function (e) {
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  isMouseDown = true;
+  var cell = e.target;
+  if (cell.classList.contains('letter') && cell.dataset.done !== 'true')
+  {
+    first = {x:+cell.dataset.i,y:+cell.dataset.j}; 
+    selectionline.style.visibility = 'visible';
+    highlightSelection(first.x,first.y,first.x,first.y);
+  }
+});
+
+totalwordsdiv.addEventListener(startEvent,function(e){
+  e.preventDefault();
+  e.stopPropagation();
+  solve();
+});
+
+totalwordsdiv.addEventListener(endEvent,function(e){
+  e.preventDefault();
+  e.stopPropagation();
+  unsolve();
+});
+
+totalwordsdiv.addEventListener(outEvent,function(e){
+  e.preventDefault();
+  e.stopPropagation();
+  unsolve();
+});
+
+highscorediv.addEventListener(endEvent,function(e){
+  e.preventDefault();
+  e.stopPropagation();
+  score = 0;
+  totalWords = 0;
+  setScore(score);
+  setTotalWords(totalWords);
+});
+
+highscorediv.addEventListener(startEvent,function(e){
+  e.preventDefault();
+  e.stopPropagation();
+});
+
+try {
+  if (window.localStorage && window.localStorage.score)
+    score = +window.localStorage.score;
+  if (window.localStorage && window.localStorage.totalWords)
+    totalWords = +window.localStorage.totalWords;
+} catch (e) {}
+
+setScore(score);
+setTotalWords(totalWords);
+</script>
+</body>
+</html>
