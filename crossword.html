@@ -91,7 +91,7 @@ line{
 }
 
 #win{
-  pointer-events:none;/* would steal events from grid without */
+  pointer-events:none;
   opacity:0;
   position:absolute;
   width:128px;
@@ -112,6 +112,16 @@ line{
 padding:0px;
 height:400px;
 max-height:calc(100vw - 64px);
+max-width:calc(100vw - 64px);
+border:0px solid blue;
+border-radius:0px;
+background-color:transparent;
+transition: opacity 1s ease-in-out;
+}
+
+#lettersdiv{
+padding:0px;
+width:400px;
 max-width:calc(100vw - 64px);
 border:0px solid blue;
 border-radius:0px;
@@ -163,15 +173,6 @@ justify-content: space-evenly;
   bottom:2;
 }
 
-.solutionletter{
-  width:32px;height:32px;
-  background-color:white;
-  font-size:28px;
-  margin:2px;
-  display:inline-block;
-  border-radius:0px;
-}
-
 .selected{
   background-color:yellow;
   fill:yellow;
@@ -181,6 +182,16 @@ justify-content: space-evenly;
   transition: opacity 0.2s ease-out;
   opacity:0;
 }
+
+.guess{opacity:0}
+.show{opacity:1}
+
+.foundsolution{
+  transition: opacity 0.2s ease-out;
+  opacity:1;
+}
+
+
 /*@media only screen and (orientation:landscape) {
   #container{flex-direction:row;}
   .word{display:block;}
@@ -204,6 +215,7 @@ justify-content: space-evenly;
   .wordicon > img {width:40px;height:40px}
   .realword{font-size:16px}
   #grid{height:400px;max-width:calc(100vw-32px);max-height:calc(100vw-32px))}
+  #lettersdiv{max-width:calc(100vw-32px)}
 }
 
 @media only screen and (min-width:800px) and (min-height:800px) {
@@ -212,6 +224,7 @@ justify-content: space-evenly;
     .realword{font-size:32px}
     #totalwordsdiv,#highscorediv{font-size:32px;}
     #grid{height:640px;max-width:calc(100vw-32px);max-height:calc(100vw-32px))}
+    #lettersdiv{width:640px;max-width:calc(100vw-32px)}
 }
 td{font-family:monospace}
 </style>
@@ -219,7 +232,9 @@ td{font-family:monospace}
 <body onload='init()'>
 <div id='container'>
   <svg class='item' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xml:space='preserve' id='grid'></svg>
-  <div class='item' id='lettersdiv'></svg>
+  <!--div class='item' id='lettersdiv'></div-->
+  <svg class='item' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xml:space='preserve' id='lettersdiv'></svg>
+  
 </div>
 <div id='win'>1</div>
 <div id='header'><div id='totalwordsdiv'>0 words</div><div id='highscorediv'>0 points</div></div>
@@ -227,7 +242,7 @@ td{font-family:monospace}
 <script src='crossword.js'></script>
 <script>
 'use strict';
-var useTwitterEmoji = true;
+var useTwitterEmoji = false;
 var lastSelection = null;
 var selectedLetter = null;
 
@@ -385,82 +400,6 @@ function showWin(n,x,y)
   setTimeout(function () { win.classList.remove('zoom')},900);
 }
 
-function checkWord(coords)
-{
-  var x1 = coords[0];
-  var y1 = coords[1];
-  var x2 = coords[2];
-  var y2 = coords[3];
-  if (x1 > x2)
-    return checkWord([x2,y2,x1,y1]);
-  if (y1 > y2)
-    return checkWord([x2,y2,x1,y1]);
-  first = null;
-  var textselection = '';
-  if (y1 === y2)
-  {
-    for (var x=x1;x<=x2;x++)
-      textselection += matrix[y1][x];
-  }
-  else if (x1 === x2)
-  {
-    for (var y=y1;y<=y2;y++)
-      textselection += matrix[y][x1];
-  }
-  else
-  {
-    var y = y1;
-    for (var x=x1;x<=x2;x++)
-    {
-      textselection += matrix[y][x];
-      y++;
-    }
-  }
-  var found = -1;
-  if (found_words.indexOf(textselection) !== -1)
-  {
-    return;
-  }
-  for (var i=0;i<words.length;i++)
-  {
-    if (textselection === words[i])
-    {
-      found = i;
-      break;
-    }
-  }
-  if (found >= 0)
-  {
-    found_words.push(textselection);
-    var lineSolution = document.querySelector('#solutionrect' + found);
-    lineSolution.dataset.done = 'true';
-    lineSolution.setAttribute('x1',x1*48+24);
-    lineSolution.setAttribute('y1',y1*48+24);
-    lineSolution.setAttribute('x2',x2*48+24);
-    lineSolution.setAttribute('y2',y2*48+24);
-    lineSolution.style.visibility = 'visible';
-
-    first = null;
-    nFound++;
-    var points = pointsForWord(textselection);
-    score += points;
-    setScore(score);
-    showWin(points,x1,y1,x2,y2);
-    totalWords++;
-    setTotalWords(totalWords);
-    if (nFound === words.length)
-    {
-      var rects = document.querySelectorAll('.solutionrect');
-      rects.forEach(r => r.style.opacity = 0);
-      isNewGame = true;
-      setTimeout(function () {init()},1000);
-    }
-  }
-  else
-  {
-  }
-}
-
 function setScore(s)
 {
   try {
@@ -607,12 +546,12 @@ function initReal()
 			html += '<g dataset-i=' + i + ' dataset-j=' + j + ' class="group">';
       if (isLetter)
       {
-				html += '<rect fill="white" id=cell' + j + '_'+ i + ' data-i='+ i + ' data-j=' + j + ' class="letter" width="46px" height="46px" x="' + (i * 48+1) + '" y="' + (j * 48+1) + '" />';
+				html += '<rect fill="white" data-i='+ i + ' data-j=' + j + ' class="letter" width="46px" height="46px" x="' + (i * 48+1) + '" y="' + (j * 48+1) + '" />';
         var display = rnd(2);
-        if (display === 0)
+        if (display === 0 && letters.length < gamew)
         {
   			  letters.push(matrix[j][i]);
-	        html += '<text style="opacity:0" text-anchor="middle" alignment-baseline="middle" x="' + (i * 48+24) + '" y="' + (j * 48+28) + '">' + matrix[j][i] + '</text>';
+	        html += '<text class="guess" text-anchor="middle" alignment-baseline="middle" x="' + (i * 48+24) + '" y="' + (j * 48+28) + '">' + matrix[j][i] + '</text>';
 	      }
 	      else
 	      {
@@ -621,7 +560,7 @@ function initReal()
 	    }
 	    else
 	    {
-		    html += '<rect fill="transparent" id=cell' + j + '_'+ i + ' data-i='+ i + ' data-j=' + j + ' class="letter" width="46px" height="46px" x="' + (i * 48) + '" y="' + (j * 48) + '" />';
+		    html += '<rect fill="transparent" class="group" width="46px" height="46px" x="' + (i * 48) + '" y="' + (j * 48) + '" />';
 		    if (useTwitterEmoji)
 		      html += '<image width="48" height="48" x="' + (i * 48) + '" y="' + (j * 48) + '" href="' + words_emojis[+matrix[j][i]] + '"/>';
 		    else
@@ -633,18 +572,22 @@ function initReal()
 	grid.innerHTML = html;
 	grid.setAttribute('viewBox','0 0 ' + size + ' ' + size);
 
-	grid.querySelectorAll('.group').forEach(g => {g.addEventListener(startEvent,function(e){
+	grid.querySelectorAll('rect').forEach(g => {g.addEventListener(startEvent,function(e){
 	  e.preventDefault();
 	  e.stopPropagation();
+	  if (!e.target.dataset.i)
+	    return;
 	  var row = e.target.dataset.j;
 	  var col = e.target.dataset.i;
 	  var letter = matrix[row][col];
-	  if (selectedLetter && selectedLetter.textContent === letter)
+	  if (selectedLetter && selectedLetter.dataset.letter === letter)
 	  {
 	    selectedLetter.classList.remove('selected');
 	    selectedLetter.classList.add('found');
+	    //console.log(selectedLetter);
+	    selectedLetter.parentElement.querySelector('text').classList.add('found');
 	    selectedLetter = null;
-	    e.target.parentElement.querySelector('text').style.opacity=1;
+	    e.target.parentElement.querySelector('text').classList.add('foundsolution');
 	    e.target.classList.add('selected');
 	    nFound++;
       var points = pointsForWord(letter);
@@ -654,7 +597,7 @@ function initReal()
       showWin(points,rect.left,rect.top);
 	    if (nFound === letters.length)
 	    {
-	      alert('Done!');
+	      restartGame();
 	    }
 	  }
 	})});
@@ -665,8 +608,24 @@ function initReal()
 
   letters.sort(function() { return 0.5 - Math.random() });
 	html = '';
-	letters.forEach(l => html += '<span class="solutionletter">' + l + '</span>');
+	//letters.forEach(l => html += '<span class="solutionletter">' + l + '</span>');
+	var j = 0;
+	var x = 0;
+	for (var i=0;i<letters.length;i++)
+	{
+	  html += '<g>';
+	  html += '<rect data-letter="' + letters[i] + '" class="solutionletter" fill="white" width="46px" height="46px" x="' + (x * 48+1) + '" y="' + (j*48) + '" />';
+	  html += '<text text-anchor="middle" alignment-baseline="middle" x="' + (x * 48+24) + '" y="' + (j*48+28) + '">' + letters[i] + '</text>';
+	  html += '</g>';
+	  x++;
+	  if ((x % gamew) === 0)
+	  {
+	    x = 0;
+	    j++;
+	  }
+	}
 	lettersdiv.innerHTML = html;
+	lettersdiv.setAttribute('viewBox','0 0 ' + size + ' ' + ((j+1) * 48));
   lettersdiv.querySelectorAll('.solutionletter').forEach(l => l.addEventListener(startEvent,function(e){
 	  e.preventDefault();
 	  e.stopPropagation();
@@ -679,16 +638,25 @@ function initReal()
   reHint();
 }
 
+function restartGame()
+{
+  setTimeout(function(){
+    grid.style.opacity=0;
+    lettersdiv.style.opacity=0;
+    setTimeout(function () { init();grid.style.opacity=1;lettersdiv.style.opacity=1 },1000);
+  },900);
+}
+
 function solve()
 {
-  var solutions = document.querySelectorAll('.solutionrect');
-  solutions.forEach(s => s.style.visibility = 'visible');
+  var solutions = document.querySelectorAll('.guess');
+  solutions.forEach(s => s.classList.add('show'));
 }
 
 function unsolve()
 {
-  var solutions = document.querySelectorAll('.solutionrect');
-  solutions.forEach(s => {if (!s.dataset.done) s.style.visibility = 'hidden'});
+  var solutions = document.querySelectorAll('.guess');
+  solutions.forEach(s => {if (!s.classList.contains('foundsolution')) {s.classList.remove('show')}});
 }
 
 if ('ontouchstart' in document.documentElement)
@@ -699,18 +667,15 @@ if ('ontouchstart' in document.documentElement)
   moveEvent = 'touchmove';
 }
 
-function getPosition(x,y) {
-  var rect = grid.getBoundingClientRect();
-  return {
-    x:rect.left + rect.width * x / gamew,
-    y:rect.top + rect.height * y / gameh
-  };
-}
-
 document.body.addEventListener(startEvent,function (){init();});
 
 /* for some reason, Chrome does not respect user-select without this */
 document.body.onselectstart= function () {return false;}
+
+grid.addEventListener(startEvent,function (e) {
+  e.preventDefault();
+  e.stopPropagation();
+});
 
 totalwordsdiv.addEventListener(startEvent,function(e){
   e.preventDefault();
