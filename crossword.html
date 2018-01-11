@@ -663,9 +663,7 @@ function initReal()
 
   grid.style.opacity = 1.0;
 
-  //console.log(letters);
   letters.sort(function() { return 0.5 - Math.random() });
-  //console.log(letters);
 	html = '';
 	letters.forEach(l => html += '<span class="solutionletter">' + l + '</span>');
 	lettersdiv.innerHTML = html;
