@@ -8,7 +8,7 @@
 <meta name='apple-mobile-web-app-title' content='WordSeek'>
 <link rel='apple-touch-icon' sizes='192x192' href='icon.png'>
 <link rel='icon' href='icon.png'>
-<title>Cross Word Emoji</title>
+<title>CrossWord Emoji</title>
 <style>
 @font-face {
   font-family: 'Ubuntu';
@@ -162,7 +162,25 @@ justify-content: space-evenly;
   bottom:2;
 }
 
-@media only screen and (orientation:landscape) {
+.solutionletter{
+  width:32px;height:32px;
+  background-color:white;
+  font-size:28px;
+  margin:2px;
+  display:inline-block;
+  border-radius:0px;
+}
+
+.selected{
+  background-color:yellow;
+  fill:yellow;
+}
+
+.found{
+  transition: opacity 0.2s ease-out;
+  opacity:0;
+}
+/*@media only screen and (orientation:landscape) {
   #container{flex-direction:row;}
   .word{display:block;}
   .wordicon{font-size:48px;}
@@ -178,7 +196,7 @@ justify-content: space-evenly;
 @media only screen and (orientation:landscape) and (min-width:800px) {
   .wordicon{font-size:80px;}
   .wordicon > img {width:80px;height:80px}
-}
+}*/
 
 @media only screen and (max-width:400px) {
   .wordicon{font-size:40px}
@@ -200,16 +218,17 @@ td{font-family:monospace}
 <body onload='init()'>
 <div id='container'>
   <svg class='item' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xml:space='preserve' id='grid'></svg>
+  <div class='item' id='lettersdiv'></svg>
 </div>
 <div id='win'>1</div>
 <div id='header'><div id='totalwordsdiv'>0 words</div><div id='highscorediv'>0 points</div></div>
 <div id='hint'></div>
+<script src='crossword.js'></script>
 <script>
 'use strict';
-var useTwitterEmoji = false;
-var HORIZONTAL = 0;
-var VERTICAL = 1;
+var useTwitterEmoji = true;
 var lastSelection = null;
+var selectedLetter = null;
 
 // full list at https://emojipedia.org/nature/
 var emojis={All:{
@@ -320,14 +339,14 @@ var isNewGame = false;
 var bgColors = '#2FABF9,#F2C03A,#DB2E29,#9280F9'.split(',');
 var hiColors = 'yellow,#3BDB29,#2FABF9,#F2C03A,#DB2E29,#9280F9'.split(',');
 var currentColor = 0;
-var letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+//var letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 var points = {"a":1,"b":3,"c":3,"d":2,"e":1,"f":4,"g":2,"h":4,"i":1,"j":8,"k":5,"l":1,"m":3,"n":1,"o":1,"p":3,"q":10,"r":1,"s":1,"t":1,"u":1,"v":4,"w":4,"x":8,"y":4,"z":10};
 var words_emojis = [];
-var gamew = 9;
-var gameh = 9;
+var gamew = 11;
+var gameh = 11;
 var nQuestions = 6;
 var nFound = 0;
-var matrix = new Array(gameh);
+var matrix = {};//new Array(gameh);
 var first = null;
 var solution = new Array();
 
@@ -345,50 +364,6 @@ function $(id)
 function rnd(n)
 {
 	return Math.floor(Math.random()*n);
-}
-
-function goodPos(x,y,word,direction)
-{
-  if (direction === HORIZONTAL)
-  {
-    for (var i=x;i<x+word.length+1;i++)
-    {
-      if (matrix[y][i] != ' ')
-        return false;
-    }
-  	return true;
-  }
-  else if (direction === VERTICAL)
-  {
-    for (var j=y;j<y+word.length+1;j++)
-    {
-      if (matrix[j][x] != ' ')
-        return false;
-    }
-  	return true;
-  }
-}
-
-function placeWord(x,y,w,emoji,direction)
-{
-  if (direction === HORIZONTAL)
-  {
-  	matrix[y][x] = emoji;
-    for (var i=x;i<x+w.length;i++)
-    {
-      matrix[y][i+1] = w.charAt(i-x);
-    }
-  	solution[w] = {x1:x,y1:y,x2:x+w.length-1,y2:y};
-  }
-  else if (direction === VERTICAL)
-  {
-  	matrix[y][x] = emoji;
-    for (var j=y;j<y+w.length;j++)
-    {
-      matrix[j+1][x] = w.charAt(j-y);
-    }
-    solution[w] = {x1:x,y1:y,x2:x,y2:y+w.length-1};
-  }
 }
 
 function highlightSelection(x1,y1,x2,y2)
@@ -542,46 +517,65 @@ function init()
   currentColor = parseInt(Math.random() * hiColors.length);
   backColor = bgColors[new Date%bgColors.length];
   document.body.style.backgroundColor = backColor;
-	words = [];
-	found_words = [];
-	words_emojis = [];
-	var n = 0;
-	while (n < 1000 && words.length < nQuestions)
-	{
-	  n++;
-    var idx = parseInt(Math.random()*names.length);
-	  var name = names[idx];
-	  if (name.length < gamew && name.length < gameh && name.indexOf(' ') === -1 && name.indexOf('-') !== 0 && words.indexOf(name.toUpperCase()) === -1)
-	  {
-      var emoji = emojis[category][name];
-      var up = name.toUpperCase();
-      /*var found = words.length === 0;
-      for (var i=0;!found && i<words.length;i++)
+  var cwgrid = null;
+  var done = false;
+  while (!done)
+  {
+    words = [];
+    found_words = [];
+    words_emojis = [];
+    var n = 0;
+    while (n < 1000 && words.length < nQuestions)
+    {
+      n++;
+      var idx = parseInt(Math.random()*names.length);
+      var name = names[idx];
+      if (name.length < gamew && name.length < gameh && name.indexOf(' ') === -1 && name.indexOf('-') !== 0 && words.indexOf(name.toUpperCase()) === -1)
       {
-        for (var j=0;j<up.length;j++)
+        var emoji = emojis[category][name];
+        var up = name.toUpperCase();
+        words.push(words.length +  up);
+        if (useTwitterEmoji)
         {
-          if (words[i].indexOf(up[j]) !== -1)
-          {
-            found = true;
-            console.log(words[i],up);
-            break;
-          }
+          var hexcode = hexCodeFromEmoji(emoji);
+          words_emojis.push('svg/' + hexcode + '.svg');
         }
+        else
+          words_emojis.push(emoji);
       }
-      if (!found)
-        break;*/
-      words.push(up);
-      if (useTwitterEmoji)
-      {
-        var hexcode = hexCodeFromEmoji(emoji);
-        words_emojis.push('<img src="svg/' + hexcode + '.svg">');
-      }
-      else
-        words_emojis.push(emoji);
     }
+    var cw = new Crossword(words, words_emojis);
+    var tries = 10; 
+    cwgrid = cw.getSquareGrid(tries);
+
+    if (cwgrid !== null)
+      done = true;
+  }
+
+  matrix = {};
+	for (var j=0;j<gameh;j++)
+	{
+		matrix[j] = new Array(gamew);
+		for (var i=0;i<gamew;i++)
+		{
+			matrix[j][i] = ' ';
+		}
 	}
+
+  for(var r=0;r<cwgrid.length;r++)
+  {
+    for(var c=0;c<cwgrid[r].length;c++)
+    {
+      var cell = cwgrid[r][c];
+      var letter = ' ';
+      if (cell !== null)
+        letter = cell.char;
+      matrix[r][c] = letter;
+    }
+  }
+
 	solution = [];
-	initReal();
+	initReal(cwgrid);
 }
 
 function hexCodeFromEmoji(emoji)
@@ -601,337 +595,77 @@ function hexCodeFromEmoji(emoji)
   return hexcode;
 }
 
-var GRID_WIDTH = 9;
-var GRID_HEIGHT = 9;
-var EMPTYCHAR = ' ';
-var FIT_ATTEMPTS = 500;
-var topScore = 0;
-var coordCount = 0;
-var coordList = [];
-var wordArray = [
-  {word:'toto',clue:'toto'},
-  {word:'titi',clue:'toto'},
-];
-function board(cols, rows) { //instantiator object for making gameboards
-this.cols = cols;
-this.rows = rows;
-var activeWordList = []; //keeps array of words actually placed in board
-var acrossCount = 0;
-var downCount = 0;
-
-var grid = new Array(cols); //create 2 dimensional array for letter grid
-for (var i = 0; i < rows; i++) {
-    grid[i] = new Array(rows);
-}
-
-for (var x = 0; x < cols; x++) {
-    for (var y = 0; y < rows; y++) {
-        grid[x][y] = {};
-        grid[x][y].targetChar = EMPTYCHAR; //target character, hidden
-        grid[x][y].indexDisplay = ''; //used to display index number of word start
-        grid[x][y].value = '-'; //actual current letter shown on board
-    }
-}
-
-function suggestCoords(word) { //search for potential cross placement locations
-    var c = '';
-    coordCount = [];
-    coordCount = 0;
-    for (i = 0; i < word.length; i++) { //cycle through each character of the word
-        for (x = 0; x < GRID_HEIGHT; x++) {
-            for (y = 0; y < GRID_WIDTH; y++) {
-                c = word[i];
-                if (grid[x][y].targetChar == c) { //check for letter match in cell
-                    if (x - i + 1> 0 && x - i + word.length-1 < GRID_HEIGHT) { //would fit vertically?
-                        coordList[coordCount] = {};
-                        coordList[coordCount].x = x - i;
-                        coordList[coordCount].y = y;
-                        coordList[coordCount].score = 0;
-                        coordList[coordCount].vertical = true;
-                        coordCount++;
-                    }
-
-                    if (y - i + 1 > 0 && y - i + word.length-1 < GRID_WIDTH) { //would fit horizontally?
-                        coordList[coordCount] = {};
-                        coordList[coordCount].x = x;
-                        coordList[coordCount].y = y - i;
-                        coordList[coordCount].score = 0;
-                        coordList[coordCount].vertical = false;
-                        coordCount++;
-                    }
-                }
-            }
-        }
-    }
-}
-
-function checkFitScore(word, x, y, vertical) {
-    var fitScore = 1; //default is 1, 2+ has crosses, 0 is invalid due to collision
-
-    if (vertical) { //vertical checking
-        for (i = 0; i < word.length; i++) {
-            if (i == 0 && x > 0) { //check for empty space preceeding first character of word if not on edge
-                if (grid[x - 1][y].targetChar != EMPTYCHAR) { //adjacent letter collision
-                    fitScore = 0;
-                    break;
-                }
-            } else if (i == word.length && x < GRID_HEIGHT) { //check for empty space after last character of word if not on edge
-                 if (grid[x+i+1][y].targetChar != EMPTYCHAR) { //adjacent letter collision
-                    fitScore = 0;
-                    break;
-                }
-            }
-            if (x + i < GRID_HEIGHT) {
-                if (grid[x + i][y].targetChar == word[i]) { //letter match - aka cross point
-                    fitScore += 1;
-                } else if (grid[x + i][y].targetChar != EMPTYCHAR) { //letter doesn't match and it isn't empty so there is a collision
-                    fitScore = 0;
-                    break;
-                } else { //verify that there aren't letters on either side of placement if it isn't a crosspoint
-                    if (y < GRID_WIDTH - 1) { //check right side if it isn't on the edge
-                        if (grid[x + i][y + 1].targetChar != EMPTYCHAR) { //adjacent letter collision
-                            fitScore = 0;
-                            break;
-                        }
-                    }
-                    if (y > 0) { //check left side if it isn't on the edge
-                        if (grid[x + i][y - 1].targetChar != EMPTYCHAR) { //adjacent letter collision
-                            fitScore = 0;
-                            break;
-                        }
-                    }
-                }
-            }
-
-        }
-
-    } else { //horizontal checking
-        for (i = 0; i < word.length; i++) {
-            if (i == 0 && y > 0) { //check for empty space preceeding first character of word if not on edge
-                if (grid[x][y-1].targetChar != EMPTYCHAR) { //adjacent letter collision
-                    fitScore = 0;
-                    break;
-                }
-            } else if (i == word.length - 1 && y + i < GRID_WIDTH -1) { //check for empty space after last character of word if not on edge
-                if (grid[x][y + i + 1].targetChar != EMPTYCHAR) { //adjacent letter collision
-                    fitScore = 0;
-                    break;
-                }
-            }
-            if (y + i < GRID_WIDTH) {
-                if (grid[x][y + i].targetChar == word[i]) { //letter match - aka cross point
-                    fitScore += 1;
-                } else if (grid[x][y + i].targetChar != EMPTYCHAR) { //letter doesn't match and it isn't empty so there is a collision
-                    fitScore = 0;
-                    break;
-                } else { //verify that there aren't letters on either side of placement if it isn't a crosspoint
-                    if (x < GRID_HEIGHT) { //check top side if it isn't on the edge
-                        if (grid[x + 1][y + i].targetChar != EMPTYCHAR) { //adjacent letter collision
-                            fitScore = 0;
-                            break;
-                        }
-                    }
-                    if (x > 0) { //check bottom side if it isn't on the edge
-                        if (grid[x - 1][y + i].targetChar != EMPTYCHAR) { //adjacent letter collision
-                            fitScore = 0;
-                            break;
-                        }
-                    }
-                }
-            }
-
-        }
-    }
-
-    return fitScore;
-}
-
-function placeWord(word, clue, x, y, vertical) { //places a new active word on the board
-
-    var wordPlaced = false;
-
-    if (vertical) {
-        if (word.length + x < GRID_HEIGHT) {
-            for (i = 0; i < word.length; i++) {
-                grid[x + i][y].targetChar = word[i];
-            }
-            wordPlaced = true;
-        }
-    } else {
-        if (word.length + y < GRID_WIDTH) {
-            for (i = 0; i < word.length; i++) {
-                grid[x][y + i].targetChar = word[i];
-            }
-            wordPlaced = true;
-        }
-    }
-
-    if (wordPlaced) {
-        var currentIndex = activeWordList.length;
-        activeWordList[currentIndex] = {};
-        activeWordList[currentIndex].word = word;
-        activeWordList[currentIndex].clue = clue;
-        activeWordList[currentIndex].x = x;
-        activeWordList[currentIndex].y = y;
-        activeWordList[currentIndex].vertical = vertical;
-
-        if (activeWordList[currentIndex].vertical) {
-            downCount++;
-            activeWordList[currentIndex].number = downCount;
-        } else {
-            acrossCount++;
-            activeWordList[currentIndex].number = acrossCount;
-        }
-    }
-
-}
-
-function isActiveWord(word) {
-    if (activeWordList.length > 0) {
-        for (var w = 0; w < activeWordList.length; w++) {
-            if (word == activeWordList[w].word) {
-                //console.log(word + ' in activeWordList');
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-this.displayGrid = function displayGrid() {
-
-    for (var x = 0; x < cols; x++) {
-        for (var y = 0; y < rows; y++) {
-            matrix[y][x] = grid[x][y].targetChar;
-        }
-    }
-    return acrossCount + downCount;
-}
-
-//for each word in the source array we test where it can fit on the board and then test those locations for validity against other already placed words
-this.generateBoard = function generateBoard(seed = 0) {
-
-    var bestScoreIndex = 0;
-    var top = 0;
-    var fitScore = 0;
-    var startTime;
-
-    //manually place the longest word horizontally at 0,0, try others if the generated board is too weak
-    placeWord(wordArray[seed].word, wordArray[seed].clue, 0, 0, false);
-
-    //attempt to fill the rest of the board 
-    for (var iy = 0; iy < FIT_ATTEMPTS; iy++) { //usually 2 times is enough for max fill potential
-        for (var ix = 1; ix < wordArray.length; ix++) {
-            if (!isActiveWord(wordArray[ix].word)) { //only add if not already in the active word list
-                topScore = 0;
-                bestScoreIndex = 0;
-
-                suggestCoords(wordArray[ix].word); //fills coordList and coordCount
-                //coordList = shuffleArray(coordList); //adds some randomization
-
-                if (coordList[0]) {
-                    for (var c = 0; c < coordList.length; c++) { //get the best fit score from the list of possible valid coordinates
-                        fitScore = checkFitScore(wordArray[ix].word, coordList[c].x, coordList[c].y, coordList[c].vertical);
-                        if (fitScore > topScore) {
-                            topScore = fitScore;
-                            bestScoreIndex = c;
-                        }
-                    }
-                }
-
-                if (topScore > 1) { //only place a word if it has a fitscore of 2 or higher
-
-                    placeWord(wordArray[ix].word, wordArray[ix].clue, coordList[bestScoreIndex].x, coordList[bestScoreIndex].y, coordList[bestScoreIndex].vertical);
-                }
-            }
-
-        }
-    }
-    if(activeWordList.length < wordArray.length/2) { //regenerate board if if less than half the words were placed
-        seed++;
-        generateBoard(seed);
-    }
-}
-}
-
-var gameboard;
-
-function seedBoard() {
-    gameboard = new board(GRID_WIDTH, GRID_HEIGHT);
-    gameboard.generateBoard();
-    return gameboard.displayGrid();
-}
-
-
 function initReal()
 {
-	for (var j=0;j<gameh;j++)
-	{
-		matrix[j] = new Array(gamew);
-		for (var i=0;i<gamew;i++)
-		{
-			matrix[j][i] = ' ';
-		}
-	}
-
-	wordArray = [];
-	for (var i=0;i<words.length;i++)
-	{
-	  wordArray.push({word:words[i],clue:''});
-	}
-	for (var i=0;i<300;i++)
-	{
-	  var n = seedBoard();
-	  if (n >= 3)
-	    break;
-	  }
-
   var size = gamew * 48;
   
 	var html = '';
-  var color = 0;
-  var solutionid = 0;
-	for (var w in solution)
-	{
-	  var x1 = 48 * solution[w].x1+24;
-	  var y1 = 48 * solution[w].y1+24;
-    var x2 = 48 * solution[w].x2+24;
-    var y2 = 48 * solution[w].y2+24;
-	  var fillColor = hiColors[color%hiColors.length];
-    html += '<line class="solutionrect" id=solutionrect' + solutionid + ' stroke-linecap="round" style="visibility:hidden;stroke:' + fillColor + '" x1=' + x1 + ' y1=' + y1 + ' x2=' + x2 + ' y2=' + y2 + ' />';
-	  color++;
-	  solutionid++;
-	}
-  html += '<line id="selectionline" x1="0" y1="0" x2="200" y2="200" stroke-linecap="round" style="visibility:hidden;stroke:rgb(255,255,0)" />';
+  var letters = [];
 	for (var j=0;j<gameh;j++)
 	{
 		for (var i=0;i<gamew;i++)
 		{
 			if (matrix[j][i] === ' ')
 				continue;
-			var letter = (matrix[j][i] >= 'A' && matrix[j][i] <= 'Z');
-			
-      if (letter)
+			var isLetter = (matrix[j][i] >= 'A' && matrix[j][i] <= 'Z');
+			html += '<g dataset-i=' + i + ' dataset-j=' + j + ' class="group">';
+      if (isLetter)
       {
+  			letters.push(matrix[j][i]);
 				html += '<rect fill="white" id=cell' + j + '_'+ i + ' data-i='+ i + ' data-j=' + j + ' class="letter" width="46px" height="46px" x="' + (i * 48+1) + '" y="' + (j * 48+1) + '" />';
 	      html += '<text text-anchor="middle" alignment-baseline="middle" x="' + (i * 48+24) + '" y="' + (j * 48+28) + '">' + matrix[j][i] + '</text>';
 	    }
 	    else
 	    {
 		    html += '<rect fill="transparent" id=cell' + j + '_'+ i + ' data-i='+ i + ' data-j=' + j + ' class="letter" width="46px" height="46px" x="' + (i * 48) + '" y="' + (j * 48) + '" />';
-	    	html += '<text style="font-size:44px" text-anchor="middle" alignment-baseline="middle" x="' + (i * 48+24) + '" y="' + (j * 48+28) + '">' + matrix[j][i] + '</text>';
+		    if (useTwitterEmoji)
+		      html += '<image width="48" height="48" x="' + (i * 48) + '" y="' + (j * 48) + '" href="' + words_emojis[+matrix[j][i]] + '"/>';
+		    else
+	    	  html += '<text style="font-size:44px" text-anchor="middle" alignment-baseline="middle" x="' + (i * 48+24) + '" y="' + (j * 48+28) + '">' + words_emojis[+matrix[j][i]] + '</text>';
 	    }
+	    html += '</g>';
 		}
 	}
 	grid.innerHTML = html;
 	grid.setAttribute('viewBox','0 0 ' + size + ' ' + size);
 
+	grid.querySelectorAll('.group').forEach(g => {g.addEventListener(startEvent,function(e){
+	  e.preventDefault();
+	  e.stopPropagation();
+	  var row = e.target.dataset.j;
+	  var col = e.target.dataset.i;
+	  var letter = matrix[row][col];
+	  if (selectedLetter && selectedLetter.textContent === letter)
+	  {
+	    selectedLetter.classList.remove('selected');
+	    selectedLetter.classList.add('found');
+	    selectedLetter = null;
+	    e.target.classList.add('selected');
+	    //console.log('found');
+	  }
+	})});
+
   win.style.backgroundColor = backColor;
 
   grid.style.opacity = 1.0;
+
+  //console.log(letters);
+  letters.sort(function() { return 0.5 - Math.random() });
+  //console.log(letters);
+	html = '';
+	letters.forEach(l => html += '<span class="solutionletter">' + l + '</span>');
+	lettersdiv.innerHTML = html;
+  lettersdiv.querySelectorAll('.solutionletter').forEach(l => l.addEventListener(startEvent,function(e){
+	  e.preventDefault();
+	  e.stopPropagation();
+	  if (selectedLetter)
+	    selectedLetter.classList.remove('selected');
+	  e.target.classList.add('selected');
+	  selectedLetter = e.target;
+    //console.log('letter=',e.target.textContent);    
+  }));
   reHint();
 }
-
 
 function solve()
 {
@@ -965,67 +699,6 @@ document.body.addEventListener(startEvent,function (){init();});
 
 /* for some reason, Chrome does not respect user-select without this */
 document.body.onselectstart= function () {return false;}
-
-grid.addEventListener(moveEvent, function (e) {
-  e.preventDefault();
-  if (first === null)
-    return;
-  var elem = null;
-  if (moveEvent === 'mousemove')
-  {
-    if (!isMouseDown)
-      return;
-    elem = document.elementFromPoint(e.clientX,e.clientY);
-  }
-  else
-  {
-    var clientX = e.touches[0].clientX;
-    var clientY = e.touches[0].clientY;
-    elem = document.elementFromPoint(clientX,clientY);  
-  }
-  if (first && elem.classList.contains('letter') && elem.dataset.done !== 'true')
-  {
-    var x1 = first.x;
-    var y1 = first.y;
-    var x2 = +elem.dataset.i;
-    var y2 = +elem.dataset.j;
-    var dx = Math.abs(x2 - x1);
-    var dy = Math.abs(y2 - y1);
-    if (dx > dy && dy <= 2)
-      highlightSelection(x1,y1,x2,y1); // horizontal
-    else if (dy > dx && dx <= 2)
-      highlightSelection(x1,y1,x1,y2); // vertical
-    else if (dx === dy)
-      highlightSelection(x1,y1,x2,y2); // diagonal
-  }
-});
-
-grid.addEventListener(endEvent,function(e) {
-  isMouseDown = false;
-  if (lastSelection)
-    checkWord(lastSelection);
-  selectionline.style.visibility = 'hidden';
-  lastSelection = null;
-});
-
-grid.addEventListener('mouseleave',function(e) {
-  isMouseDown = false;
-  selectionline.style.visibility = 'hidden';
-  lastSelection = null;
-});
-
-grid.addEventListener(startEvent, function (e) {
-  e.preventDefault();
-  e.stopImmediatePropagation();
-  isMouseDown = true;
-  var cell = e.target;
-  if (cell.classList.contains('letter') && cell.dataset.done !== 'true')
-  {
-    first = {x:+cell.dataset.i,y:+cell.dataset.j}; 
-    selectionline.style.visibility = 'visible';
-    highlightSelection(first.x,first.y,first.x,first.y);
-  }
-});
 
 totalwordsdiv.addEventListener(startEvent,function(e){
   e.preventDefault();
