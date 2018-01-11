@@ -58,6 +58,7 @@ text{
   font-size:36px;
   fill:black;
   opacity:1.0;
+  transition: opacity .2s ease-out;
 }
 
 line{
@@ -375,15 +376,10 @@ function highlightSelection(x1,y1,x2,y2)
   selectionline.setAttribute('y2',y2*48+24);
 }
 
-function showWin(n,x1,y1,x2,y2)
+function showWin(n,x,y)
 {
-  var pos = getPosition((x1+x2+1)/2,(y1+y2)/2);
-  pos.x -= win.offsetWidth / 2;
-  pos.y -= win.offsetHeight / 2;
-  pos.x |= 0;
-  pos.y |= 0;
-  win.style.left = pos.x + 'px';
-  win.style.top = pos.y + 'px';
+  win.style.left = (x-64+24) + 'px';
+  win.style.top = (y-64+24) + 'px';
   win.textContent = '+' + n;
   win.classList.add('zoom');
   setTimeout(function () { win.classList.remove('zoom')},900);
@@ -611,9 +607,17 @@ function initReal()
 			html += '<g dataset-i=' + i + ' dataset-j=' + j + ' class="group">';
       if (isLetter)
       {
-  			letters.push(matrix[j][i]);
 				html += '<rect fill="white" id=cell' + j + '_'+ i + ' data-i='+ i + ' data-j=' + j + ' class="letter" width="46px" height="46px" x="' + (i * 48+1) + '" y="' + (j * 48+1) + '" />';
-	      html += '<text text-anchor="middle" alignment-baseline="middle" x="' + (i * 48+24) + '" y="' + (j * 48+28) + '">' + matrix[j][i] + '</text>';
+        var display = rnd(2);
+        if (display === 0)
+        {
+  			  letters.push(matrix[j][i]);
+	        html += '<text style="opacity:0" text-anchor="middle" alignment-baseline="middle" x="' + (i * 48+24) + '" y="' + (j * 48+28) + '">' + matrix[j][i] + '</text>';
+	      }
+	      else
+	      {
+  	      html += '<text text-anchor="middle" alignment-baseline="middle" x="' + (i * 48+24) + '" y="' + (j * 48+28) + '">' + matrix[j][i] + '</text>';
+	      }
 	    }
 	    else
 	    {
@@ -640,8 +644,18 @@ function initReal()
 	    selectedLetter.classList.remove('selected');
 	    selectedLetter.classList.add('found');
 	    selectedLetter = null;
+	    e.target.parentElement.querySelector('text').style.opacity=1;
 	    e.target.classList.add('selected');
-	    //console.log('found');
+	    nFound++;
+      var points = pointsForWord(letter);
+      score += points;
+      setScore(score);
+      var rect = e.target.getBoundingClientRect();
+      showWin(points,rect.left,rect.top);
+	    if (nFound === letters.length)
+	    {
+	      alert('Done!');
+	    }
 	  }
 	})});
 
