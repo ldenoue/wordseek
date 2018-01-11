@@ -33,9 +33,9 @@ font-family:'Ubuntu',Helvetica,monospace;
 
 body{
 background-color:#294;
+user-select:none;
 -webkit-touch-callout: none; /* iOS Safari */
 -webkit-user-select: none; /* Safari */
-user-select:none;
 background-repeat: no-repeat;
 background-size: cover;
 }
@@ -964,7 +964,7 @@ function getPosition(x,y) {
 document.body.addEventListener(startEvent,function (){init();});
 
 /* for some reason, Chrome does not respect user-select without this */
-//document.body.onselectstart= function () {return false;}
+document.body.onselectstart= function () {return false;}
 
 grid.addEventListener(moveEvent, function (e) {
   e.preventDefault();
