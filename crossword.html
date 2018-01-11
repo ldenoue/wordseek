@@ -963,6 +963,9 @@ function getPosition(x,y) {
 
 document.body.addEventListener(startEvent,function (){init();});
 
+/* for some reason, Chrome does not respect user-select without this */
+document.body.onselectstart= function () {return false;}
+
 grid.addEventListener(moveEvent, function (e) {
   e.preventDefault();
   if (first === null)
