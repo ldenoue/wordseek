@@ -5,9 +5,9 @@
 <meta name='apple-mobile-web-app-capable' content='yes'>
 <meta name='mobile-web-app-capable' content='yes'>
 <meta name='apple-mobile-web-app-status-bar-style' content='black-translucent'>
-<meta name='apple-mobile-web-app-title' content='WordSeek'>
-<link rel='apple-touch-icon' sizes='192x192' href='icon.png'>
-<link rel='icon' href='icon.png'>
+<meta name='apple-mobile-web-app-title' content='CrossWord Emoji'>
+<link rel='apple-touch-icon' sizes='192x192' href='crossword-icon.png'>
+<link rel='icon' href='crossword-icon.png'>
 <title>CrossWord Emoji</title>
 <style>
 @font-face {
@@ -34,27 +34,18 @@ font-family:'Ubuntu',Helvetica,monospace;
 body{
 background-color:#294;
 user-select:none;
--webkit-touch-callout: none; /* iOS Safari */
--webkit-user-select: none; /* Safari */
+-webkit-touch-callout: none;
+-webkit-user-select: none;
 background-repeat: no-repeat;
 background-size: cover;
 }
-
-.highlighted { background-color: yellow;}
-.word{display:inline-block;margin:8px;}
-.wordicon{font-size:60px}
-.wordicon > img {padding:8px}
-.wordicon > img {width:80px;height:80px}
-.realword{font-size:20px}
-
-.crossed {opacity:0.5;color:#555;}
 
 rect{
 	stroke-width:0;stroke:rgb(0,0,0);
 }
 
 text{
-  pointer-events:none;/* prevents it from stealing events from rects */
+  pointer-events:none;
   font-size:36px;
   fill:black;
   opacity:1.0;
@@ -109,20 +100,9 @@ line{
 .zoom{animation: winAnimation 0.9s ease-out}
 
 #grid{
-padding:0px;
-height:400px;
-max-height:calc(100vw - 64px);
-max-width:calc(100vw - 64px);
-border:0px solid blue;
-border-radius:0px;
-background-color:transparent;
-transition: opacity 1s ease-in-out;
-}
-
-#lettersdiv{
-padding:0px;
-width:400px;
-max-width:calc(100vw - 64px);
+padding:16px;
+width:440px;
+max-width:100vw;
 border:0px solid blue;
 border-radius:0px;
 background-color:transparent;
@@ -191,50 +171,11 @@ justify-content: space-evenly;
   opacity:1;
 }
 
-
-/*@media only screen and (orientation:landscape) {
-  #container{flex-direction:row;}
-  .word{display:block;}
-  .wordicon{font-size:48px;}
-  .wordicon > img {width:48px;height:48px}
-  .realword{font-size:18px;}
-  #grid{
-    max-height:calc(100vh - 64px);
-    height:400px;
-    max-width:calc(100vh - 64px);
-  }
-}
-
-@media only screen and (orientation:landscape) and (min-width:800px) {
-  .wordicon{font-size:80px;}
-  .wordicon > img {width:80px;height:80px}
-}*/
-
-@media only screen and (max-width:400px) {
-  .wordicon{font-size:40px}
-  .wordicon > img {width:40px;height:40px}
-  .realword{font-size:16px}
-  #grid{height:400px;max-width:calc(100vw-32px);max-height:calc(100vw-32px))}
-  #lettersdiv{max-width:calc(100vw-32px)}
-}
-
-@media only screen and (min-width:800px) and (min-height:800px) {
-    .wordicon{font-size:120px}
-    .wordicon > img {width:120px;height:120px}
-    .realword{font-size:32px}
-    #totalwordsdiv,#highscorediv{font-size:32px;}
-    #grid{height:640px;max-width:calc(100vw-32px);max-height:calc(100vw-32px))}
-    #lettersdiv{width:640px;max-width:calc(100vw-32px)}
-}
-td{font-family:monospace}
 </style>
 </head>
 <body onload='init()'>
 <div id='container'>
   <svg class='item' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xml:space='preserve' id='grid'></svg>
-  <!--div class='item' id='lettersdiv'></div-->
-  <svg class='item' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xml:space='preserve' id='lettersdiv'></svg>
-  
 </div>
 <div id='win'>1</div>
 <div id='header'><div id='totalwordsdiv'>0 words</div><div id='highscorediv'>0 points</div></div>
@@ -254,7 +195,9 @@ var emojis={All:{
   Potato:"🥔",Carrot:"🥕",Corn:"🌽",Pepper:"🌶",Cucumber:"🥒",Broccoli:"🥦",
   Mushroom:"🍄",Peanuts:"🥜",Chestnut:"🌰",Bread:"🍞",Croissant:"🥐",Baguette:"🥖",
   Pretzel:"🥨",Pancakes:"🥞",Cheese:"🧀",Meat:"🍖",Poultry:"🍗",Meat:"🥩",Bacon:"🥓",Hamburger:"🍔",
-  Fries:"🍟",Pizza:"🍕","Hot Dog":"🌭",Sandwich:"🥪",Taco:"🌮",Burrito:"🌯",Cooking:"🍳",Pot:"🍲",Bowl:"🥣",
+  Fries:"🍟",Pizza:"🍕",
+  "HotDog":"🌭",
+  Sandwich:"🥪",Taco:"🌮",Burrito:"🌯",Cooking:"🍳",Pot:"🍲",Bowl:"🥣",
   Salad:"🥗",Popcorn:"🍿",Can:"🥫",Bento:"🍱",Cracker:"🍘",Rice:"🍚",Curry:"🍛",Bowl:"🍜",Spaghetti:"🍝",
   Potato:"🍠",Sushi:"🍣",Shrimp:"🍤",Dumpling:"🥟",Cookie:"🥠",Box:"🥡","IceCream":"🍦",
   Doughnut:"🍩",Cookie:"🍪",Cake:"🎂",Shortcake:"🍰",Pie:"🥧",Chocolate:"🍫",
@@ -276,20 +219,24 @@ var emojis={All:{
   Seedling:"🌱",Tree:"🌲",Deciduous:"🌳",Palm:"🌴",Cactus:"🌵",Rice:"🌾",Herb:"🌿",Shamrock:"☘",
   Clover:"🍀",Maple:"🍁",Leaf:"🍂",Leaf:"🍃",Mushroom:"🍄",Chestnut:"🌰",Moon:"🌕",Moon:"🌜",Sun:"🌞",
   Star:"⭐",Cloud:"⛅",Tornado:"🌪",
-  Rainbow:"🌈",Umbrella:"☂",Drops:"☔",
+  Rainbow:"🌈",
+  //Umbrella:"☂",
+  Drops:"☔",
   Snowman:"⛄",Comet:"☄",Fire:"🔥",Droplet:"💧",
   Tree:"🎄",Sparkles:"✨",Tanabata:"🎋",Pine:"🎍",Baby:"👶",Angel:"👼",SantaClaus:"🎅",Elf:"🧝",
   Socks:"🧦",Deer:"🦌",Cookie:"🍪",Milk:"🥛",Wine:"🍷",Fork:"🍴",Church:"⛪",Star:"🌟",Snowflake:"❄",
   Snowman:"⛄",Fire:"🔥",Tree:"🎄",Gift:"🎁",Bell:"🔔",Notes:"🎶",Candle:"🕯",Smiling:"😁",Snowboarder:"🏂",
   Evergreen:"🌲",Mountain:"🏔",
   Wind:"🌬",
-  Umbrella:"🌂",
+  //Umbrella:"🌂",
   Rain:"☔",Snowflake:"❄",Snowman:"⛄",Skis:"🎿",Horse:"🏇",Skier:"⛷",Snowboarder:"🏂",
   Surfing:"🏄",Rowing:"🚣",Boat:"🚣",Swimming:"🏊",Bouncing:"⛹",Weights:"🏋",Biking:"🚴",
   Wrestling:"🤼",
   Handball:"🤾",Juggling:"🤹",Circus:"🎪",Ribbon:"🎗",Ticket:"🎫",Medal:"🎖",
   Trophy:"🏆",Medal:"🏅",Soccer:"⚽",Basketball:"🏀",Volleyball:"🏐",Football:"🏈",Rugby:"🏉",Tennis:"🎾",
-  Bowling:"🎳",Cricket:"🏏",Hockey:"🏑",Hockey:"🏒","Ping Pong":"🏓",Badminton:"🏸",Boxing:"🥊",
+  Bowling:"🎳",Cricket:"🏏",Hockey:"🏑",Hockey:"🏒",
+  "PingPong":"🏓",
+  Badminton:"🏸",Boxing:"🥊",
   Skating:"⛸",
   Fishing:"🎣",
   Skis:"🎿",Sled:"🛷",Pool:"🎱",Die:"🎲",Palette:"🎨",Score:"🎼",Microphone:"🎤",Headphone:"🎧",
@@ -298,7 +245,8 @@ var emojis={All:{
   Camping:"🏕",Beach:"🏖",Desert:"🏜",Island:"🏝",
   Stadium:"🏟",Building:"🏛",Construction:"🏗",Houses:"🏘",
   House:"🏠",
-  Office:"🏢","Post Office":"🏤",
+  Office:"🏢",
+  "PostOffice":"🏤",
   Hospital:"🏥",Bank:"🏦",Hotel:"🏨",Store:"🏪",School:"🏫",Factory:"🏭",Castle:"🏰",Wedding:"💒",
   Liberty:"🗽",Church:"⛪",Mosque:"🕌",Synagogue:"🕍",Kaaba:"🕋",Tent:"⛺",
   Carousel:"🎠","Wheel":"🎡",Roller:"🎢",
@@ -320,11 +268,14 @@ var emojis={All:{
   Handshake:"🤝",Nail:"💅",Ear:"👂",Nose:"👃",Footprints:"👣",Eyes:"👀",Eye:"👁",Brain:"🧠",Tongue:"👅",Mouth:"👄",
   Glasses:"👓",Sunglasses:"🕶",Necktie:"👔",TShirt:"👕",Jeans:"👖",Scarf:"🧣",Gloves:"🧤",Coat:"🧥",Socks:"🧦",
   Dress:"👗",Kimono:"👘",Bikini:"👙",Purse:"👛",Handbag:"👜",Backpack:"🎒",Shoe:"👞",Shoe:"👟",
-  Sandal:"👡",Boot:"👢",Crown:"👑",Hat:"👒",Cap:"🎓",Helmet:"⛑",Lipstick:"💄",Ring:"💍",Umbrella:"🌂",
+  Sandal:"👡",Boot:"👢",Crown:"👑",Hat:"👒",Cap:"🎓",Helmet:"⛑",Lipstick:"💄",Ring:"💍",
+  //Umbrella:"🌂",
   Briefcase:"💼",
   Bath:"🛀",Bed:"🛌",Bomb:"💣",Hole:"🕳",Bags:"🛍",Gem:"💎",Knife:"🔪",
   Amphora:"🏺",Map:"🗺",Drum:"🛢",Bell:"🛎",Hourglass:"⌛",Watch:"⌚",Alarm:"⏰",Stopwatch:"⏱",Timer:"⏲",
-  Thermometer:"🌡",Umbrella:"⛱",Balloon:"🎈",Popper:"🎉",Dolls:"🎎",Ribbon:"🎀",Gift:"🎁",Crystal:"🔮",
+  Thermometer:"🌡",
+  //Umbrella:"⛱",
+  Balloon:"🎈",Popper:"🎉",Dolls:"🎎",Ribbon:"🎀",Gift:"🎁",Crystal:"🔮",
   Joystick:"🕹",Picture:"🖼",Microphone:"🎙",Radio:"📻",Phone:"📱",Telephone:"📞",Pager:"📟",Fax:"📠",
   Battery:"🔋",Plug:"🔌",Laptop:"💻",Computer:"🖥",Printer:"🖨",Keyboard:"⌨",Mouse:"🖱",Trackball:"🖲",Disk:"💽",
   Floppy:"💾",DVD:"📀",Camera:"🎥",Projector:"📽",Television:"📺",Camera:"📷",
@@ -358,14 +309,12 @@ var currentColor = 0;
 //var letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 var points = {"a":1,"b":3,"c":3,"d":2,"e":1,"f":4,"g":2,"h":4,"i":1,"j":8,"k":5,"l":1,"m":3,"n":1,"o":1,"p":3,"q":10,"r":1,"s":1,"t":1,"u":1,"v":4,"w":4,"x":8,"y":4,"z":10};
 var words_emojis = [];
-var gamew = 11;
-var gameh = 11;
+var gamew = 9;
+var gameh = 9;
 var nQuestions = 6;
 var nFound = 0;
 var matrix = {};//new Array(gameh);
 var first = null;
-var solution = new Array();
-
 var categories = Object.keys(emojis);
 var words = [];
 var found_words = [];
@@ -509,7 +458,6 @@ function init()
     }
   }
 
-	solution = [];
 	initReal(cwgrid);
 }
 
@@ -569,10 +517,35 @@ function initReal()
 	    html += '</g>';
 		}
 	}
-	grid.innerHTML = html;
-	grid.setAttribute('viewBox','0 0 ' + size + ' ' + size);
+	//grid.innerHTML = html;
+	var sizeh = size + 2*48;
+	grid.setAttribute('viewBox','0 0 ' + size + ' ' + sizeh);
 
-	grid.querySelectorAll('rect').forEach(g => {g.addEventListener(startEvent,function(e){
+	win.style.backgroundColor = backColor;
+
+  grid.style.opacity = 1.0;
+
+  letters.sort(function() { return 0.5 - Math.random() });
+	//html = '';
+	//letters.forEach(l => html += '<span class="solutionletter">' + l + '</span>');
+	var j = gameh+1;
+	var x = 0;
+	for (var i=0;i<letters.length;i++)
+	{
+	  html += '<g>';
+	  html += '<rect data-letter="' + letters[i] + '" class="solutionletter" fill="white" width="46px" height="46px" x="' + (x * 48+1) + '" y="' + (j*48) + '" />';
+	  html += '<text text-anchor="middle" alignment-baseline="middle" x="' + (x * 48+24) + '" y="' + (j*48+28) + '">' + letters[i] + '</text>';
+	  html += '</g>';
+	  x++;
+	  if ((x % gamew) === 0)
+	  {
+	    x = 0;
+	    j++;
+	  }
+	}
+  grid.innerHTML = html;
+
+	grid.querySelectorAll('.letter').forEach(g => {g.addEventListener(startEvent,function(e){
 	  e.preventDefault();
 	  e.stopPropagation();
 	  if (!e.target.dataset.i)
@@ -601,39 +574,13 @@ function initReal()
 	    }
 	  }
 	})});
-
-  win.style.backgroundColor = backColor;
-
-  grid.style.opacity = 1.0;
-
-  letters.sort(function() { return 0.5 - Math.random() });
-	html = '';
-	//letters.forEach(l => html += '<span class="solutionletter">' + l + '</span>');
-	var j = 0;
-	var x = 0;
-	for (var i=0;i<letters.length;i++)
-	{
-	  html += '<g>';
-	  html += '<rect data-letter="' + letters[i] + '" class="solutionletter" fill="white" width="46px" height="46px" x="' + (x * 48+1) + '" y="' + (j*48) + '" />';
-	  html += '<text text-anchor="middle" alignment-baseline="middle" x="' + (x * 48+24) + '" y="' + (j*48+28) + '">' + letters[i] + '</text>';
-	  html += '</g>';
-	  x++;
-	  if ((x % gamew) === 0)
-	  {
-	    x = 0;
-	    j++;
-	  }
-	}
-	lettersdiv.innerHTML = html;
-	lettersdiv.setAttribute('viewBox','0 0 ' + size + ' ' + ((j+1) * 48));
-  lettersdiv.querySelectorAll('.solutionletter').forEach(l => l.addEventListener(startEvent,function(e){
+  grid.querySelectorAll('.solutionletter').forEach(l => l.addEventListener(startEvent,function(e){
 	  e.preventDefault();
 	  e.stopPropagation();
 	  if (selectedLetter)
 	    selectedLetter.classList.remove('selected');
 	  e.target.classList.add('selected');
 	  selectedLetter = e.target;
-    //console.log('letter=',e.target.textContent);    
   }));
   reHint();
 }
@@ -642,8 +589,7 @@ function restartGame()
 {
   setTimeout(function(){
     grid.style.opacity=0;
-    lettersdiv.style.opacity=0;
-    setTimeout(function () { init();grid.style.opacity=1;lettersdiv.style.opacity=1 },1000);
+    setTimeout(function () { init();grid.style.opacity=1; },1000);
   },900);
 }
 
