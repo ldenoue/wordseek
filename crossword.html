@@ -132,8 +132,8 @@ justify-content: space-evenly;
   padding:0;
   font-size:22px;
 }
-#totalwordsdiv{float:left;padding:8px;}
-#highscorediv{float:right;padding:8px;}
+#totalwordsdiv{float:left;padding:8px;background-color:rgba(128,128,125,0.2)}
+#highscorediv{float:right;padding:8px;background-color:rgba(128,128,125,0.2)}
 
 .solutionrect { opacity:0.9; transition: opacity 1s ease-in-out}
 
@@ -581,6 +581,9 @@ function initReal()
 	    selectedLetter.classList.remove('selected');
 	  e.target.classList.add('selected');
 	  selectedLetter = e.target;
+	  var rect = grid.getBoundingClientRect();
+	  selectedLetter.dataset.dx = e.clientX - rect.left - selectedLetter.getAttribute('x');
+	  selectedLetter.dataset.dy = e.clientY - rect.top - selectedLetter.getAttribute('y');
   }));
   reHint();
 }
@@ -621,6 +624,29 @@ document.body.onselectstart= function () {return false;}
 grid.addEventListener(startEvent,function (e) {
   e.preventDefault();
   e.stopPropagation();
+});
+
+grid.addEventListener(endEvent,function (e) {
+  e.preventDefault();
+  e.stopPropagation();
+  isMouseDown = false;
+});
+
+grid.addEventListener(moveEvent,function(e){
+  e.preventDefault();
+  e.stopPropagation();
+  if (selectedLetter === null)
+    return;
+  var r = selectedLetter;
+  var t = r.parentElement.querySelector('text');
+  var rect = grid.getBoundingClientRect();
+  var dx = +r.dataset.dx;
+  var dy = +r.dataset.dy;
+  r.setAttribute('x',e.clientX - rect.left - dx);
+  r.setAttribute('y',e.clientY - rect.top - dy);
+  t.setAttribute('x',e.clientX - rect.left + 24 - dx);
+  t.setAttribute('y',e.clientY - rect.top + 24 - dy);
+  console.log('move',rect.left,rect.top);
 });
 
 totalwordsdiv.addEventListener(startEvent,function(e){
