@@ -1,8 +1,10 @@
 CACHE MANIFEST
-# v2.2.10 - 2018-01-12
+# v2.2.12 - 2018-01-12
 crossword.html
 crossword.js
 emojis.js
+coin.mp3
+win.mp3
 crossword-icon.png
 ubuntu.woff2
 svg/1f308.svg

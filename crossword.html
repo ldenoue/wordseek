@@ -127,17 +127,8 @@ justify-content: space-evenly;
 
 .item{align-self:center}
 
-#header{
-  position:fixed;
-  width:100vw;
-  top:0px;
-  left:0px;
-  margin:0px;
-  padding:0;
-  font-size:22px;
-}
-#totalwordsdiv{cursor:pointer;margin:10px;border-radius:8px;float:left;padding:8px;background-color:rgba(128,128,125,0.2)}
-#highscorediv{cursor:pointer;margin:10px;border-radius:8px;float:right;padding:8px;background-color:rgba(128,128,125,0.2)}
+#totalwordsdiv{position:absolute;left:0;top:0;cursor:pointer;margin:10px;padding:8px;}
+#highscorediv{position:absolute;right:0;top:0;cursor:pointer;margin:10px;padding:8px;}
 
 .solutionrect { opacity:0.9; transition: opacity 1s ease-in-out}
 
@@ -194,12 +185,15 @@ justify-content: space-evenly;
   <svg class='item' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xml:space='preserve' id='grid'></svg>
 </div>
 <div id='win'>1</div>
-<div id='header'><div id='totalwordsdiv'>0 words</div><div id='highscorediv'>0 points</div></div>
+<div id='totalwordsdiv'>0 words</div>
+<div id='highscorediv'>0 points</div>
 <div id='hint'></div>
 <script src='crossword.js'></script>
 <script src='emojis.js'></script>
 <script>
 'use strict';
+var audioCoin = null;
+var audioWin = null;
 var useTwitterEmoji = true;
 var lastSelection = null;
 var selectedLetter = null;
@@ -252,7 +246,7 @@ function showWin(n,x,y)
 function setScore(s)
 {
   try {
-    window.localStorage.score = s;
+    window.localStorage.crossscore = s;
   } catch (e) {}
   if (s > 1)
     highscorediv.textContent = score + ' points';
@@ -263,7 +257,7 @@ function setScore(s)
 function setTotalWords(s)
 {
   try {
-    window.localStorage.totalWords = s;
+    window.localStorage.crosstotalWords = s;
   } catch (e) {}
   if (s > 1)
     totalwordsdiv.textContent = totalWords + ' words';
@@ -477,6 +471,7 @@ function initReal()
 	    e.target.parentElement.querySelector('text').classList.add('foundsolution');
 	    e.target.classList.add('selected');
 	    nFound++;
+	    audioCoin.play();
       var points = pointsForWord(letter);
       score += points;
       setScore(score);
@@ -484,6 +479,8 @@ function initReal()
       showWin(points,rect.left,rect.top);
 	    if (nFound === letters.length)
 	    {
+	      totalWords += words.length;
+	      setTotalWords(totalWords);
 	      restartGame();
 	    }
 	  }
@@ -513,6 +510,7 @@ function restartGame()
   document.querySelectorAll('rect').forEach(r => r.classList.add('highlight'));
   setTimeout(function(){
     grid.style.opacity=0;
+    audioWin.play();
     setTimeout(function () { init();grid.style.opacity=1; },1000);
   },900);
 }
@@ -561,18 +559,6 @@ grid.addEventListener(endEvent,function (e) {
   e.stopPropagation();
 });
 
-/*document.body.addEventListener(moveEvent,function(e){
-  e.preventDefault();
-  e.stopPropagation();
-  if (selectedLetter === null)
-    return;
-  var r = selectedLetter;
-  var dx = +r.dataset.dx;
-  var dy = +r.dataset.dy;
-  selection.style.left = e.clientX - dx;
-  selection.style.top = e.clientY - dy;
-});*/
-
 totalwordsdiv.addEventListener(startEvent,function(e){
   e.preventDefault();
   e.stopPropagation();
@@ -606,14 +592,21 @@ highscorediv.addEventListener(startEvent,function(e){
 });
 
 try {
-  if (window.localStorage && window.localStorage.score)
-    score = +window.localStorage.score;
-  if (window.localStorage && window.localStorage.totalWords)
-    totalWords = +window.localStorage.totalWords;
+  if (window.localStorage && window.localStorage.crossscore)
+    score = +window.localStorage.crossscore;
+  if (window.localStorage && window.localStorage.crosstotalWords)
+    totalWords = +window.localStorage.crosstotalWords;
 } catch (e) {}
 
 setScore(score);
 setTotalWords(totalWords);
+
+audioCoin = document.createElement('audio');
+audioCoin.src = 'coin.mp3';
+
+audioWin = document.createElement('audio');
+audioWin.src = 'win.mp3';
+
 </script>
 </body>
 </html>
