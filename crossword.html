@@ -192,7 +192,9 @@ justify-content: space-evenly;
 <script src='emojis.js'></script>
 <script>
 'use strict';
+var audioVolume = 0.1;
 var audioCoin = null;
+var audioCoin2 = null;
 var audioWin = null;
 var useTwitterEmoji = true;
 var lastSelection = null;
@@ -471,10 +473,20 @@ function initReal()
 	    e.target.parentElement.querySelector('text').classList.add('foundsolution');
 	    e.target.classList.add('selected');
 	    nFound++;
-	    audioCoin.play();
       var points = pointsForWord(letter);
       score += points;
       setScore(score);
+      if (points >= 2)
+      {
+	      audioCoin2.currentTime = 0;
+	      audioCoin2.play();
+      }
+      else
+      {
+	      audioCoin.currentTime = 0;
+	      audioCoin.play();
+	    }
+
       var rect = e.target.getBoundingClientRect();
       showWin(points,rect.left,rect.top);
 	    if (nFound === letters.length)
@@ -510,13 +522,21 @@ function restartGame()
   document.querySelectorAll('rect').forEach(r => r.classList.add('highlight'));
   setTimeout(function(){
     grid.style.opacity=0;
+    audioWin.currentTime = 0;
     audioWin.play();
     setTimeout(function () { init();grid.style.opacity=1; },1000);
   },900);
 }
 
+function play()
+{
+  audioCoin.currentTime = 0;
+  audioCoin.play();
+}
+
 function solve()
 {
+  play();
   var solutions = document.querySelectorAll('.guess');
   solutions.forEach(s => s.classList.add('show'));
 }
@@ -603,9 +623,15 @@ setTotalWords(totalWords);
 
 audioCoin = document.createElement('audio');
 audioCoin.src = 'coin.mp3';
+audioCoin.volume = audioVolume;
+
+audioCoin2 = document.createElement('audio');
+audioCoin2.src = 'win.mp3';
+audioCoin2.volume = audioVolume;
 
 audioWin = document.createElement('audio');
-audioWin.src = 'win.mp3';
+audioWin.src = 'notif.mp3';
+audioWin.volume = audioVolume;
 
 </script>
 </body>
