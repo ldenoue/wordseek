@@ -1,4 +1,4 @@
-<html lang='en'>
+<html lang='en' manifest='crossword.appcache'>
 <head>
 <meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover'>
@@ -108,7 +108,7 @@ line{
 
 #grid{
 padding:0px;
-width:440px;
+width:540px;
 max-width:calc(100vw - 16px);
 transition: opacity 1s ease-in-out;
 }
@@ -292,6 +292,7 @@ function reHint()
   hint.parentNode.replaceChild(newone, hint);
 }
 
+var cwgrid = null;
 function init()
 {
   nFound = 0;
@@ -301,7 +302,7 @@ function init()
   currentColor = parseInt(Math.random() * hiColors.length);
   backColor = bgColors[new Date%bgColors.length];
   document.body.style.backgroundColor = backColor;
-  var cwgrid = null;
+  cwgrid = null;
   var done = false;
   while (!done)
   {
