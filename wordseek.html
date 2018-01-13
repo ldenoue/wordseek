@@ -793,16 +793,13 @@ try {
 setScore(score);
 setTotalWords(totalWords);
 
-audioCoin = document.createElement('audio');
-audioCoin.src = 'coin.mp3';
+audioCoin = new Audio('coin.mp3');
 audioCoin.volume = audioVolume;
 
-audioCoin2 = document.createElement('audio');
-audioCoin2.src = 'win.mp3';
+audioCoin2 = new Audio('win.mp3');
 audioCoin2.volume = audioVolume;
 
-audioWin = document.createElement('audio');
-audioWin.src = 'notif.mp3';
+audioWin = new Audio('endgame.mp3');
 audioWin.volume = audioVolume;
 
 </script>

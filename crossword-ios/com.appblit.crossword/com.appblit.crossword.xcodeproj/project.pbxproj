@@ -1,0 +1,369 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 48;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		F9F4F408200A4CB400CEA193 /* endgame.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = F9F4F407200A4CB400CEA193 /* endgame.mp3 */; };
+		F9F530FB200A12CE0068B6AC /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F9F530FA200A12CE0068B6AC /* AppDelegate.m */; };
+		F9F530FE200A12CF0068B6AC /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9F530FD200A12CF0068B6AC /* ViewController.m */; };
+		F9F53101200A12CF0068B6AC /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F9F530FF200A12CF0068B6AC /* Main.storyboard */; };
+		F9F53103200A12CF0068B6AC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F9F53102200A12CF0068B6AC /* Assets.xcassets */; };
+		F9F53106200A12CF0068B6AC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F9F53104200A12CF0068B6AC /* LaunchScreen.storyboard */; };
+		F9F53109200A12CF0068B6AC /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F9F53108200A12CF0068B6AC /* main.m */; };
+		F9F53117200A13290068B6AC /* crossword.html in Resources */ = {isa = PBXBuildFile; fileRef = F9F5310F200A13280068B6AC /* crossword.html */; };
+		F9F53118200A13290068B6AC /* crossword.appcache in Resources */ = {isa = PBXBuildFile; fileRef = F9F53110200A13280068B6AC /* crossword.appcache */; };
+		F9F53119200A13290068B6AC /* emojis.js in Resources */ = {isa = PBXBuildFile; fileRef = F9F53111200A13280068B6AC /* emojis.js */; };
+		F9F5311A200A13290068B6AC /* crossword-icon.png in Resources */ = {isa = PBXBuildFile; fileRef = F9F53112200A13290068B6AC /* crossword-icon.png */; };
+		F9F5311B200A13290068B6AC /* coin.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = F9F53113200A13290068B6AC /* coin.mp3 */; };
+		F9F5311C200A13290068B6AC /* ubuntu.woff2 in Resources */ = {isa = PBXBuildFile; fileRef = F9F53114200A13290068B6AC /* ubuntu.woff2 */; };
+		F9F5311E200A13290068B6AC /* win.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = F9F53116200A13290068B6AC /* win.mp3 */; };
+		F9F53120200A133C0068B6AC /* svg in Resources */ = {isa = PBXBuildFile; fileRef = F9F5311F200A133B0068B6AC /* svg */; };
+		F9F53122200A138B0068B6AC /* crossword.js in Resources */ = {isa = PBXBuildFile; fileRef = F9F53121200A138B0068B6AC /* crossword.js */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		F9F4F407200A4CB400CEA193 /* endgame.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = endgame.mp3; path = ../../../endgame.mp3; sourceTree = "<group>"; };
+		F9F530F6200A12CE0068B6AC /* com.appblit.crossword.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = com.appblit.crossword.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F9F530F9200A12CE0068B6AC /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
+		F9F530FA200A12CE0068B6AC /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
+		F9F530FC200A12CE0068B6AC /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
+		F9F530FD200A12CF0068B6AC /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
+		F9F53100200A12CF0068B6AC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
+		F9F53102200A12CF0068B6AC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		F9F53105200A12CF0068B6AC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		F9F53107200A12CF0068B6AC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F9F53108200A12CF0068B6AC /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
+		F9F5310F200A13280068B6AC /* crossword.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; name = crossword.html; path = ../../../crossword.html; sourceTree = "<group>"; };
+		F9F53110200A13280068B6AC /* crossword.appcache */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = crossword.appcache; path = ../../../crossword.appcache; sourceTree = "<group>"; };
+		F9F53111200A13280068B6AC /* emojis.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = emojis.js; path = ../../../emojis.js; sourceTree = "<group>"; };
+		F9F53112200A13290068B6AC /* crossword-icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = "crossword-icon.png"; path = "../../../crossword-icon.png"; sourceTree = "<group>"; };
+		F9F53113200A13290068B6AC /* coin.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = coin.mp3; path = ../../../coin.mp3; sourceTree = "<group>"; };
+		F9F53114200A13290068B6AC /* ubuntu.woff2 */ = {isa = PBXFileReference; lastKnownFileType = file; name = ubuntu.woff2; path = ../../../ubuntu.woff2; sourceTree = "<group>"; };
+		F9F53116200A13290068B6AC /* win.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = win.mp3; path = ../../../win.mp3; sourceTree = "<group>"; };
+		F9F5311F200A133B0068B6AC /* svg */ = {isa = PBXFileReference; lastKnownFileType = folder; name = svg; path = ../../../svg; sourceTree = "<group>"; };
+		F9F53121200A138B0068B6AC /* crossword.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = crossword.js; path = ../../../crossword.js; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		F9F530F3200A12CE0068B6AC /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		F9F530ED200A12CE0068B6AC = {
+			isa = PBXGroup;
+			children = (
+				F9F530F8200A12CE0068B6AC /* com.appblit.crossword */,
+				F9F530F7200A12CE0068B6AC /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		F9F530F7200A12CE0068B6AC /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				F9F530F6200A12CE0068B6AC /* com.appblit.crossword.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F9F530F8200A12CE0068B6AC /* com.appblit.crossword */ = {
+			isa = PBXGroup;
+			children = (
+				F9F530F9200A12CE0068B6AC /* AppDelegate.h */,
+				F9F530FA200A12CE0068B6AC /* AppDelegate.m */,
+				F9F530FC200A12CE0068B6AC /* ViewController.h */,
+				F9F530FD200A12CF0068B6AC /* ViewController.m */,
+				F9F53113200A13290068B6AC /* coin.mp3 */,
+				F9F53116200A13290068B6AC /* win.mp3 */,
+				F9F4F407200A4CB400CEA193 /* endgame.mp3 */,
+				F9F5311F200A133B0068B6AC /* svg */,
+				F9F53112200A13290068B6AC /* crossword-icon.png */,
+				F9F53110200A13280068B6AC /* crossword.appcache */,
+				F9F5310F200A13280068B6AC /* crossword.html */,
+				F9F53121200A138B0068B6AC /* crossword.js */,
+				F9F53111200A13280068B6AC /* emojis.js */,
+				F9F53114200A13290068B6AC /* ubuntu.woff2 */,
+				F9F530FF200A12CF0068B6AC /* Main.storyboard */,
+				F9F53102200A12CF0068B6AC /* Assets.xcassets */,
+				F9F53104200A12CF0068B6AC /* LaunchScreen.storyboard */,
+				F9F53107200A12CF0068B6AC /* Info.plist */,
+				F9F53108200A12CF0068B6AC /* main.m */,
+			);
+			path = com.appblit.crossword;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		F9F530F5200A12CE0068B6AC /* com.appblit.crossword */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F9F5310C200A12CF0068B6AC /* Build configuration list for PBXNativeTarget "com.appblit.crossword" */;
+			buildPhases = (
+				F9F530F2200A12CE0068B6AC /* Sources */,
+				F9F530F3200A12CE0068B6AC /* Frameworks */,
+				F9F530F4200A12CE0068B6AC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = com.appblit.crossword;
+			productName = com.appblit.crossword;
+			productReference = F9F530F6200A12CE0068B6AC /* com.appblit.crossword.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F9F530EE200A12CE0068B6AC /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0920;
+				ORGANIZATIONNAME = "Laurent Denoue";
+				TargetAttributes = {
+					F9F530F5200A12CE0068B6AC = {
+						CreatedOnToolsVersion = 9.2;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = F9F530F1200A12CE0068B6AC /* Build configuration list for PBXProject "com.appblit.crossword" */;
+			compatibilityVersion = "Xcode 8.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = F9F530ED200A12CE0068B6AC;
+			productRefGroup = F9F530F7200A12CE0068B6AC /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				F9F530F5200A12CE0068B6AC /* com.appblit.crossword */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F9F530F4200A12CE0068B6AC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F9F5311C200A13290068B6AC /* ubuntu.woff2 in Resources */,
+				F9F5311E200A13290068B6AC /* win.mp3 in Resources */,
+				F9F53120200A133C0068B6AC /* svg in Resources */,
+				F9F53118200A13290068B6AC /* crossword.appcache in Resources */,
+				F9F53106200A12CF0068B6AC /* LaunchScreen.storyboard in Resources */,
+				F9F53103200A12CF0068B6AC /* Assets.xcassets in Resources */,
+				F9F53101200A12CF0068B6AC /* Main.storyboard in Resources */,
+				F9F4F408200A4CB400CEA193 /* endgame.mp3 in Resources */,
+				F9F53117200A13290068B6AC /* crossword.html in Resources */,
+				F9F53119200A13290068B6AC /* emojis.js in Resources */,
+				F9F53122200A138B0068B6AC /* crossword.js in Resources */,
+				F9F5311A200A13290068B6AC /* crossword-icon.png in Resources */,
+				F9F5311B200A13290068B6AC /* coin.mp3 in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		F9F530F2200A12CE0068B6AC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F9F530FE200A12CF0068B6AC /* ViewController.m in Sources */,
+				F9F53109200A12CF0068B6AC /* main.m in Sources */,
+				F9F530FB200A12CE0068B6AC /* AppDelegate.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXVariantGroup section */
+		F9F530FF200A12CF0068B6AC /* Main.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F9F53100200A12CF0068B6AC /* Base */,
+			);
+			name = Main.storyboard;
+			sourceTree = "<group>";
+		};
+		F9F53104200A12CF0068B6AC /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				F9F53105200A12CF0068B6AC /* Base */,
+			);
+			name = LaunchScreen.storyboard;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
+
+/* Begin XCBuildConfiguration section */
+		F9F5310A200A12CF0068B6AC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+			};
+			name = Debug;
+		};
+		F9F5310B200A12CF0068B6AC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 11.2;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		F9F5310D200A12CF0068B6AC /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 388X9C8CWR;
+				INFOPLIST_FILE = com.appblit.crossword/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.appblit.com-appblit-crossword";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		F9F5310E200A12CF0068B6AC /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 388X9C8CWR;
+				INFOPLIST_FILE = com.appblit.crossword/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = "com.appblit.com-appblit-crossword";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F9F530F1200A12CE0068B6AC /* Build configuration list for PBXProject "com.appblit.crossword" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F9F5310A200A12CF0068B6AC /* Debug */,
+				F9F5310B200A12CF0068B6AC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F9F5310C200A12CF0068B6AC /* Build configuration list for PBXNativeTarget "com.appblit.crossword" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F9F5310D200A12CF0068B6AC /* Debug */,
+				F9F5310E200A12CF0068B6AC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = F9F530EE200A12CE0068B6AC /* Project object */;
+}

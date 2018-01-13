@@ -503,10 +503,10 @@ function initReal()
 function restartGame()
 {
   document.querySelectorAll('rect').forEach(r => r.classList.add('highlight'));
+  audioWin.currentTime = 0;
+  audioWin.play();
   setTimeout(function(){
     grid.style.opacity=0;
-    audioWin.currentTime = 0;
-    audioWin.play();
     setTimeout(function () { init();grid.style.opacity=1; },1000);
   },900);
 }
@@ -597,16 +597,16 @@ try {
 setScore(score);
 setTotalWords(totalWords);
 
-audioCoin = document.createElement('audio');
+audioCoin = new Audio();
 audioCoin.src = 'coin.mp3';
 audioCoin.volume = audioVolume;
 
-audioCoin2 = document.createElement('audio');
+audioCoin2 = new Audio();
 audioCoin2.src = 'win.mp3';
 audioCoin2.volume = audioVolume;
 
-audioWin = document.createElement('audio');
-audioWin.src = 'notif.mp3';
+audioWin = new Audio();
+audioWin.src = 'endgame.mp3';
 audioWin.volume = audioVolume;
 
 </script>
