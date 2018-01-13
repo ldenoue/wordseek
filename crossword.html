@@ -31,7 +31,7 @@ font-family:'Ubuntu',Helvetica,monospace;
 }
 
 .letter,.solutionletter{stroke-width:3px;stroke:transparent}
-.solutionletter{stroke-width:3px}
+.solutionletter{stroke-width:3px;}
 body{
 box-sizing:border-box;
 background-color:#294;
@@ -157,8 +157,8 @@ justify-content: space-evenly;
 
 .highlight{
   transition: all 0.9s ease-out;
-  opacity:1.0;
-  fill:yellow;
+  opacity:0.0;
+  fill:white;
 }
 
 .found{
@@ -297,8 +297,8 @@ function init()
   var elems = document.querySelectorAll('.letter');
   elems.forEach(a => delete a.dataset.done);
 
-  currentColor = parseInt(Math.random() * hiColors.length);
-  backColor = bgColors[new Date%bgColors.length];
+  currentColor = parseInt(Math.random() * bgColors.length);
+  backColor = bgColors[currentColor];
   document.body.style.backgroundColor = backColor;
   cwgrid = null;
   var done = false;
@@ -369,7 +369,7 @@ function initReal()
 	var html = '';
   var letters = [];
   var off = 48;
-  var MAX_GUESS = 7;
+  var MAX_GUESS = 8;
 	for (var j=0;j<gameh;j++)
 	{
 		for (var i=0;i<gamew;i++)
@@ -433,7 +433,7 @@ function initReal()
   letters.sort(function() { return 0.5 - Math.random() });
 	var j = gameh+1;
 	var x = 0;
-	var solutionw = 64;
+	var solutionw = (64+48)/2;
 	var solutionfont = (solutionw * 36 / 48);
 	var offsetx = (sizew - (letters.length * solutionw))/2;
 	for (var i=0;i<letters.length;i++)
@@ -502,6 +502,7 @@ function initReal()
 	})});
   grid.querySelectorAll('.solutionletter').forEach(l => {
     l.style.stroke = backColor;
+    //l.style.fill = bgColors[(currentColor+1)%bgColors.length]
     l.addEventListener(startEvent,function(e){
       e.preventDefault();
       e.stopPropagation();
@@ -517,13 +518,15 @@ function initReal()
 
 function restartGame()
 {
-  document.querySelectorAll('rect').forEach(r => r.classList.add('highlight'));
   audioWin.currentTime = 0;
   audioWin.play();
-  setTimeout(function(){
-    grid.style.opacity=0;
-    setTimeout(function () { init();grid.style.opacity=1; },1000);
-  },900);
+  setTimeout(function () {
+    document.querySelectorAll('g').forEach(r => r.classList.add('highlight'));
+    setTimeout(function(){
+      grid.style.opacity=0;
+      setTimeout(function () { init();grid.style.opacity=1; },1000);
+    },900);
+  },2000);
 }
 
 function solve()

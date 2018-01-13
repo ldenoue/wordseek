@@ -21,8 +21,10 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.view.backgroundColor = [UIColor colorWithRed:0.92 green:0.38 blue:0.24 alpha:1.0];
     CGRect rect = self.view.frame;
     WKWebView *web = [[WKWebView alloc] initWithFrame:rect];
+    web.backgroundColor = [UIColor colorWithRed:0.92 green:0.38 blue:0.24 alpha:1.0];
     [self.view addSubview:web];
     NSString *path = [[NSBundle mainBundle] pathForResource:@"wordseek" ofType:@"html"];
     NSURL *url = [NSURL fileURLWithPath:path];
