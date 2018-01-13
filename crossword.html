@@ -30,6 +30,8 @@ font-family:'Ubuntu',Helvetica,monospace;
 
 }
 
+.letter,.solutionletter{stroke-width:3px;stroke:transparent}
+.solutionletter{stroke-width:3px}
 body{
 box-sizing:border-box;
 background-color:#294;
@@ -56,7 +58,7 @@ text{
   fill:black;
   opacity:1.0;
   text-anchor:middle;
-  alignment-baseline:middle;
+  alignment-baseline:central;
 }
 
 line{
@@ -110,6 +112,7 @@ line{
 padding:0px;
 width:540px;
 max-width:calc(100vw - 16px);
+max-height:calc(100vh - 16px);
 transition: opacity 1s ease-in-out;
 }
 
@@ -127,8 +130,8 @@ justify-content: space-evenly;
 
 .item{align-self:center}
 
-#totalwordsdiv{position:absolute;left:0;top:0;cursor:pointer;margin:10px;padding:8px;}
-#highscorediv{position:absolute;right:0;top:0;cursor:pointer;margin:10px;padding:8px;}
+#totalwordsdiv{position:absolute;left:0;top:0;cursor:pointer;margin:0px;padding:8px;}
+#highscorediv{position:absolute;right:0;top:0;cursor:pointer;margin:0px;padding:8px;}
 
 .solutionrect { opacity:0.9; transition: opacity 1s ease-in-out}
 
@@ -301,6 +304,7 @@ function init()
   var done = false;
   while (!done)
   {
+    var picked = [];
     words = [];
     found_words = [];
     words_emojis = [];
@@ -310,10 +314,11 @@ function init()
       n++;
       var idx = parseInt(Math.random()*names.length);
       var name = names[idx];
-      if (name.length < gamew && name.length < gameh && name.indexOf(' ') === -1 && name.indexOf('-') !== 0 && words.indexOf(name.toUpperCase()) === -1)
+      if (name.length < gamew && name.length < gameh && name.indexOf(' ') === -1 && name.indexOf('-') !== 0 && picked.indexOf(name.toUpperCase()) === -1)
       {
         var emoji = emojis[category][name];
         var up = name.toUpperCase();
+        picked.push(up);
         words.push(words.length +  up);
         if (useTwitterEmoji)
         {
@@ -363,6 +368,8 @@ function initReal()
   
 	var html = '';
   var letters = [];
+  var off = 48;
+  var MAX_GUESS = 7;
 	for (var j=0;j<gameh;j++)
 	{
 		for (var i=0;i<gamew;i++)
@@ -374,16 +381,16 @@ function initReal()
 			html += '<g>';
       if (isLetter)
       {
-				html += '<rect fill="white" data-i='+ i + ' data-j=' + j + ' class="letter" width="46px" height="46px" x="' + (i * 48+1) + '" y="' + (j * 48+1) + '" />';
+				html += '<rect fill="white" data-i='+ i + ' data-j=' + j + ' class="letter" width="48px" height="48px" x="' + (off + i * 48) + '" y="' + (off + j * 48) + '" />';
         var display = rnd(2);
-        if (display === 0 && letters.length < gamew)
+        if (display === 0 && letters.length <= MAX_GUESS)//gamew)
         {
   			  letters.push(matrix[j][i]);
-	        html += '<text class="guess" x="' + (i * 48+24) + '" y="' + (j * 48+28) + '">' + matrix[j][i] + '</text>';
+	        html += '<text class="guess" x="' + (off + i * 48+24) + '" y="' + (off +j * 48+24) + '">' + matrix[j][i] + '</text>';
 	      }
 	      else
 	      {
-  	      html += '<text class="guess foundsolution" x="' + (i * 48+24) + '" y="' + (j * 48+28) + '">' + matrix[j][i] + '</text>';
+  	      html += '<text class="guess foundsolution" x="' + (off + i * 48+24) + '" y="' + (off+ j * 48+24) + '">' + matrix[j][i] + '</text>';
 	      }
 	    }
 	    else
@@ -391,38 +398,50 @@ function initReal()
 		    //html += '<rect fill="transparent" class="group" width="46px" height="46px" x="' + (i * 48) + '" y="' + (j * 48) + '" />';
 		    if (useTwitterEmoji)
 		    {
-		      html += '<image width="48" height="48" x="' + (i * 48) + '" y="' + (j * 48) + '" xlink:href="' + words_emojis[+matrix[j][i]] + '"/>';
-		      //html += '<svg width=45 height=45 viewBox="0 0 45 45"><use xlink:href="' +  words_emojis[+matrix[j][i]] + '"></use></svg>';
+		      //html += '<image width="48" height="48" x="' + (i * 48) + '" y="' + (j * 48) + '" xlink:href="' + words_emojis[+matrix[j][i]] + '"/>';
+          var imsize = 72;
+          var delta = 16;
+          var dx;
+          var dy;
+		      if (i<gamew-1 && matrix[j][i+1] !== ' ')
+		      {
+		        dx = -delta;
+		        dy = 0;
+		      }
+		      else
+		      {
+		        dx = 0;
+		        dy = -delta;
+		      }
+          html += '<image width="' + imsize + '" height="' + imsize + '" x="' + (off+ i * 48 - (imsize/2-24) + dx) + '" y="' + (off + j * 48 - (imsize/2-24) + dy) + '" xlink:href="' + words_emojis[+matrix[j][i]] + '"/>';
 		    }
 		    else
-	    	  html += '<text class="emojitext" x="' + (i * 48+24) + '" y="' + (j * 48+28) + '">' + words_emojis[+matrix[j][i]] + '</text>';
+	    	  html += '<text class="emojitext" x="' + (off + i * 48+24) + '" y="' + (off + j * 48+24) + '">' + words_emojis[+matrix[j][i]] + '</text>';
 	    }
 	    html += '</g>';
 		}
 	}
 	//grid.innerHTML = html;
-	var sizeh = size + 2*48;
-	grid.setAttribute('viewBox','0 0 ' + size + ' ' + sizeh);
+	var sizeh = size + 2*48 + 2*off;
+	var sizew = size + 2* off;
+	grid.setAttribute('viewBox','0 0 ' + sizew + ' ' + sizeh);
 
 	win.style.backgroundColor = backColor;
 
   grid.style.opacity = 1.0;
 
   letters.sort(function() { return 0.5 - Math.random() });
-	//html = '';
-	//letters.forEach(l => html += '<span class="solutionletter">' + l + '</span>');
 	var j = gameh+1;
 	var x = 0;
+	var solutionw = 64;
+	var solutionfont = (solutionw * 36 / 48);
+	var offsetx = (sizew - (letters.length * solutionw))/2;
 	for (var i=0;i<letters.length;i++)
 	{
 	  html += '<g>';
-	  //html += '<svg transition="translate 2s ease-in" x=' + (x*48) + ' y=' + (j*48) + '>';
-	  html += '<rect data-letter="' + letters[i] + '" class="solutionletter" fill="white" width="46px" height="46px" x="' + (x * 48+1) + '" y="' + (j*48) + '" />';
-	  html += '<text x="' + (x * 48+24) + '" y="' + (j*48+28) + '">' + letters[i] + '</text>';
-	  //html += '<rect data-letter="' + letters[i] + '" class="solutionletter" fill="white" width="46px" height="46px" x="1" y="1"/>';
-	  //html += '<text x="24" y="24">' + letters[i] + '</text>';
+	  html += '<rect data-letter="' + letters[i] + '" class="solutionletter" fill="white" width=' + solutionw + ' height=' + solutionw + ' x=' + (offsetx + x * solutionw) + ' y=' + (off + j*48) + ' />';
+	  html += '<text style="font-size:' + solutionfont + 'px" x="' + (offsetx + x * solutionw+solutionw/2) + '" y="' + (off + j*48+solutionw/2) + '">' + letters[i] + '</text>';
 	  html += '</g>';
-	  //html += '</svg>';
 	  x++;
 	  if ((x % gamew) === 0)
 	  {
@@ -432,7 +451,9 @@ function initReal()
 	}
   grid.innerHTML = html;
 
-	grid.querySelectorAll('.letter').forEach(g => {g.addEventListener(startEvent,function(e){
+	grid.querySelectorAll('.letter').forEach(g => {
+	  g.style.stroke = backColor;
+    g.addEventListener(startEvent,function(e){
 	  e.preventDefault();
 	  e.stopPropagation();
 	  if (!e.target.dataset.i)
@@ -479,23 +500,18 @@ function initReal()
 	    }
 	  }
 	})});
-  grid.querySelectorAll('.solutionletter').forEach(l => l.addEventListener(startEvent,function(e){
-	  e.preventDefault();
-	  e.stopPropagation();
-	  if (selectedLetter)
-	    selectedLetter.classList.remove('selected');
-	  e.target.classList.add('selected');
-	  selectedLetter = e.target;
-	  var rect = grid.getBoundingClientRect();
-	  /*var dx = e.clientX - rect.left - selectedLetter.getAttribute('x');
-	  var dy = e.clientY - rect.top - selectedLetter.getAttribute('y');
-	  selectedLetter.dataset.dx = dx;
-	  selectedLetter.dataset.dy = dy;
-	  selection.querySelector('text').textContent = selectedLetter.parentElement.querySelector('text').textContent;
-	  selection.style.display='block';
-	  selection.style.left = (e.clientX - dx) + 'px';
-	  selection.style.top = (e.clientY - dy) + 'px';*/
-  }));
+  grid.querySelectorAll('.solutionletter').forEach(l => {
+    l.style.stroke = backColor;
+    l.addEventListener(startEvent,function(e){
+      e.preventDefault();
+      e.stopPropagation();
+      if (selectedLetter)
+        selectedLetter.classList.remove('selected');
+      e.target.classList.add('selected');
+      selectedLetter = e.target;
+      var rect = grid.getBoundingClientRect();
+    })
+  });
   reHint();
 }
 
