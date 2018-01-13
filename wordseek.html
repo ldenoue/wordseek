@@ -60,8 +60,6 @@ line{
   stroke-width:48;
 }
 
-#overlay{text-align:center;width:100vw;height:100%;position:fixed;left:0;top:0;}
-
 @keyframes winAnimation {
   0%   { opacity:0; transform:scale(0.3)}
   50%  { opacity:0.5; transform:scale(1.0)}
@@ -207,10 +205,9 @@ justify-content: space-evenly;
 <div id='win'>1</div>
 <div id='header'><div id='totalwordsdiv'>0 words</div><div id='highscorediv'>0 points</div></div>
 <div id='hint'></div>
-<div id='overlay'></div>
 <script>
 'use strict';
-var audioVolume = 0.1;
+var firstTime = true;
 var audioCoin = null;
 var audioCoin2 = null;
 var audioWin = null;
@@ -679,8 +676,20 @@ function getPosition(x,y) {
   };
 }
 
-var firstTime = true;
-document.body.addEventListener(startEvent,function (){ if (!firstTime) init();});
+function loadSounds()
+{
+  audioCoin = new Audio('coin.mp3');
+  audioCoin2 = new Audio('win.mp3');
+  audioWin = new Audio('endgame.mp3');
+}
+document.body.addEventListener(startEvent,function (){
+  if (firstTime)
+  {
+    firstTime = false;
+    loadSounds();
+  }
+  init();
+});
 
 document.addEventListener('keydown',function(e){
   if (e.key === 'h')
@@ -747,6 +756,12 @@ grid.addEventListener('mouseleave',function(e) {
 grid.addEventListener(startEvent, function (e) {
   e.preventDefault();
   e.stopImmediatePropagation();
+  if (firstTime)
+  {
+    firstTime = false;
+    loadSounds();
+  }
+
   isMouseDown = true;
   var cell = e.target;
   if (cell.classList.contains('letter') && cell.dataset.done !== 'true')
@@ -758,6 +773,11 @@ grid.addEventListener(startEvent, function (e) {
 });
 
 totalwordsdiv.addEventListener(startEvent,function(e){
+  if (firstTime)
+  {
+    firstTime = false;
+    loadSounds();
+  }
   e.preventDefault();
   e.stopPropagation();
   solve();
@@ -785,6 +805,11 @@ highscorediv.addEventListener(endEvent,function(e){
 });
 
 highscorediv.addEventListener(startEvent,function(e){
+  if (firstTime)
+  {
+    firstTime = false;
+    loadSounds();
+  }
   e.preventDefault();
   e.stopPropagation();
 });
@@ -799,21 +824,6 @@ try {
 setScore(score);
 setTotalWords(totalWords);
 
-/* on iOS, we need a tap/click to load audio files */
-overlay.addEventListener('click',function(e){
-  e.preventDefault();
-  e.stopImmediatePropagation();
-  firstTime = false;
-  overlay.style.display='none';
-  audioCoin = new Audio('coin.mp3');
-  audioCoin.volume = audioVolume;
-
-  audioCoin2 = new Audio('win.mp3');
-  audioCoin2.volume = audioVolume;
-
-  audioWin = new Audio('endgame.mp3');
-  audioWin.volume = audioVolume;
-});
 </script>
 </body>
 </html>

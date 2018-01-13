@@ -192,7 +192,6 @@ justify-content: space-evenly;
 <script src='emojis.js'></script>
 <script>
 'use strict';
-var audioVolume = 0.1;
 var audioCoin = null;
 var audioCoin2 = null;
 var audioWin = null;
@@ -597,18 +596,9 @@ try {
 setScore(score);
 setTotalWords(totalWords);
 
-audioCoin = new Audio();
-audioCoin.src = 'coin.mp3';
-audioCoin.volume = audioVolume;
-
-audioCoin2 = new Audio();
-audioCoin2.src = 'win.mp3';
-audioCoin2.volume = audioVolume;
-
-audioWin = new Audio();
-audioWin.src = 'endgame.mp3';
-audioWin.volume = audioVolume;
-
+audioCoin = new Audio('coin.mp3');
+audioCoin2 = new Audio('win.mp3');
+audioWin = new Audio('endgame.mp3');
 </script>
 </body>
 </html>
