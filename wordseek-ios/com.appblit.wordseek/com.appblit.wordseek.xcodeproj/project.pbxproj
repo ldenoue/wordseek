@@ -18,9 +18,9 @@
 		F9F05A9D2003B43B000D5CD4 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = F9F05A9C2003B43B000D5CD4 /* Assets.xcassets */; };
 		F9F05AA02003B43B000D5CD4 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F9F05A9E2003B43B000D5CD4 /* LaunchScreen.storyboard */; };
 		F9F05AA32003B43B000D5CD4 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = F9F05AA22003B43B000D5CD4 /* main.m */; };
-		F9F4F40C200A4EBC00CEA193 /* endgame.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = F9F4F40B200A4EBC00CEA193 /* endgame.mp3 */; };
-		F9F530E9200A12050068B6AC /* win.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = F9F530E5200A12040068B6AC /* win.mp3 */; };
-		F9F530EA200A12050068B6AC /* coin.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = F9F530E6200A12040068B6AC /* coin.mp3 */; };
+		F9F4F416200A5EBE00CEA193 /* endgame.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = F9F4F413200A5EBE00CEA193 /* endgame.mp3 */; };
+		F9F4F417200A5EBE00CEA193 /* coin.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = F9F4F414200A5EBE00CEA193 /* coin.mp3 */; };
+		F9F4F418200A5EBE00CEA193 /* win.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = F9F4F415200A5EBE00CEA193 /* win.mp3 */; };
 		F9F530EC200A12050068B6AC /* emojis.js in Resources */ = {isa = PBXBuildFile; fileRef = F9F530E8200A12050068B6AC /* emojis.js */; };
 /* End PBXBuildFile section */
 
@@ -40,9 +40,9 @@
 		F9F05A9F2003B43B000D5CD4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		F9F05AA12003B43B000D5CD4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F9F05AA22003B43B000D5CD4 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
-		F9F4F40B200A4EBC00CEA193 /* endgame.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = endgame.mp3; path = ../../../endgame.mp3; sourceTree = "<group>"; };
-		F9F530E5200A12040068B6AC /* win.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = win.mp3; path = ../../../win.mp3; sourceTree = "<group>"; };
-		F9F530E6200A12040068B6AC /* coin.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = coin.mp3; path = ../../../coin.mp3; sourceTree = "<group>"; };
+		F9F4F413200A5EBE00CEA193 /* endgame.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = endgame.mp3; path = ../../../endgame.mp3; sourceTree = "<group>"; };
+		F9F4F414200A5EBE00CEA193 /* coin.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = coin.mp3; path = ../../../coin.mp3; sourceTree = "<group>"; };
+		F9F4F415200A5EBE00CEA193 /* win.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = win.mp3; path = ../../../win.mp3; sourceTree = "<group>"; };
 		F9F530E8200A12050068B6AC /* emojis.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = emojis.js; path = ../../../emojis.js; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -80,11 +80,11 @@
 				F985371C2003B63D008D5EA3 /* ubuntu.woff2 */,
 				F985371B2003B63D008D5EA3 /* wordseek.appcache */,
 				F98537192003B63C008D5EA3 /* wordseek.html */,
-				F9F530E6200A12040068B6AC /* coin.mp3 */,
-				F9F530E5200A12040068B6AC /* win.mp3 */,
-				F9F4F40B200A4EBC00CEA193 /* endgame.mp3 */,
 				F9F530E8200A12050068B6AC /* emojis.js */,
 				F9F05A932003B43B000D5CD4 /* AppDelegate.h */,
+				F9F4F414200A5EBE00CEA193 /* coin.mp3 */,
+				F9F4F413200A5EBE00CEA193 /* endgame.mp3 */,
+				F9F4F415200A5EBE00CEA193 /* win.mp3 */,
 				F9F05A942003B43B000D5CD4 /* AppDelegate.m */,
 				F9F05A962003B43B000D5CD4 /* ViewController.h */,
 				F9F05A972003B43B000D5CD4 /* ViewController.m */,
@@ -156,15 +156,15 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F9F530E9200A12050068B6AC /* win.mp3 in Resources */,
-				F9F530EA200A12050068B6AC /* coin.mp3 in Resources */,
 				F985371F2003B63D008D5EA3 /* wordseek.appcache in Resources */,
 				F985371D2003B63D008D5EA3 /* wordseek.html in Resources */,
 				F985371E2003B63D008D5EA3 /* icon.png in Resources */,
+				F9F4F418200A5EBE00CEA193 /* win.mp3 in Resources */,
 				F951D4762005135D001511F7 /* svg in Resources */,
-				F9F4F40C200A4EBC00CEA193 /* endgame.mp3 in Resources */,
 				F9F05AA02003B43B000D5CD4 /* LaunchScreen.storyboard in Resources */,
 				F9F05A9D2003B43B000D5CD4 /* Assets.xcassets in Resources */,
+				F9F4F416200A5EBE00CEA193 /* endgame.mp3 in Resources */,
+				F9F4F417200A5EBE00CEA193 /* coin.mp3 in Resources */,
 				F98537202003B63D008D5EA3 /* ubuntu.woff2 in Resources */,
 				F9F05A9B2003B43B000D5CD4 /* Main.storyboard in Resources */,
 				F9F530EC200A12050068B6AC /* emojis.js in Resources */,

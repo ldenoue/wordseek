@@ -60,6 +60,8 @@ line{
   stroke-width:48;
 }
 
+#overlay{text-align:center;width:100vw;height:100%;position:fixed;left:0;top:0;}
+
 @keyframes winAnimation {
   0%   { opacity:0; transform:scale(0.3)}
   50%  { opacity:0.5; transform:scale(1.0)}
@@ -205,6 +207,7 @@ justify-content: space-evenly;
 <div id='win'>1</div>
 <div id='header'><div id='totalwordsdiv'>0 words</div><div id='highscorediv'>0 points</div></div>
 <div id='hint'></div>
+<div id='overlay'></div>
 <script>
 'use strict';
 var audioVolume = 0.1;
@@ -676,7 +679,8 @@ function getPosition(x,y) {
   };
 }
 
-document.body.addEventListener(startEvent,function (){init();});
+var firstTime = true;
+document.body.addEventListener(startEvent,function (){ if (!firstTime) init();});
 
 document.addEventListener('keydown',function(e){
   if (e.key === 'h')
@@ -725,6 +729,8 @@ grid.addEventListener(moveEvent, function (e) {
 });
 
 grid.addEventListener(endEvent,function(e) {
+  e.preventDefault();
+  e.stopPropagation();
   isMouseDown = false;
   if (lastSelection)
     checkWord(lastSelection);
@@ -793,15 +799,21 @@ try {
 setScore(score);
 setTotalWords(totalWords);
 
-audioCoin = new Audio('coin.mp3');
-audioCoin.volume = audioVolume;
+/* on iOS, we need a tap/click to load audio files */
+overlay.addEventListener('click',function(e){
+  e.preventDefault();
+  e.stopImmediatePropagation();
+  firstTime = false;
+  overlay.style.display='none';
+  audioCoin = new Audio('coin.mp3');
+  audioCoin.volume = audioVolume;
 
-audioCoin2 = new Audio('win.mp3');
-audioCoin2.volume = audioVolume;
+  audioCoin2 = new Audio('win.mp3');
+  audioCoin2.volume = audioVolume;
 
-audioWin = new Audio('endgame.mp3');
-audioWin.volume = audioVolume;
-
+  audioWin = new Audio('endgame.mp3');
+  audioWin.volume = audioVolume;
+});
 </script>
 </body>
 </html>
