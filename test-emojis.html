@@ -1,35 +1,21 @@
 <html lang="en">
 <head>
 <meta charset='utf-8'>
-
 <script src='emojis.js'></script>
+<style>
+span{display:inline-block;min-width:120px}
+</style>
 </head>
 <body>
-<div id=list></div>
+<ul id='list'></ul>
 <script>
 'use strict';
 var category = 'All';
 var names = Object.keys(emojis[category]);
 
-function hexCodeFromEmoji(emoji)
-{
-  var code = emoji.charCodeAt(0);
-  if (emoji.length > 2)
-    console.error('emoji > 3',emoji);
-  if (emoji.length === 2)
-  {
-    code = (
-            0x10000
-            | ((emoji.charCodeAt(0) - 0xD800) << 10)
-            | (emoji.charCodeAt(1) - 0xDC00)
-        );
-  }
-  var hexcode = code.toString(16);
-  return hexcode;
-}
-
 for (var i=0;i<names.length;i++)
 {
+  var li = document.createElement('li');
   var img = document.createElement('img');
   img.width = 64;
   var name = names[i];
@@ -42,11 +28,11 @@ for (var i=0;i<names.length;i++)
   img.title = name;
   var t = document.createElement('span');
   t.textContent = name;
-  list.appendChild(t);
-  list.appendChild(img);
+  li.appendChild(t);
+  li.appendChild(img);
+  list.appendChild(li);
 
 }
-
 </script>
 </body>
 

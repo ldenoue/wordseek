@@ -207,6 +207,11 @@ justify-content: space-evenly;
 <div id='hint'></div>
 <script>
 'use strict';
+var audioVolume = 0.1;
+var audioCoin = null;
+var audioCoin2 = null;
+var audioWin = null;
+
 var useTwitterEmoji = true;
 var HORIZONTAL = 0;
 var VERTICAL = 1;
@@ -406,6 +411,16 @@ function checkWord(coords)
     nFound++;
     var points = pointsForWord(textselection);
     score += points;
+    if (points >= 12)
+    {
+      audioCoin2.currentTime = 0;
+      audioCoin2.play();
+    }
+    else
+    {
+      audioCoin.currentTime = 0;
+      audioCoin.play();
+    }
     setScore(score);
     showWin(points,x1,y1,x2,y2);
     totalWords++;
@@ -416,6 +431,8 @@ function checkWord(coords)
       rects.forEach(r => r.style.opacity = 0);
       isNewGame = true;
       showGrid(false);
+      audioWin.currentTime = 0;
+      audioWin.play();
       setTimeout(function () {init()},1000);
     }
   }
@@ -499,23 +516,6 @@ function init()
 	}
 	solution = [];
 	initReal();
-}
-
-function hexCodeFromEmoji(emoji)
-{
-  var code = emoji.charCodeAt(0);
-  if (emoji.length > 2)
-    console.error('emoji > 3',emoji);
-  if (emoji.length === 2)
-  {
-    code = (
-            0x10000
-            | ((emoji.charCodeAt(0) - 0xD800) << 10)
-            | (emoji.charCodeAt(1) - 0xDC00)
-        );
-  }
-  var hexcode = code.toString(16);
-  return hexcode;
 }
 
 function initReal()
@@ -792,6 +792,19 @@ try {
 
 setScore(score);
 setTotalWords(totalWords);
+
+audioCoin = document.createElement('audio');
+audioCoin.src = 'coin.mp3';
+audioCoin.volume = audioVolume;
+
+audioCoin2 = document.createElement('audio');
+audioCoin2.src = 'win.mp3';
+audioCoin2.volume = audioVolume;
+
+audioWin = document.createElement('audio');
+audioWin.src = 'notif.mp3';
+audioWin.volume = audioVolume;
+
 </script>
 </body>
 </html>

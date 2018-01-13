@@ -68,7 +68,7 @@ var emojis={All:{
   Fuel:"⛽",Light:"🚦",Construction:"🚧",Anchor:"⚓",Sailboat:"⛵",Speedboat:"🚤",Ship:"🛳",Ferry:"⛴",Boat:"🛥",
   Ship:"🚢",Airplane:"🛩",Seat:"💺",Helicopter:"🚁",Cableway:"🚠",Tramway:"🚡",Satellite:"🛰",Rocket:"🚀",
   Saucer:"🛸",
-  Umbrella:"⛱",
+  //Umbrella:"⛱",
   Yen:"💴",Dollar:"💵",Euro:"💶",Pound:"💷",Moai:"🗿",
   "Smiling":"😀","Joy":"😂","Laughing":"🤣","Sweat":"😅","Squinting":"😆","Winking":"😉",
   Savoring:"😋",Sunglasses:"😎",Kiss:"😘",Hugging:"🤗",Thinking:"🤔",Eyebrow:"🤨",Rolling:"🙄",Smirking:"😏",
@@ -85,7 +85,7 @@ var emojis={All:{
   Bath:"🛀",Bed:"🛌",Bomb:"💣",Hole:"🕳",Bags:"🛍",Gem:"💎",Knife:"🔪",
   Amphora:"🏺",Map:"🗺",Drum:"🛢",Bell:"🛎",Hourglass:"⌛",Watch:"⌚",Alarm:"⏰",Stopwatch:"⏱",Timer:"⏲",
   Thermometer:"🌡",
-  //Umbrella:"⛱",
+  Umbrella:"⛱",
   Balloon:"🎈",Popper:"🎉",Dolls:"🎎",Ribbon:"🎀",Gift:"🎁",Crystal:"🔮",
   Joystick:"🕹",Picture:"🖼",Microphone:"🎙",Radio:"📻",Phone:"📱",Telephone:"📞",Pager:"📟",Fax:"📠",
   Battery:"🔋",Plug:"🔌",Laptop:"💻",Computer:"🖥",Printer:"🖨",Keyboard:"⌨",Mouse:"🖱",Trackball:"🖲",Disk:"💽",
@@ -105,3 +105,21 @@ var emojis={All:{
   Golfing:"🏌"
   }
 };
+
+function hexCodeFromEmoji(emoji)
+{
+  if (emoji === undefined)
+    return hexCodeFromEmoji(emojis.All.Smiling);
+
+  var code = emoji.charCodeAt(0);
+  if (emoji.length > 2)
+    return hexCodeFromEmoji(emojis.All.Smiling);
+  if (emoji.length === 2)
+  {
+    code = (0x10000
+            | ((emoji.charCodeAt(0) - 0xD800) << 10)
+            | (emoji.charCodeAt(1) - 0xDC00));
+  }
+  var hexcode = code.toString(16);
+  return hexcode;
+}
