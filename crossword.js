@@ -19,9 +19,9 @@ function WordElement(word, index){
     this.index = index; // use to map this node to its word or clue
 }
 
-function Crossword(words_in, clues_in){
-    var GRID_ROWS = 9;
-    var GRID_COLS = 9;
+function Crossword(w,h,words_in, clues_in){
+    var GRID_ROWS = w;
+    var GRID_COLS = h;
     // This is an index of the positions of the char in the crossword (so we know where we can potentially place words)
     // example {"a" : [{'row' : 10, 'col' : 5}, {'row' : 62, 'col' :17}], {'row' : 54, 'col' : 12}], "b" : [{'row' : 3, 'col' : 13}]} 
     // where the two item arrays are the row and column of where the letter occurs
@@ -37,7 +37,7 @@ function Crossword(words_in, clues_in){
         for(var i = 0; i < max_tries; i++){
             var a_grid = this.getGrid(1);
             if(a_grid == null) continue;
-            var ratio = Math.min(a_grid.length, a_grid[0].length) * 1.0 / Math.max(a_grid.length, a_grid[0].length);
+            var ratio = Math.min(a_grid.grid.length, a_grid.grid[0].length) * 1.0 / Math.max(a_grid.grid.length, a_grid.grid[0].length);
             if(ratio > best_ratio){
                 best_grid = a_grid;
                 best_ratio = ratio;
@@ -50,6 +50,7 @@ function Crossword(words_in, clues_in){
 
     // returns an abitrary grid, or null if it can't build one
     this.getGrid = function(max_tries){
+        wordPlaces = {};
         for(var tries = 0; tries < max_tries; tries++){
             clear(); // always start with a fresh grid and char_index
             // place the first word in the middle of the grid
@@ -96,7 +97,7 @@ function Crossword(words_in, clues_in){
                 if(!word_has_been_added_to_grid) break;
             }
             // no need to try again
-            if(word_has_been_added_to_grid) return minimizeGrid();  
+            if(word_has_been_added_to_grid) return {grid:minimizeGrid(),words:wordPlaces};  
         }
 
         bad_words = groups[groups.length - 1];
@@ -188,9 +189,11 @@ function Crossword(words_in, clues_in){
 
     }	
 
+    var wordPlaces = {};
     // place the word at the row and col indicated (the first char goes there)
     // the next chars go to the right (across) or below (down), depending on the direction
     var placeWordAt = function(word, index_of_word_in_input_list, row, col, direction){
+        wordPlaces[index_of_word_in_input_list] = {word:word,row:row,col:col,direction:direction};
         if(direction == "across"){
             for(var c = col, i = 0; c < col + word.length; c++, i++){
                 addCellToGrid(word, index_of_word_in_input_list, i, row, c, direction);

@@ -30,7 +30,7 @@ font-family:'Ubuntu',Helvetica,monospace;
 
 }
 
-.letter,.solutionletter{stroke-width:3px;stroke:transparent}
+.letter,.solutionletter{rx:0px;ry:0px;stroke-width:3px;stroke:transparent}
 .solutionletter{stroke-width:3px;}
 body{
 box-sizing:border-box;
@@ -106,6 +106,8 @@ line{
   line-height:128px;
 }
 
+.bright{color:yellow;transition:all 0.2s ease-out}
+
 .zoom{animation: winAnimation 0.9s ease-out}
 
 #grid{
@@ -157,7 +159,7 @@ justify-content: space-evenly;
 
 .highlighted{
   fill:yellow;
-  transition: all 0.2 ease-out;
+  transition: all 0.2s ease-out;
 }
 
 .highlight{
@@ -238,6 +240,19 @@ var found_words = [];
 var category = categories[0];
 var names = Object.keys(emojis[category]);
 
+for (var i=0;i<names.length;i++)
+{
+  var len = names[i].length + 1;//+1 because we need to place the emoji too
+  if (len > gamew && len > gameh)
+  {
+    //console.log(len,'too long',names[i]);
+    names[i] = null;
+  }
+}
+//console.log('before',names.length);
+names = names.filter(n => n !== null);
+//console.log('after',names.length);
+
 function $(id)
 {
 	return document.getElementById(id);
@@ -277,6 +292,8 @@ function setTotalWords(s)
     totalwordsdiv.textContent = totalWords + ' words';
   else
     totalwordsdiv.textContent = totalWords + ' word';
+  totalwordsdiv.classList.add('bright');
+  setTimeout(function () { totalwordsdiv.classList.remove('bright');},200);
 }
 
 function pointsForWord(textselection)
@@ -301,9 +318,7 @@ function reHint()
 }
 
 var cwgrid = null;
-var winMatrix = new Array(gameh);
-for (var j=0;j<gamew;j++)
-  winMatrix[j] = new Array(gamew);
+var wordPositions = null;
 
 function init()
 {
@@ -328,7 +343,8 @@ function init()
       n++;
       var idx = parseInt(Math.random()*names.length);
       var name = names[idx];
-      if (name.length < gamew && name.length < gameh && name.indexOf(' ') === -1 && name.indexOf('-') !== 0 && picked.indexOf(name.toUpperCase()) === -1)
+      var len = name.length + 1; // +1 because we need to place the emoji too
+      if (len < gamew && len < gameh && name.indexOf(' ') === -1 && name.indexOf('-') === -1 && picked.indexOf(name.toUpperCase()) === -1)
       {
         var emoji = emojis[category][name];
         var up = name.toUpperCase();
@@ -343,12 +359,16 @@ function init()
           words_emojis.push(emoji);
       }
     }
-    var cw = new Crossword(words, words_emojis);
+    var cw = new Crossword(gamew,gameh,words, words_emojis);
     var tries = 10; 
-    cwgrid = cw.getSquareGrid(tries);
+    var obj = cw.getSquareGrid(tries);
 
-    if (cwgrid !== null)
+    if (obj !== null)
+    {
+      cwgrid = obj.grid;
+      wordPositions = obj.words;
       done = true;
+    }
   }
 
   matrix = {};
@@ -358,7 +378,6 @@ function init()
 		for (var i=0;i<gamew;i++)
 		{
 			matrix[j][i] = ' ';
-			winMatrix[j][i] = [];
 		}
 	}
 
@@ -371,18 +390,12 @@ function init()
       if (cell !== null)
         letter = cell.char;
       matrix[r][c] = letter;
-      if (cell)
-      {
-        if (cell.down)
-          winMatrix[r][c].push(cell.down.index);
-        if (cell.across)
-          winMatrix[r][c].push(cell.across.index);
-      }
     }
   }
-  //console.log(winMatrix);
 	initReal(cwgrid);
 }
+
+var wordCounts = null;
 
 function initReal()
 {
@@ -393,6 +406,14 @@ function initReal()
 	letters = [];
   var off = 0;//48;
   var MAX_GUESS = gamew;
+
+  wordCounts = new Array(words.length);
+  for (var i=0;i<words.length;i++)
+  {
+    wordCounts[i] = words[i].length - 1;
+  }
+
+  var htmlemoji = '';
 	for (var j=0;j<gameh;j++)
 	{
 		for (var i=0;i<gamew;i++)
@@ -403,7 +424,7 @@ function initReal()
 			html += '<g>';
       if (isLetter)
       {
-				html += '<rect fill="white" id=letter' + i + '-' + j + ' data-i='+ i + ' data-j=' + j + ' class="letter" width=' + tilew + ' height=' + tilew + ' x=' + (off + i * tilew) + ' y=' + (off + j * tilew) + ' />';
+				html += '<g><rect fill="white" id=letter' + i + '-' + j + ' data-i='+ i + ' data-j=' + j + ' class="letter" width=' + tilew + ' height=' + tilew + ' x=' + (off + i * tilew) + ' y=' + (off + j * tilew) + ' />';
         var display = rnd(2);
         if (display === 0 && letters.length < MAX_GUESS)
         {
@@ -412,36 +433,27 @@ function initReal()
 	      }
 	      else
 	      {
+          var cell = cwgrid[j][i];
+          if (cell.across)
+  	        wordCounts[cell.across.index]--;
+          if (cell.down)
+  	        wordCounts[cell.down.index]--;
   	      html += '<text class="guess foundsolution" x="' + (off + i * tilew+tilew/2) + '" y="' + (off+ j * tilew+tilew/2) + '">' + matrix[j][i] + '</text>';
 	      }
+	      html += '</g>';
 	    }
 	    else
 	    {
 		    if (useTwitterEmoji)
 		    {
-		      html += '<image class="emojiimage" data-i='+ i + ' data-j=' + j + ' width=' + tilew + ' height=' + tilew + ' x=' + (off + i * tilew) + ' y=' + (off + j * tilew) + ' xlink:href="' + words_emojis[+matrix[j][i]] + '"/>';
-          /*var imsize = tilew;//72;
-          var delta = 0;//16;
-          var dx;
-          var dy;
-		      if (i<gamew-1 && matrix[j][i+1] !== ' ')
-		      {
-		        dx = -delta;
-		        dy = 0;
-		      }
-		      else
-		      {
-		        dx = 0;
-		        dy = -delta;
-		      }
-          html += '<image width="' + imsize + '" height="' + imsize + '" x="' + (off+ i * tilew - (imsize/2-tilew/2) + dx) + '" y="' + (off + j * tilew - (imsize/2-tilew/2) + dy) + '" xlink:href="' + words_emojis[+matrix[j][i]] + '"/>';*/
+		      htmlemoji += '<g><image class="emojiimage" data-i='+ i + ' data-j=' + j + ' width=' + tilew + ' height=' + tilew + ' x=' + (off + i * tilew) + ' y=' + (off + j * tilew) + ' xlink:href="' + words_emojis[+matrix[j][i]] + '"/></g>';
 		    }
 		    else
-	    	  html += '<text class="emojitext" x="' + (off + i * tilew+tilew/2) + '" y="' + (off + j * tilew+tilew/2) + '">' + words_emojis[+matrix[j][i]] + '</text>';
+	    	  htmlemoji += '<g><text class="emojitext" x="' + (off + i * tilew+tilew/2) + '" y="' + (off + j * tilew+tilew/2) + '">' + words_emojis[+matrix[j][i]] + '</text></g>';
 	    }
-	    html += '</g>';
 		}
 	}
+	html += htmlemoji;
 	//grid.innerHTML = html;
 	var sizeh = size + 2 *tilew + 2*off;
 	var sizew = size + 2 * off;
@@ -560,56 +572,33 @@ function initReal()
   reHint();
 }
 
-function isWordDone(x,y)
+function areWordsDone(x,y)
 {
   var cell = cwgrid[y][x];
-  console.log(cell);
-  var index = -1;
+  if (!cell)
+    return 0;
+
+  var nWords = 0;
   if (cell.across)
-    index = cell.across.index;
-  else if (cell.down)
-    index = cell.down.index;
-
-  var lettersAcross = [];
-  var lettersDown = [];
-  
-  var found = document.querySelectorAll('.foundsolution');
-  var positionsFound = [];
-  for (var i=0;i<found.length;i++)
   {
-    var rect = found[i].parentElement;
-    var row = +rect.dataset.j;
-    var col = +rect.dataset.i;
-    positionsFound.push({x:col,y:col});
-  }
-
-  for (var r=0;r<cwgrid.length;r++)
-  {
-    for (var s=0;s<cwgrid[r].length;s++)
+    wordCounts[cell.across.index]--;
+    if (wordCounts[cell.across.index] === 0)
     {
-      var cell = cwgrid[r][s];
-      if (!cell)
-        continue;
-      if (cell.across && cell.across.index === index)
-      {
-        lettersAcross.push({x:s,y:r});
-      }
-      else if (cell.down && cell.down.index === index)
-      {
-        lettersDown.push({x:s,y:r});
-      }
+      nWords++;
+      console.log('done',words[cell.across.index]);
     }
   }
-  var wordAcross = '';
-  lettersAcross.forEach(l => wordAcross += matrix[l.y][l.x]);
-  console.log(wordAcross);
-  var wordDown = '';
-  lettersDown.forEach(l => wordDown += matrix[l.y][l.x]);
-  console.log(wordDown);
-  if (words.indexOf(wordAcross) !== -1 || words.indexOf(wordDown) !== -1)
+
+  if (cell.down)
   {
-    console.log('found new word');
+    wordCounts[cell.down.index]--;
+    if (wordCounts[cell.down.index] === 0)
+    {
+      nWords++;
+      console.log('done',words[cell.down.index]);
+    }
   }
+  return nWords;
 }
 
 function placeLetter(target,selectedLetter)
@@ -632,14 +621,12 @@ function placeLetter(target,selectedLetter)
   var points = pointsForWord(letter);
   score += points;
   setScore(score);
-  
-  if (isWordDone(+target.dataset.i,+target.dataset.j))
+ 
+  var nWordsDone = areWordsDone(+target.dataset.i,+target.dataset.j);
+  if (nWordsDone > 0)
   {
-
-  }
-
-  if (points >= 2)
-  {
+    totalWords += nWordsDone;
+    setTotalWords(totalWords);
     audioCoin2.currentTime = 0;
     audioCoin2.play();
   }
@@ -648,13 +635,21 @@ function placeLetter(target,selectedLetter)
     audioCoin.currentTime = 0;
     audioCoin.play();
   }
+  /*if (points >= 2)
+  {
+    audioCoin2.currentTime = 0;
+    audioCoin2.play();
+  }
+  else
+  {
+    audioCoin.currentTime = 0;
+    audioCoin.play();
+  }*/
 
   var rect = target.getBoundingClientRect();
   showWin(points,rect.left,rect.top);
   if (nFound === letters.length)
   {
-    totalWords += words.length;
-    setTotalWords(totalWords);
     restartGame();
   }
 }
