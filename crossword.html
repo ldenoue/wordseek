@@ -155,6 +155,11 @@ justify-content: space-evenly;
   fill:yellow;
 }
 
+.highlighted{
+  fill:yellow;
+  transition: all 0.2 ease-out;
+}
+
 .highlight{
   transition: all 0.9s ease-out;
   opacity:0.0;
@@ -169,6 +174,10 @@ justify-content: space-evenly;
 .emojitext{
   font-size:64px;
   transform:translate(-8px,-8px);
+}
+
+.emojiimage{
+  cursor:pointer;
 }
 
 .guess{
@@ -201,6 +210,7 @@ var audioWin = null;
 var useTwitterEmoji = true;
 var lastSelection = null;
 var selectedLetter = null;
+var letters = [];
 var score = 0;
 var totalWords = 0;
 var startEvent = 'mousedown';
@@ -291,6 +301,10 @@ function reHint()
 }
 
 var cwgrid = null;
+var winMatrix = new Array(gameh);
+for (var j=0;j<gamew;j++)
+  winMatrix[j] = new Array(gamew);
+
 function init()
 {
   nFound = 0;
@@ -344,6 +358,7 @@ function init()
 		for (var i=0;i<gamew;i++)
 		{
 			matrix[j][i] = ' ';
+			winMatrix[j][i] = [];
 		}
 	}
 
@@ -356,20 +371,28 @@ function init()
       if (cell !== null)
         letter = cell.char;
       matrix[r][c] = letter;
+      if (cell)
+      {
+        if (cell.down)
+          winMatrix[r][c].push(cell.down.index);
+        if (cell.across)
+          winMatrix[r][c].push(cell.across.index);
+      }
     }
   }
-
+  //console.log(winMatrix);
 	initReal(cwgrid);
 }
 
 function initReal()
 {
-  var size = gamew * 48;
+  var tilew = 48;
+  var size = gamew * tilew;
   
 	var html = '';
-  var letters = [];
-  var off = 48;
-  var MAX_GUESS = 8;
+	letters = [];
+  var off = 0;//48;
+  var MAX_GUESS = gamew;
 	for (var j=0;j<gameh;j++)
 	{
 		for (var i=0;i<gamew;i++)
@@ -377,30 +400,28 @@ function initReal()
 			if (matrix[j][i] === ' ')
 				continue;
 			var isLetter = (matrix[j][i] >= 'A' && matrix[j][i] <= 'Z');
-			//html += '<g dataset-i=' + i + ' dataset-j=' + j + ' class="group">';
 			html += '<g>';
       if (isLetter)
       {
-				html += '<rect fill="white" data-i='+ i + ' data-j=' + j + ' class="letter" width="48px" height="48px" x="' + (off + i * 48) + '" y="' + (off + j * 48) + '" />';
+				html += '<rect fill="white" id=letter' + i + '-' + j + ' data-i='+ i + ' data-j=' + j + ' class="letter" width=' + tilew + ' height=' + tilew + ' x=' + (off + i * tilew) + ' y=' + (off + j * tilew) + ' />';
         var display = rnd(2);
-        if (display === 0 && letters.length <= MAX_GUESS)//gamew)
+        if (display === 0 && letters.length < MAX_GUESS)
         {
   			  letters.push(matrix[j][i]);
-	        html += '<text class="guess" x="' + (off + i * 48+24) + '" y="' + (off +j * 48+24) + '">' + matrix[j][i] + '</text>';
+	        html += '<text class="guess" x="' + (off + i * tilew+tilew/2) + '" y="' + (off +j * tilew+tilew/2) + '">' + matrix[j][i] + '</text>';
 	      }
 	      else
 	      {
-  	      html += '<text class="guess foundsolution" x="' + (off + i * 48+24) + '" y="' + (off+ j * 48+24) + '">' + matrix[j][i] + '</text>';
+  	      html += '<text class="guess foundsolution" x="' + (off + i * tilew+tilew/2) + '" y="' + (off+ j * tilew+tilew/2) + '">' + matrix[j][i] + '</text>';
 	      }
 	    }
 	    else
 	    {
-		    //html += '<rect fill="transparent" class="group" width="46px" height="46px" x="' + (i * 48) + '" y="' + (j * 48) + '" />';
 		    if (useTwitterEmoji)
 		    {
-		      //html += '<image width="48" height="48" x="' + (i * 48) + '" y="' + (j * 48) + '" xlink:href="' + words_emojis[+matrix[j][i]] + '"/>';
-          var imsize = 72;
-          var delta = 16;
+		      html += '<image class="emojiimage" data-i='+ i + ' data-j=' + j + ' width=' + tilew + ' height=' + tilew + ' x=' + (off + i * tilew) + ' y=' + (off + j * tilew) + ' xlink:href="' + words_emojis[+matrix[j][i]] + '"/>';
+          /*var imsize = tilew;//72;
+          var delta = 0;//16;
           var dx;
           var dy;
 		      if (i<gamew-1 && matrix[j][i+1] !== ' ')
@@ -413,17 +434,17 @@ function initReal()
 		        dx = 0;
 		        dy = -delta;
 		      }
-          html += '<image width="' + imsize + '" height="' + imsize + '" x="' + (off+ i * 48 - (imsize/2-24) + dx) + '" y="' + (off + j * 48 - (imsize/2-24) + dy) + '" xlink:href="' + words_emojis[+matrix[j][i]] + '"/>';
+          html += '<image width="' + imsize + '" height="' + imsize + '" x="' + (off+ i * tilew - (imsize/2-tilew/2) + dx) + '" y="' + (off + j * tilew - (imsize/2-tilew/2) + dy) + '" xlink:href="' + words_emojis[+matrix[j][i]] + '"/>';*/
 		    }
 		    else
-	    	  html += '<text class="emojitext" x="' + (off + i * 48+24) + '" y="' + (off + j * 48+24) + '">' + words_emojis[+matrix[j][i]] + '</text>';
+	    	  html += '<text class="emojitext" x="' + (off + i * tilew+tilew/2) + '" y="' + (off + j * tilew+tilew/2) + '">' + words_emojis[+matrix[j][i]] + '</text>';
 	    }
 	    html += '</g>';
 		}
 	}
 	//grid.innerHTML = html;
-	var sizeh = size + 2*48 + 2*off;
-	var sizew = size + 2* off;
+	var sizeh = size + 2 *tilew + 2*off;
+	var sizew = size + 2 * off;
 	grid.setAttribute('viewBox','0 0 ' + sizew + ' ' + sizeh);
 
 	win.style.backgroundColor = backColor;
@@ -433,13 +454,13 @@ function initReal()
   letters.sort(function() { return 0.5 - Math.random() });
 	var j = gameh+1;
 	var x = 0;
-	var solutionw = (64+48)/2;
-	var solutionfont = (solutionw * 36 / 48);
+	var solutionw = tilew;//(64+48)/2;
+	var solutionfont = (solutionw * 36 / tilew);
 	var offsetx = (sizew - (letters.length * solutionw))/2;
 	for (var i=0;i<letters.length;i++)
 	{
 	  html += '<g>';
-	  html += '<rect data-letter="' + letters[i] + '" class="solutionletter" fill="white" width=' + solutionw + ' height=' + solutionw + ' x=' + (offsetx + x * solutionw) + ' y=' + (off + j*48) + ' />';
+	  html += '<rect data-letter="' + letters[i] + '" class="solutionletter" fill="white" width=' + solutionw + ' height=' + solutionw + ' x=' + (offsetx + x * solutionw) + ' y=' + (off + j* tilew) + ' />';
 	  html += '<text style="font-size:' + solutionfont + 'px" x="' + (offsetx + x * solutionw+solutionw/2) + '" y="' + (off + j*48+solutionw/2) + '">' + letters[i] + '</text>';
 	  html += '</g>';
 	  x++;
@@ -451,69 +472,191 @@ function initReal()
 	}
   grid.innerHTML = html;
 
+  grid.querySelectorAll('.emojiimage').forEach(g => g.addEventListener(startEvent,function (e){
+    var image = e.target;
+    var i = +image.dataset.i;
+    var j = +image.dataset.j;
+    var index = +matrix[j][i];
+    //console.error('emoji image touched',i,j,index);
+    document.querySelectorAll('.solutionletter').forEach(r => r.classList.remove('selected'));
+    document.querySelectorAll('.highlighted').forEach(r => r.classList.remove('highlighted'));
+    var positions = [];
+    for (var r=0;r<cwgrid.length;r++)
+    {
+      for (var s=0;s<cwgrid[r].length;s++)
+      {
+        var cell = cwgrid[r][s];
+        if (!cell || (r===j && s===i))
+          continue;
+        //console.log(cell);
+        if (cell.across && cell.across.index === index)
+        {
+          document.querySelector('#letter' + s + '-' + r).classList.add('highlighted');
+          //console.log(cell.char,r,s);
+        }
+        else if (cell.down && cell.down.index === index)
+        {
+          document.querySelector('#letter' + s + '-' + r).classList.add('highlighted');
+          //console.log(cell.char,r,s);
+        }
+      }
+    }
+  }));
+
 	grid.querySelectorAll('.letter').forEach(g => {
 	  g.style.stroke = backColor;
     g.addEventListener(startEvent,function(e){
-	  e.preventDefault();
-	  e.stopPropagation();
-	  if (!e.target.dataset.i)
-	    return;
-	  var row = e.target.dataset.j;
-	  var col = e.target.dataset.i;
-	  var letter = matrix[row][col];
-	  if (selectedLetter && selectedLetter.dataset.letter === letter && !e.target.parentElement.querySelector('text').classList.contains('foundsolution'))
-	  {
-	    var x = +e.target.getAttribute('x');
-	    var y = +e.target.getAttribute('y');
-	    var xnow = +selectedLetter.getAttribute('x');
-	    var ynow = +selectedLetter.getAttribute('y');
-	    var dx = x - xnow;
-	    var dy = y - ynow - 1;
-	    var g = selectedLetter.parentElement;
-	    g.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
-	    setTimeout(function(){g.style.display='none'},200);
-	    selectedLetter = null;
-	    e.target.parentElement.querySelector('text').classList.add('foundsolution');
-	    e.target.classList.add('selected');
-	    nFound++;
-      var points = pointsForWord(letter);
-      score += points;
-      setScore(score);
-      if (points >= 2)
+      e.preventDefault();
+      e.stopPropagation();
+      if (!e.target.dataset.i)
+        return;
+      var row = e.target.dataset.j;
+      var col = e.target.dataset.i;
+      var letter = matrix[row][col];
+      if (selectedLetter && selectedLetter.dataset.letter === letter && !e.target.parentElement.querySelector('text').classList.contains('foundsolution'))
       {
-	      audioCoin2.currentTime = 0;
-	      audioCoin2.play();
+        document.querySelectorAll('.highlighted').forEach(r => r.classList.remove('highlighted'));
+        placeLetter(e.target,selectedLetter);
       }
-      else
-      {
-	      audioCoin.currentTime = 0;
-	      audioCoin.play();
-	    }
-
-      var rect = e.target.getBoundingClientRect();
-      showWin(points,rect.left,rect.top);
-	    if (nFound === letters.length)
-	    {
-	      totalWords += words.length;
-	      setTotalWords(totalWords);
-	      restartGame();
-	    }
-	  }
-	})});
+    });
+	});
   grid.querySelectorAll('.solutionletter').forEach(l => {
     l.style.stroke = backColor;
-    //l.style.fill = bgColors[(currentColor+1)%bgColors.length]
     l.addEventListener(startEvent,function(e){
       e.preventDefault();
       e.stopPropagation();
+      var highlighted = document.querySelectorAll('.highlighted');
+      var letters = [];
+      var elem = null;
+      for (i=0;i<highlighted.length;i++)
+      {
+        var row = highlighted[i].dataset.j;
+        var col = highlighted[i].dataset.i;
+        var text = highlighted[i].parentElement.querySelector('text');
+        if (!text.classList.contains('foundsolution'))
+        {
+          letters.push(matrix[row][col]);
+          elem = highlighted[i];
+          break;
+        }
+      }
+      //console.log(letters);
       if (selectedLetter)
         selectedLetter.classList.remove('selected');
-      e.target.classList.add('selected');
       selectedLetter = e.target;
-      var rect = grid.getBoundingClientRect();
+      selectedLetter.classList.add('selected');
+      if (letters.length > 0)
+      {
+        var text = selectedLetter.parentElement.querySelector('text');
+        var letter = text.textContent;
+        if (letter === letters[0])
+        {
+          placeLetter(elem,e.target);
+          //console.log('found');
+        }
+      }
     })
   });
   reHint();
+}
+
+function isWordDone(x,y)
+{
+  var cell = cwgrid[y][x];
+  console.log(cell);
+  var index = -1;
+  if (cell.across)
+    index = cell.across.index;
+  else if (cell.down)
+    index = cell.down.index;
+
+  var lettersAcross = [];
+  var lettersDown = [];
+  
+  var found = document.querySelectorAll('.foundsolution');
+  var positionsFound = [];
+  for (var i=0;i<found.length;i++)
+  {
+    var rect = found[i].parentElement;
+    var row = +rect.dataset.j;
+    var col = +rect.dataset.i;
+    positionsFound.push({x:col,y:col});
+  }
+
+  for (var r=0;r<cwgrid.length;r++)
+  {
+    for (var s=0;s<cwgrid[r].length;s++)
+    {
+      var cell = cwgrid[r][s];
+      if (!cell)
+        continue;
+      if (cell.across && cell.across.index === index)
+      {
+        lettersAcross.push({x:s,y:r});
+      }
+      else if (cell.down && cell.down.index === index)
+      {
+        lettersDown.push({x:s,y:r});
+      }
+    }
+  }
+  var wordAcross = '';
+  lettersAcross.forEach(l => wordAcross += matrix[l.y][l.x]);
+  console.log(wordAcross);
+  var wordDown = '';
+  lettersDown.forEach(l => wordDown += matrix[l.y][l.x]);
+  console.log(wordDown);
+  if (words.indexOf(wordAcross) !== -1 || words.indexOf(wordDown) !== -1)
+  {
+    console.log('found new word');
+  }
+}
+
+function placeLetter(target,selectedLetter)
+{
+  var x = +target.getAttribute('x');
+  var y = +target.getAttribute('y');
+  var xnow = +selectedLetter.getAttribute('x');
+  var ynow = +selectedLetter.getAttribute('y');
+  var dx = x - xnow;
+  var dy = y - ynow - 1;
+  var g = selectedLetter.parentElement;
+  g.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+  setTimeout(function(){g.style.display='none'},200);
+  selectedLetter = null;
+  var text = target.parentElement.querySelector('text');
+  var letter = text.textContent;
+  text.classList.add('foundsolution');
+  target.classList.add('selected');
+  nFound++;
+  var points = pointsForWord(letter);
+  score += points;
+  setScore(score);
+  
+  if (isWordDone(+target.dataset.i,+target.dataset.j))
+  {
+
+  }
+
+  if (points >= 2)
+  {
+    audioCoin2.currentTime = 0;
+    audioCoin2.play();
+  }
+  else
+  {
+    audioCoin.currentTime = 0;
+    audioCoin.play();
+  }
+
+  var rect = target.getBoundingClientRect();
+  showWin(points,rect.left,rect.top);
+  if (nFound === letters.length)
+  {
+    totalWords += words.length;
+    setTotalWords(totalWords);
+    restartGame();
+  }
 }
 
 function restartGame()
