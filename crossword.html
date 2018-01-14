@@ -106,7 +106,7 @@ line{
   line-height:128px;
 }
 
-.bright{color:yellow;transition:all 0.2s ease-out}
+.bright{color:yellow;transition:color 0.3s ease-out}
 
 .zoom{animation: winAnimation 0.9s ease-out}
 
@@ -174,8 +174,9 @@ justify-content: space-evenly;
 }
 
 .emojitext{
-  font-size:64px;
-  transform:translate(-8px,-8px);
+  pointer-events:all;
+  font-size:48px;
+  cursor:pointer;
 }
 
 .emojiimage{
@@ -209,7 +210,7 @@ justify-content: space-evenly;
 var audioCoin = null;
 var audioCoin2 = null;
 var audioWin = null;
-var useTwitterEmoji = true;
+var useTwitterEmoji = false;
 var lastSelection = null;
 var selectedLetter = null;
 var letters = [];
@@ -289,11 +290,11 @@ function setTotalWords(s)
     window.localStorage.crosstotalWords = s;
   } catch (e) {}
   if (s > 1)
-    totalwordsdiv.textContent = totalWords + ' words';
+    totalwordsdiv.textContent = s + ' words';
   else
-    totalwordsdiv.textContent = totalWords + ' word';
+    totalwordsdiv.textContent = s + ' word';
   totalwordsdiv.classList.add('bright');
-  setTimeout(function () { totalwordsdiv.classList.remove('bright');},200);
+  setTimeout(function () { totalwordsdiv.classList.remove('bright');},300);
 }
 
 function pointsForWord(textselection)
@@ -446,10 +447,10 @@ function initReal()
 	    {
 		    if (useTwitterEmoji)
 		    {
-		      htmlemoji += '<g><image class="emojiimage" data-i='+ i + ' data-j=' + j + ' width=' + tilew + ' height=' + tilew + ' x=' + (off + i * tilew) + ' y=' + (off + j * tilew) + ' xlink:href="' + words_emojis[+matrix[j][i]] + '"/></g>';
+		      htmlemoji += '<g><image class="emoji emojiimage" data-i='+ i + ' data-j=' + j + ' width=' + tilew + ' height=' + tilew + ' x=' + (off + i * tilew) + ' y=' + (off + j * tilew) + ' xlink:href="' + words_emojis[+matrix[j][i]] + '"/></g>';
 		    }
 		    else
-	    	  htmlemoji += '<g><text class="emojitext" x="' + (off + i * tilew+tilew/2) + '" y="' + (off + j * tilew+tilew/2) + '">' + words_emojis[+matrix[j][i]] + '</text></g>';
+	    	  htmlemoji += '<g><text class="emoji emojitext"data-i='+ i + ' data-j=' + j + ' x="' + (off + i * tilew+tilew/2) + '" y="' + (off + j * tilew+tilew/2) + '">' + words_emojis[+matrix[j][i]] + '</text></g>';
 	    }
 		}
 	}
@@ -484,35 +485,14 @@ function initReal()
 	}
   grid.innerHTML = html;
 
-  grid.querySelectorAll('.emojiimage').forEach(g => g.addEventListener(startEvent,function (e){
+  grid.querySelectorAll('.emoji').forEach(g => g.addEventListener(startEvent,function (e){
     var image = e.target;
     var i = +image.dataset.i;
     var j = +image.dataset.j;
     var index = +matrix[j][i];
-    //console.error('emoji image touched',i,j,index);
     document.querySelectorAll('.solutionletter').forEach(r => r.classList.remove('selected'));
     document.querySelectorAll('.highlighted').forEach(r => r.classList.remove('highlighted'));
-    var positions = [];
-    for (var r=0;r<cwgrid.length;r++)
-    {
-      for (var s=0;s<cwgrid[r].length;s++)
-      {
-        var cell = cwgrid[r][s];
-        if (!cell || (r===j && s===i))
-          continue;
-        //console.log(cell);
-        if (cell.across && cell.across.index === index)
-        {
-          document.querySelector('#letter' + s + '-' + r).classList.add('highlighted');
-          //console.log(cell.char,r,s);
-        }
-        else if (cell.down && cell.down.index === index)
-        {
-          document.querySelector('#letter' + s + '-' + r).classList.add('highlighted');
-          //console.log(cell.char,r,s);
-        }
-      }
-    }
+    highlightWord(index);
   }));
 
 	grid.querySelectorAll('.letter').forEach(g => {
@@ -521,7 +501,9 @@ function initReal()
       e.preventDefault();
       e.stopPropagation();
       if (!e.target.dataset.i)
+      {
         return;
+      }
       var row = e.target.dataset.j;
       var col = e.target.dataset.i;
       var letter = matrix[row][col];
@@ -529,9 +511,22 @@ function initReal()
       {
         document.querySelectorAll('.highlighted').forEach(r => r.classList.remove('highlighted'));
         placeLetter(e.target,selectedLetter);
+        selectedLetter = null;
+      }
+      else if (selectedLetter === null)
+      {
+        var cell = cwgrid[row][col];
+        var index = 0;
+        if (cell.across)
+          index = cell.across.index;
+        else
+          index = cell.down.index;
+        document.querySelectorAll('.highlighted').forEach(r => r.classList.remove('highlighted'));
+        highlightWord(index);
       }
     });
 	});
+
   grid.querySelectorAll('.solutionletter').forEach(l => {
     l.style.stroke = backColor;
     l.addEventListener(startEvent,function(e){
@@ -564,12 +559,33 @@ function initReal()
         if (letter === letters[0])
         {
           placeLetter(elem,e.target);
+          selectedLetter = null;
           //console.log('found');
         }
       }
     })
   });
   reHint();
+}
+
+function highlightWord(idx)
+{
+  var pos = wordPositions[idx];
+  var len = pos.word.length -1;
+  if (pos.direction === 'across')
+  {
+    for (var i=pos.col+1;i<pos.col+1+len;i++)
+    {
+      document.querySelector('#letter' + i + '-' + pos.row).classList.add('highlighted');
+    }
+  }
+  else if (pos.direction === 'down')
+  {
+    for (var j=pos.row+1;j<pos.row+1+len;j++)
+    {
+      document.querySelector('#letter' + pos.col + '-' + j).classList.add('highlighted');
+    }
+  }
 }
 
 function areWordsDone(x,y)
@@ -585,7 +601,6 @@ function areWordsDone(x,y)
     if (wordCounts[cell.across.index] === 0)
     {
       nWords++;
-      console.log('done',words[cell.across.index]);
     }
   }
 
@@ -595,7 +610,6 @@ function areWordsDone(x,y)
     if (wordCounts[cell.down.index] === 0)
     {
       nWords++;
-      console.log('done',words[cell.down.index]);
     }
   }
   return nWords;

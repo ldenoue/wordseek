@@ -138,6 +138,7 @@ function Crossword(w,h,words_in, clues_in){
 
     // move the grid onto the smallest grid that will fit it
     var minimizeGrid = function(){
+        return grid;
         // find bounds
         var r_min = GRID_ROWS-1, r_max = 0, c_min = GRID_COLS-1, c_max = 0;
         for(var r = 0; r < GRID_ROWS; r++){
