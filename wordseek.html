@@ -66,12 +66,6 @@ line{
   100% { opacity:0; transform:scale(1.3)}
 }
 
-@keyframes hintAnimation {
-  0%   { opacity:0; transform:scale(0.3)}
-  50%  { opacity:0.2; transform:scale(1.0)}
-  100% { opacity:0; transform:scale(0.3)}
-}
-
 #hint{
   pointer-events:none;
   opacity:0;
@@ -137,14 +131,27 @@ justify-content: space-evenly;
   padding:0;
   font-size:22px;
 }
-#totalwordsdiv{float:left;padding:8px;}
-#highscorediv{float:right;padding:8px;}
+
+.topbutton{
+  /*background-color:rgba(255,255,255,0.2);
+  margin:4px;*/
+  padding:8px;
+  border-radius:5px;
+  cursor:pointer;
+  color:black;
+  font-size:16px;
+  min-width:64px;
+  text-align:center;
+}
+
+#totalwordsdiv{float:left;}
+#highscorediv{float:right;}
 
 .solutionrect { opacity:0.9; transition: opacity 1s ease-in-out}
 
 #help{
   cursor:pointer;
-  font-size:22px;
+  
   position:fixed;
   right:2;
   bottom:2;
@@ -157,6 +164,43 @@ justify-content: space-evenly;
   left:2;
   bottom:2;
 }
+
+#confirmdialog{
+  position: fixed;
+  display:none;
+  flex-direction:column;
+  align-items: center;
+  text-align:center;
+  justify-content: space-evenly;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.8);
+  text-align:center;
+  transition:opacity 0.2s ease-in-out;
+  opacity:0;
+}
+
+#dialog{
+  border-radius:8px;
+  align-self:center;
+  background-color:white;
+  padding:32px;
+}
+#dialog div {font-size:16px}
+button{cursor:pointer;font-family:Ubuntu;text-transform:uppercase;outline:none;
+border-radius:5px;
+border:0px solid black;
+background-color:tomato;
+padding:8px;margin:8px;
+font-size:16px;
+min-width:60px;
+color:white;
+font-variant: small-caps;
+}
+menu{padding:16px}
+
 
 @media only screen and (orientation:landscape) {
   #container{flex-direction:row;}
@@ -188,7 +232,7 @@ justify-content: space-evenly;
     .wordicon{font-size:120px}
     .wordicon > img {width:120px;height:120px}
     .realword{font-size:32px}
-    #totalwordsdiv,#highscorediv{font-size:32px;}
+    .topbutton{font-size:32px;}
     #grid{height:640px;max-width:calc(100vw-32px);max-height:calc(100vw-32px))}
     #questions1,#questions2{min-width:200px}
 }
@@ -203,8 +247,16 @@ justify-content: space-evenly;
   <div class='item' id='questions2'></div>
 </div>
 <div id='win'>1</div>
-<div id='header'><div id='totalwordsdiv'>0 words</div><div id='highscorediv'>0 points</div></div>
-<div id='hint'></div>
+<div id='header'><div id='totalwordsdiv' class='topbutton'>0 words</div><div id='highscorediv' class='topbutton'>0</div></div>
+<div id='confirmdialog' ontouchstart='dismissDialog(false)' onclick='dismissDialog(false)'>
+  <div id='dialog' class="hideDialog">
+    <div>Reset score?</div>
+    <menu>
+        <button ontouchstart='dismissDialog(false)' onclick='dismissDialog(false)'>Cancel</button>
+        <button ontouchstart='dismissDialog(true)' onclick='dismissDialog(true)'>Reset</button>
+    </menu>
+  </div>
+</div>
 <script>
 'use strict';
 var firstTime = true;
@@ -245,6 +297,22 @@ var words = [];
 var found_words = [];
 var category = categories[0];
 var names = Object.keys(emojis[category]);
+
+function dismissDialog(yes)
+{
+  confirmdialog.style.opacity = 0;
+  setTimeout(function(){
+    confirmdialog.style.display = 'none';
+  },200);
+  if (yes)
+  {
+    score = 0;
+    totalWords = 0;
+    setScore(score);
+    setTotalWords(totalWords);
+  }
+  return false;
+}
 
 function $(id)
 {
@@ -430,7 +498,6 @@ function checkWord(coords)
       var rects = document.querySelectorAll('.solutionrect');
       rects.forEach(r => r.style.opacity = 0);
       isNewGame = true;
-      showGrid(false);
       audioWin.currentTime = 0;
       audioWin.play();
       setTimeout(function () {init()},1000);
@@ -478,12 +545,6 @@ function pointsForWord(textselection)
   return pts;
 }
 
-function reHint()
-{
-  var newone = hint.cloneNode(true);
-  hint.parentNode.replaceChild(newone, hint);
-}
-
 function init()
 {
   nFound = 0;
@@ -493,6 +554,7 @@ function init()
   currentColor = parseInt(Math.random() * hiColors.length);
   backColor = bgColors[new Date%bgColors.length];
   document.body.style.backgroundColor = backColor;
+  document.querySelectorAll('button').forEach((b) => b.style.backgroundColor = backColor);
 	words = [];
 	found_words = [];
 	words_emojis = [];
@@ -630,22 +692,6 @@ function initReal()
   questions2.innerHTML = html;
   
   grid.style.opacity = 1.0;
-  
-  reHint();
-  
-  showGrid(true);
-}
-
-function showGrid(yes)
-{
-  /*var opacity = 0.0;
-  if (yes)
-    opacity = 1;
-  setTimeout(function() {
-    var ts = document.querySelectorAll('text');
-    ts.forEach(t => {t.style.transitionDelay=rnd(10)/100+'s'; t.style.opacity = opacity});
-  },200);*/
-
 }
 
 function solve()
@@ -682,7 +728,8 @@ function loadSounds()
   audioCoin2 = new Audio('win.mp3');
   audioWin = new Audio('endgame.mp3');
 }
-document.body.addEventListener(startEvent,function (){
+
+document.body.addEventListener(startEvent,function (e){
   if (firstTime)
   {
     firstTime = false;
@@ -691,9 +738,16 @@ document.body.addEventListener(startEvent,function (){
   init();
 });
 
+confirmdialog.addEventListener(startEvent,function (e){
+  e.preventDefault();
+  e.stopPropagation();
+});
+
 document.addEventListener('keydown',function(e){
   if (e.key === 'h')
     solve();
+  else if (e.key === 'Escape')
+    dismissDialog(false);
 });
 
 document.addEventListener('keyup',function(e){
@@ -798,10 +852,6 @@ totalwordsdiv.addEventListener(outEvent,function(e){
 highscorediv.addEventListener(endEvent,function(e){
   e.preventDefault();
   e.stopPropagation();
-  score = 0;
-  totalWords = 0;
-  setScore(score);
-  setTotalWords(totalWords);
 });
 
 highscorediv.addEventListener(startEvent,function(e){
@@ -812,6 +862,10 @@ highscorediv.addEventListener(startEvent,function(e){
   }
   e.preventDefault();
   e.stopPropagation();
+  confirmdialog.style.display = 'flex';
+  setTimeout(function () {
+    confirmdialog.style.opacity = 1;
+  },10);
 });
 
 try {

@@ -22,7 +22,6 @@
 		F9F5311C200A13290068B6AC /* ubuntu.woff2 in Resources */ = {isa = PBXBuildFile; fileRef = F9F53114200A13290068B6AC /* ubuntu.woff2 */; };
 		F9F5311E200A13290068B6AC /* win.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = F9F53116200A13290068B6AC /* win.mp3 */; };
 		F9F53120200A133C0068B6AC /* svg in Resources */ = {isa = PBXBuildFile; fileRef = F9F5311F200A133B0068B6AC /* svg */; };
-		F9F53122200A138B0068B6AC /* crossword.js in Resources */ = {isa = PBXBuildFile; fileRef = F9F53121200A138B0068B6AC /* crossword.js */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -45,7 +44,6 @@
 		F9F53114200A13290068B6AC /* ubuntu.woff2 */ = {isa = PBXFileReference; lastKnownFileType = file; name = ubuntu.woff2; path = ../../../ubuntu.woff2; sourceTree = "<group>"; };
 		F9F53116200A13290068B6AC /* win.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = win.mp3; path = ../../../win.mp3; sourceTree = "<group>"; };
 		F9F5311F200A133B0068B6AC /* svg */ = {isa = PBXFileReference; lastKnownFileType = folder; name = svg; path = ../../../svg; sourceTree = "<group>"; };
-		F9F53121200A138B0068B6AC /* crossword.js */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.javascript; name = crossword.js; path = ../../../crossword.js; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,7 +87,6 @@
 				F9F53112200A13290068B6AC /* crossword-icon.png */,
 				F9F53110200A13280068B6AC /* crossword.appcache */,
 				F9F5310F200A13280068B6AC /* crossword.html */,
-				F9F53121200A138B0068B6AC /* crossword.js */,
 				F9F53111200A13280068B6AC /* emojis.js */,
 				F9F53114200A13290068B6AC /* ubuntu.woff2 */,
 				F9F530FF200A12CF0068B6AC /* Main.storyboard */,
@@ -169,7 +166,6 @@
 				F9F4F408200A4CB400CEA193 /* endgame.mp3 in Resources */,
 				F9F53117200A13290068B6AC /* crossword.html in Resources */,
 				F9F53119200A13290068B6AC /* emojis.js in Resources */,
-				F9F53122200A138B0068B6AC /* crossword.js in Resources */,
 				F9F5311A200A13290068B6AC /* crossword-icon.png in Resources */,
 				F9F5311B200A13290068B6AC /* coin.mp3 in Resources */,
 			);
