@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# v2.2.23 - 2018-01-16
+# v2.2.24 - 2018-01-16
 crossword.html
 emojis.js
 coin.mp3
@@ -7,6 +7,8 @@ win.mp3
 endgame.mp3
 crossword-icon.png
 ubuntu.woff2
+Mute_Icon.svg
+Speaker_Icon.svg
 svg/1f308.svg
 svg/1f30b.svg
 svg/1f31c.svg

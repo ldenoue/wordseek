@@ -128,8 +128,8 @@ line{
 #grid{
 padding:0px;
 width:840px;
-max-width:calc(100vw - 16px);
-max-height:calc(100vh - 16px);
+max-width:calc(100vw - 8px);
+max-height:calc(100vh - 8px);
 transition: opacity 1s ease-in-out;
 }
 
@@ -158,6 +158,7 @@ justify-content: space-evenly;
 
 #totalwordsdiv{left:0;top:0;}
 #highscorediv{right:0;top:0;}
+#volumediv{cursor:pointer;position:absolute;padding:8px;right:0;bottom:0;}
 
 .solutionrect {opacity:0.9; transition: opacity 1s ease-in-out}
 
@@ -255,16 +256,17 @@ color:white;
 font-variant: small-caps;
 }
 menu{padding:16px}
-
+#fullscreen{font-size:16px;position:fixed;bottom:0;left:0}
 </style>
 </head>
-<body onload='init()'>
+<body>
 <div id='container'>
-  <svg class='item' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xml:space='preserve' id='grid'></svg>
+  <svg class='item' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xml:space='preserve' id='grid'></svg>
 </div>
 <div id='win'>1</div>
 <div id='totalwordsdiv' class='topbutton'>0 words</div>
 <div id='highscorediv' class='topbutton'>0 points</div>
+<svg id='volumediv' width=24 height=24 xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 32 32'><image x=0 y=0 width=32 height=32 xlink:href='Speaker_Icon.svg'/></svg>
 <div id='confirmdialog'>
   <div id='dialog' class="hideDialog">
     <div>Reset score?</div>
@@ -274,9 +276,11 @@ menu{padding:16px}
     </menu>
   </div>
 </div>
+<!--button id='fullscreen' onclick='document.documentElement.requestFullscreen()'>Full Screen</button-->
 <script src='emojis.js'></script>
 <script>
 'use strict';
+var volumeOn = true;
 var audioCoin = null;
 var audioCoin2 = null;
 var audioWin = null;
@@ -1051,20 +1055,25 @@ function placeLetter(target,selectedLetter)
   var points = pointsForWord(letter);
   score += points;
   setScore(score);
-  audioCoin.play();
+  if (volumeOn)
+  {
+    audioCoin.currentTime = 0;
+    audioCoin.play();
+  }
   var nWordsDone = areWordsDone(+target.dataset.i,+target.dataset.j);
   if (nWordsDone > 0)
   {
     totalWords += nWordsDone;
     setTotalWords(totalWords);
-    audioCoin2.currentTime = 0;
-    audioCoin2.play();
+    if (volumeOn)
+    {
+      audioCoin2.currentTime = 0;
+      audioCoin2.play();
+    }
   }
   else
   {
     dest.classList.add('popup');
-    audioCoin.currentTime = 0;
-    //audioCoin.play();
   }
   var rect = target.getBoundingClientRect();
   showWin(points,rect.left,rect.top);
@@ -1106,8 +1115,11 @@ function wiggleWord(idx)
 
 function restartGame()
 {
-  audioWin.currentTime = 0;
-  audioWin.play();
+  if (volumeOn)
+  {
+    audioWin.currentTime = 0;
+    audioWin.play();
+  }
   setTimeout(function () {
     document.querySelectorAll('g').forEach(r => r.classList.add('highlight'));
     setTimeout(function(){
@@ -1262,6 +1274,39 @@ confirmdialog.addEventListener('transitionend',function (e) {
     confirmdialog.style.display = 'flex';
 });
 
+function setVolume(volume)
+{
+  var image = volumediv.querySelector('image');
+  var src = image.getAttribute('xlink:href');
+  if (volume)
+    image.setAttribute('xlink:href','Speaker_Icon.svg');
+  else
+    image.setAttribute('xlink:href','Mute_Icon.svg');
+
+  try {
+    if (window.localStorage)
+      window.localStorage.crossvolumeon = volume;
+  } catch (e) {}
+}
+
+try {
+  if (window.localStorage && window.localStorage.crossvolumeon)
+  {
+    volumeOn = window.localStorage.crossvolumeon === 'true';
+  }
+  else
+    setVolume(volumeOn);
+} catch (e) {}
+setVolume(volumeOn);
+
+volumediv.addEventListener(startEvent, function (e) {
+  e.preventDefault();
+  e.stopPropagation();
+  volumeOn = !volumeOn;
+  setVolume(volumeOn);
+});
+
+init();
 </script>
 </body>
 </html>

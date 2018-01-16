@@ -146,6 +146,7 @@ justify-content: space-evenly;
 
 #totalwordsdiv{float:left;}
 #highscorediv{float:right;}
+#volumediv{cursor:pointer;position:absolute;padding:8px;right:0;bottom:0;}
 
 .solutionrect { opacity:0.9; transition: opacity 1s ease-in-out}
 
@@ -240,7 +241,7 @@ menu{padding:16px}
 </style>
 <script src='emojis.js'></script>
 </head>
-<body onload='init()'>
+<body>
 <div id='container'>
   <div class='item' id='questions1'></div>
   <svg class='item' version='1.1' xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' xml:space='preserve' id='grid'></svg>
@@ -248,6 +249,7 @@ menu{padding:16px}
 </div>
 <div id='win'>1</div>
 <div id='header'><div id='totalwordsdiv' class='topbutton'>0 words</div><div id='highscorediv' class='topbutton'>0</div></div>
+<svg id='volumediv' width=24 height=24 xmlns='http://www.w3.org/2000/svg' xmlns:xlink='http://www.w3.org/1999/xlink' viewBox='0 0 32 32'><image x=0 y=0 width=32 height=32 xlink:href='Speaker_Icon.svg'/></svg>
 <div id='confirmdialog'>
   <div id='dialog' class="hideDialog">
     <div>Reset score?</div>
@@ -260,6 +262,8 @@ menu{padding:16px}
 <script>
 'use strict';
 var firstTime = true;
+
+var volumeOn = true;
 var audioCoin = null;
 var audioCoin2 = null;
 var audioWin = null;
@@ -478,13 +482,19 @@ function checkWord(coords)
     score += points;
     if (points >= 12)
     {
-      audioCoin2.currentTime = 0;
-      audioCoin2.play();
+      if (volumeOn)
+      {
+      	audioCoin2.currentTime = 0;
+      	audioCoin2.play();
+    	}
     }
     else
     {
-      audioCoin.currentTime = 0;
-      audioCoin.play();
+    	if (volumeOn)
+		  {
+				audioCoin.currentTime = 0;
+				audioCoin.play();
+			}
     }
     setScore(score);
     showWin(points,x1,y1,x2,y2);
@@ -495,8 +505,11 @@ function checkWord(coords)
       var rects = document.querySelectorAll('.solutionrect');
       rects.forEach(r => r.style.opacity = 0);
       isNewGame = true;
-      audioWin.currentTime = 0;
-      audioWin.play();
+			if (volumeOn)
+		  {
+				audioWin.currentTime = 0;
+				audioWin.play();
+    	}
       setTimeout(function () {init()},1000);
     }
   }
@@ -892,6 +905,40 @@ try {
 setScore(score);
 setTotalWords(totalWords);
 
+function setVolume(volume)
+{
+  var image = volumediv.querySelector('image');
+  var src = image.getAttribute('xlink:href');
+  if (volume)
+    image.setAttribute('xlink:href','Speaker_Icon.svg');
+  else
+    image.setAttribute('xlink:href','Mute_Icon.svg');
+
+  try {
+    if (window.localStorage)
+      window.localStorage.wordseekvolumeon = volume;
+  } catch (e) {}
+}
+
+try {
+  if (window.localStorage && window.localStorage.wordseekvolumeon)
+  {
+    volumeOn = window.localStorage.wordseekvolumeon === 'true';
+  }
+  else
+    setVolume(volumeOn);
+} catch (e) {}
+setVolume(volumeOn);
+
+volumediv.addEventListener(startEvent, function (e) {
+  e.preventDefault();
+  e.stopPropagation();
+  volumeOn = !volumeOn;
+  setVolume(volumeOn);
+});
+
+
+init();
 </script>
 </body>
 </html>

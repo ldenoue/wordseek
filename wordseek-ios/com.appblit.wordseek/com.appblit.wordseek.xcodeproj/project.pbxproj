@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F9010955200E8FBA00B6EDA8 /* Mute_Icon.svg in Resources */ = {isa = PBXBuildFile; fileRef = F9010953200E8FBA00B6EDA8 /* Mute_Icon.svg */; };
+		F9010956200E8FBA00B6EDA8 /* Speaker_Icon.svg in Resources */ = {isa = PBXBuildFile; fileRef = F9010954200E8FBA00B6EDA8 /* Speaker_Icon.svg */; };
 		F951D4762005135D001511F7 /* svg in Resources */ = {isa = PBXBuildFile; fileRef = F951D4752005135D001511F7 /* svg */; };
 		F985371D2003B63D008D5EA3 /* wordseek.html in Resources */ = {isa = PBXBuildFile; fileRef = F98537192003B63C008D5EA3 /* wordseek.html */; };
 		F985371E2003B63D008D5EA3 /* icon.png in Resources */ = {isa = PBXBuildFile; fileRef = F985371A2003B63C008D5EA3 /* icon.png */; };
@@ -25,6 +27,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		F9010953200E8FBA00B6EDA8 /* Mute_Icon.svg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = Mute_Icon.svg; path = ../../../Mute_Icon.svg; sourceTree = "<group>"; };
+		F9010954200E8FBA00B6EDA8 /* Speaker_Icon.svg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = Speaker_Icon.svg; path = ../../../Speaker_Icon.svg; sourceTree = "<group>"; };
 		F951D4752005135D001511F7 /* svg */ = {isa = PBXFileReference; lastKnownFileType = folder; name = svg; path = ../../../svg; sourceTree = "<group>"; };
 		F98537192003B63C008D5EA3 /* wordseek.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; name = wordseek.html; path = ../../../wordseek.html; sourceTree = "<group>"; };
 		F985371A2003B63C008D5EA3 /* icon.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; name = icon.png; path = ../../../icon.png; sourceTree = "<group>"; };
@@ -82,6 +86,8 @@
 				F98537192003B63C008D5EA3 /* wordseek.html */,
 				F9F530E8200A12050068B6AC /* emojis.js */,
 				F9F05A932003B43B000D5CD4 /* AppDelegate.h */,
+				F9010953200E8FBA00B6EDA8 /* Mute_Icon.svg */,
+				F9010954200E8FBA00B6EDA8 /* Speaker_Icon.svg */,
 				F9F4F414200A5EBE00CEA193 /* coin.mp3 */,
 				F9F4F413200A5EBE00CEA193 /* endgame.mp3 */,
 				F9F4F415200A5EBE00CEA193 /* win.mp3 */,
@@ -163,6 +169,8 @@
 				F951D4762005135D001511F7 /* svg in Resources */,
 				F9F05AA02003B43B000D5CD4 /* LaunchScreen.storyboard in Resources */,
 				F9F05A9D2003B43B000D5CD4 /* Assets.xcassets in Resources */,
+				F9010956200E8FBA00B6EDA8 /* Speaker_Icon.svg in Resources */,
+				F9010955200E8FBA00B6EDA8 /* Mute_Icon.svg in Resources */,
 				F9F4F416200A5EBE00CEA193 /* endgame.mp3 in Resources */,
 				F9F4F417200A5EBE00CEA193 /* coin.mp3 in Resources */,
 				F98537202003B63D008D5EA3 /* ubuntu.woff2 in Resources */,
