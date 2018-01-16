@@ -30,70 +30,34 @@ font-family:'Ubuntu',Helvetica,monospace;
 }
 
 @keyframes wiggleAnimation {
-  0% {transform: rotate(10deg);}
-  25% {transform: rotate(-10deg);}
-  50% {transform: rotate(10deg);}
-  75% {transform: rotate(-10deg);}
-  100% {transform: rotate(0deg);}
+  0%    {transform: rotate(10deg)}
+  25%   {transform: rotate(-10deg)}
+  50%   {transform: rotate(10deg)}
+  75%   {transform: rotate(-10deg)}
+  100%  {transform: rotate(0deg)}
 }
 
 @keyframes rotateAnimation {
-  0% {transform: rotate(0deg) scale(1.0)}
-  50% {transform: rotate(180deg) scale(0.5)}
-  100% {transform: rotate(360deg) scale(0.2)}
+  0%    {transform: rotate(0deg) scale(1.0)}
+  50%   {transform: rotate(180deg) scale(0.5)}
+  100%  {transform: rotate(360deg) scale(0.2)}
 }
 
 @keyframes winAnimation {
-  0%   { opacity:0; transform:scale(0.3)}
-  50%  { opacity:0.5; transform:scale(1.0)}
-  100% { opacity:0; transform:scale(1.3)}
+  0%   {opacity:0; transform:scale(0.3)}
+  50%  {opacity:0.5; transform:scale(1.0)}
+  100% {opacity:0; transform:scale(1.3)}
 }
 
 @keyframes zoomAnimation {
-  0%   { transform:scale(1.0)}
-  50%  { transform:scale(1.1)}
-  100% { transform:scale(1.0)}
+  0%   {transform:scale(1.0)}
+  50%  {transform:scale(1.1)}
+  100% {transform:scale(1.0)}
 }
-
-@keyframes shakeAnimation {
-  10%, 90% { transform: translate3d(-1px, 0, 0);
-  }
-  20%, 80% { transform: translate3d(2px, 0, 0);
-  }
-  30%, 50%, 70% { transform: translate3d(-4px, 0, 0);
-  }
-  40%, 60% { transform: translate3d(4px, 0, 0);
-  }
-}
-
-/*@keyframes popupAnimation {
-  0%{
-    transform: scale(1);
-  }
-  50%{
-    transform: scale(1.4);
-  }
-  60%{
-    transform: scale(1.1);
-  }
-  70%{
-    transform: scale(1.2);
-  }
-  80%{
-    transform: scale(1);
-  }
-  90%{
-    transform: scale(1.1);
-  }
-  100%{
-    transform: scale(1);
-  }
-}*/
 
 .zoom{animation:zoomAnimation 1s ease-in-out}
 
 .letter,.solutionletter{stroke-width:0px;stroke:transparent}
-/*.solutionletter{stroke-width:3px;}*/
 
 body{
 box-sizing:border-box;
@@ -103,10 +67,6 @@ user-select:none;
 -webkit-user-select: none;
 background-repeat: no-repeat;
 background-size: cover;
-}
-
-.shake{
-  animation:shakeAnimation 0.82s cubic-bezier(.36,.07,.19,.97) both;
 }
 
 rect{
@@ -125,7 +85,6 @@ text{
   fill:black;
   opacity:1.0;
   text-anchor:middle;
-  /*alignment-baseline:central;*/
   dominant-baseline:central;
 }
 
@@ -133,21 +92,16 @@ line{
   stroke-width:48;
 }
 
-.wiggle{animation:wiggleAnimation .3s ease-in-out;}
+.wiggle{animation:wiggleAnimation .4s ease-in-out;}
 
-@keyframes popupshakeAnimation {
-  10%/*, 90%*/ { transform:scale(1.0);
-  }
-  20%/*, 80%*/ { transform:scale(1.1);
-  }
-  30%/*, 50%, 70%*/ { transform:scale(1.3);
-  }
-  /*40%,*/ 60% { transform:scale(1.0);
-  }
+@keyframes popupAnimation {
+  10%   {transform:scale(1.0)}
+  20%   {transform:scale(0.9)}
+  50%   {transform:scale(1.3)}
+  100%  {transform:scale(1.0)}
 }
 
-.popup{animation:popupshakeAnimation 0.5s cubic-bezier(.36,.07,.19,.97) both/*ease-in-out*/;}
-
+.popup{animation:popupAnimation 0.4s ease-in-out;}
 
 .rotate{animation:rotateAnimation linear .5s 1;}
 
@@ -174,8 +128,8 @@ line{
 #grid{
 padding:0px;
 width:840px;
-max-width:calc(100vw - 16px);
-max-height:calc(100vh - 16px);
+max-width:calc(100vmin - 16px);
+max-height:calc(100vmin - 16px);
 transition: opacity 1s ease-in-out;
 }
 
@@ -194,8 +148,6 @@ justify-content: space-evenly;
 .item{align-self:center}
 
 .topbutton{
-  /*background-color:rgba(255,255,255,0.2);
-  margin:4px;*/
   padding:8px;
   border-radius:5px;
   position:absolute;
@@ -207,7 +159,7 @@ justify-content: space-evenly;
 #totalwordsdiv{left:0;top:0;}
 #highscorediv{right:0;top:0;}
 
-.solutionrect { opacity:0.9; transition: opacity 1s ease-in-out}
+.solutionrect {opacity:0.9; transition: opacity 1s ease-in-out}
 
 #help{
   cursor:pointer;
@@ -313,48 +265,46 @@ menu{padding:16px}
 <div id='win'>1</div>
 <div id='totalwordsdiv' class='topbutton'>0 words</div>
 <div id='highscorediv' class='topbutton'>0 points</div>
-<div id='confirmdialog' ontouchstart='dismissDialog(false)' onclick='dismissDialog(false)'>
+<div id='confirmdialog'>
   <div id='dialog' class="hideDialog">
     <div>Reset score?</div>
     <menu>
-        <button ontouchstart='dismissDialog(false)' onclick='dismissDialog(false)'>Cancel</button>
-        <button ontouchstart='dismissDialog(true)' onclick='dismissDialog(true)'>Reset</button>
+        <button id='cancelbutton'>Cancel</button>
+        <button id='resetbutton'>Reset</button>
     </menu>
   </div>
 </div>
-<!--script src='crossword.js'></script-->
 <script src='emojis.js'></script>
 <script>
 'use strict';
 var audioCoin = null;
 var audioCoin2 = null;
 var audioWin = null;
+
 var useTwitterEmoji = true;
-var lastSelection = null;
 var selectedLetter = null;
 var letters = [];
-var score = 0;
 var cwgrid = null;
+
+var score = 0;
 var totalWords = 0;
 var startEvent = 'mousedown';
 var endEvent = 'mouseup';
 var moveEvent = 'mousemove';
 var outEvent = 'mouseleave';
-var isMouseDown = false;
 var backColor = null;
-var isNewGame = false;
-var bgColors = '#2FABF9,#F2C03A,#DB2E29,#9280F9'.split(',');
-var hiColors = 'yellow,#3BDB29,#2FABF9,#F2C03A,#DB2E29,#9280F9'.split(',');
+//var bgColors = '#229944,#2FABF9,#F2C03A,#DB2E29,#9280F9'.split(',');
+var bgColors = '#229944,#2FABF9,#E0B03A,#DB2E29,#9280F9'.split(',');
+//var bgColors = '#115555,#229944,#119999,#22BBBB,#88CC66,#115555,#229944,#119999'.split(',');
 var currentColor = 0;
-//var letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 var points = {"a":1,"b":3,"c":3,"d":2,"e":1,"f":4,"g":2,"h":4,"i":1,"j":8,"k":5,"l":1,"m":3,"n":1,"o":1,"p":3,"q":10,"r":1,"s":1,"t":1,"u":1,"v":4,"w":4,"x":8,"y":4,"z":10};
 var words_emojis = [];
 var gamew = 9;
 var gameh = 9;
 var nQuestions = 6;
 var nFound = 0;
+
 var matrix = null;
-var first = null;
 var categories = Object.keys(emojis);
 var words = [];
 var found_words = [];
@@ -765,7 +715,7 @@ function init()
         words.push(words.length +  up);
         if (useTwitterEmoji)
         {
-          var hexcode = hexCodeFromEmoji(emoji);
+          var hexcode = hexCodeFromEmoji(emoji);//emojis.All.Maple
           words_emojis.push('svg/' + hexcode + '.svg');
         }
         else
@@ -829,6 +779,18 @@ function initReal()
   var rectw = tilew - 2 * rectBorder;
 
   var htmlemoji = '';
+  
+  /*var characters = '';
+  words.forEach(w => characters += w.substring(1));
+  var hideletters = characters.split('').sort(function() { return 0.5 - Math.random() }).slice(0,MAX_GUESS);*/
+  var hideletters = [];
+  for (var i=0;i<words.length;i++)
+  {
+    var wordletters = words[i].substring(1).split('').sort(function() { return 0.5 - Math.random() });
+    hideletters.push(wordletters[0]);
+    hideletters.push(wordletters[1]);
+  }
+  hideletters = hideletters.slice(0,MAX_GUESS);
 	for (var j=0;j<gameh;j++)
 	{
 		for (var i=0;i<gamew;i++)
@@ -846,9 +808,12 @@ function initReal()
       {
 				html += '<g style="transform-origin:' + midx + 'px ' + midy + 'px">';
 				html += '<rect rx=' + rectBorderRadius + ' ry=' + rectBorderRadius + ' fill="white" id=letter' + i + '-' + j + ' data-i='+ i + ' data-j=' + j + ' class="letter" width=' + rectw + ' height=' + rectw + ' x=' + (rectBorder + off + i * tilew) + ' y=' + (rectBorder + off + j * tilew) + ' />';
-        var display = rnd(2);
-        if (display === 0 && letters.length < MAX_GUESS)
+        //var display = rnd(2);
+        //if (display === 0 && letters.length < MAX_GUESS)
+        var idxLetter = hideletters.indexOf(matrix[j][i]);
+        if (idxLetter !== -1)
         {
+          hideletters.splice(idxLetter,1); // remove this letter
   			  letters.push(matrix[j][i]);
 	        html += '<text class="guess" x="' + midx + '" y="' + midy + '">' + matrix[j][i] + '</text>';
 	      }
@@ -876,7 +841,7 @@ function initReal()
 	}
 	html += htmlemoji;
 	//grid.innerHTML = html;
-	var sizeh = size + 2 *tilew + 2*off;
+	var sizeh = size + 2 * off + 2 * tilew; // 2 more rows: one empty and one letters to place
 	var sizew = size + 2 * off;
 	grid.setAttribute('viewBox','0 0 ' + sizew + ' ' + sizeh);
 
@@ -891,18 +856,24 @@ function initReal()
 	
 	var solutionfont = (solutionw * 36 / tilew);
 	var offsetx = (sizew - (letters.length * solutionw))/2;
+	console.log(offsetx);
+	var offsetTop = j * tilew - 4;
 	for (var i=0;i<letters.length;i++)
 	{
-	  html += '<g>';
-	  html += '<rect rx=' + rectBorderRadius + ' ry=' + rectBorderRadius + ' data-letter="' + letters[i] + '" class="solutionletter" fill="white" width=' + rectw + ' height=' + rectw + ' x=' + (rectBorder + offsetx + x * solutionw) + ' y=' + (rectBorder + off + j* tilew) + ' />';
-	  html += '<text style="font-size:' + solutionfont + 'px" x="' + (offsetx + x * solutionw+solutionw/2) + '" y="' + (off + j*48+solutionw/2) + '">' + letters[i] + '</text>';
+    var midx = off + offsetx + x * solutionw + solutionw / 2;
+    var midy = off + offsetTop + solutionw / 2;
+    var left = rectBorder + off + offsetx + x * solutionw;;
+    var top = rectBorder + off + offsetTop;
+	  html += '<g style="transform-origin:' + midx + 'px ' + midy + 'px">';
+	  html += '<rect rx=' + rectBorderRadius + ' ry=' + rectBorderRadius + ' data-letter="' + letters[i] + '" class="solutionletter" fill="white" width=' + rectw + ' height=' + rectw + ' x=' + left + ' y=' + top + ' />';
+	  html += '<text style="font-size:' + solutionfont + 'px" x="' + midx + '" y="' + midy + '">' + letters[i] + '</text>';
 	  html += '</g>';
 	  x++;
-	  if ((x % gamew) === 0)
+	  /*if ((x % gamew) === 0)
 	  {
 	    x = 0;
 	    j++;
-	  }
+	  }*/
 	}
   grid.innerHTML = html;
 
@@ -918,7 +889,6 @@ function initReal()
   }));
 
 	grid.querySelectorAll('.letter').forEach(rect => {
-	  //rect.style.stroke = backColor;
 	  removeAnimation(rect.parentNode,['wiggle','popup']);
     rect.addEventListener(startEvent,function(e){
       e.preventDefault();
@@ -955,7 +925,6 @@ function initReal()
 	});
 
   grid.querySelectorAll('.solutionletter').forEach(l => {
-    //l.style.stroke = backColor;
     l.addEventListener(startEvent,function(e){
       e.preventDefault();
       e.stopPropagation();
@@ -979,6 +948,7 @@ function initReal()
         selectedLetter.classList.remove('selected');
       selectedLetter = e.target;
       selectedLetter.classList.add('selected');
+      //selectedLetter.parentNode.classList.add('popup');
       if (letters.length > 0)
       {
         var text = selectedLetter.parentElement.querySelector('text');
@@ -1083,7 +1053,7 @@ function placeLetter(target,selectedLetter)
   var points = pointsForWord(letter);
   score += points;
   setScore(score);
- 
+  audioCoin.play();
   var nWordsDone = areWordsDone(+target.dataset.i,+target.dataset.j);
   if (nWordsDone > 0)
   {
@@ -1096,7 +1066,7 @@ function placeLetter(target,selectedLetter)
   {
     dest.classList.add('popup');
     audioCoin.currentTime = 0;
-    audioCoin.play();
+    //audioCoin.play();
   }
   var rect = target.getBoundingClientRect();
   showWin(points,rect.left,rect.top);
@@ -1110,7 +1080,7 @@ function wiggleWord(idx)
 {
   var delay = 0;
   var wordLength = words[idx].length - 1;
-  var duration = 0.3;//0.820;
+  var duration = 0.4;//0.820;
   var delayIncrement = duration / wordLength / 2;
   for (var r=0;r<cwgrid.length;r++)
   {
@@ -1129,7 +1099,8 @@ function wiggleWord(idx)
         var parent = g.parentNode; parent.appendChild(g);
         g.style.animationDelay = delay + 's';
         delay += delayIncrement;
-        g.classList.add('popup');
+        //g.classList.add('popup');//Laurent
+        g.classList.add('wiggle');//Elena
       }
     }
   }
@@ -1268,10 +1239,25 @@ setScore(score);
 setTotalWords(totalWords);
 
 audioCoin = new Audio('coin.mp3');
+//audioCoin = new Audio('peanut.mp3');
+//audioCoin = new Audio('ball.mp3');
+//audioCoin = new Audio('marble.mp3');
 audioCoin2 = new Audio('win.mp3');
 audioWin = new Audio('endgame.mp3');
 
 removeAnimation(win,['win']);
+
+confirmdialog.addEventListener(startEvent, function (e) {
+  dismissDialog(false);
+});
+
+cancelbutton.addEventListener(startEvent, function (e) {
+  dismissDialog(false);
+});
+
+resetbutton.addEventListener(startEvent, function (e) {
+  dismissDialog(true);
+});
 
 confirmdialog.addEventListener('transitionend',function (e) {
   var opacity = +e.target.style.opacity;
