@@ -92,8 +92,9 @@ font-family:'Ubuntu',Helvetica,monospace;
 
 .zoom{animation:zoomAnimation 1s ease-in-out}
 
-.letter,.solutionletter{rx:0px;ry:0px;stroke-width:3px;stroke:transparent}
-.solutionletter{stroke-width:3px;}
+.letter,.solutionletter{stroke-width:0px;stroke:transparent}
+/*.solutionletter{stroke-width:3px;}*/
+
 body{
 box-sizing:border-box;
 background-color:#294;
@@ -124,7 +125,8 @@ text{
   fill:black;
   opacity:1.0;
   text-anchor:middle;
-  alignment-baseline:central;
+  /*alignment-baseline:central;*/
+  dominant-baseline:central;
 }
 
 line{
@@ -144,7 +146,7 @@ line{
   }
 }
 
-.popup{animation:popupshakeAnimation 0.82s cubic-bezier(.36,.07,.19,.97) both/*ease-in-out*/;}
+.popup{animation:popupshakeAnimation 0.5s cubic-bezier(.36,.07,.19,.97) both/*ease-in-out*/;}
 
 
 .rotate{animation:rotateAnimation linear .5s 1;}
@@ -257,7 +259,9 @@ justify-content: space-evenly;
   opacity:0;
 }
 
-.show{opacity:1}
+.show{
+  opacity:1;
+}
 
 .foundsolution{
   transition: opacity 0.2s ease-out;
@@ -278,7 +282,7 @@ justify-content: space-evenly;
   background-color: rgba(0, 0, 0, 0.8);
   text-align:center;
   transition:opacity 0.2s ease-in-out;
-  opacity:0;
+  opacity:0.0;
 }
 
 #dialog{
@@ -663,9 +667,6 @@ function Crossword(w,h,words_in, clues_in){
 function dismissDialog(yes)
 {
   confirmdialog.style.opacity = 0;
-  setTimeout(function(){
-    confirmdialog.style.display = 'none';
-  },200);
   if (yes)
   {
     score = 0;
@@ -691,7 +692,6 @@ function showWin(n,x,y)
   win.style.top = (y-64+24) + 'px';
   win.textContent = '+' + n;
   win.classList.add('win');
-  setTimeout(function () { win.classList.remove('win')},900);
 }
 
 function setScore(s)
@@ -824,6 +824,10 @@ function initReal()
     wordCounts[i] = words[i].length - 1;
   }
 
+  var rectBorder = 2;
+  var rectBorderRadius = 2;
+  var rectw = tilew - 2 * rectBorder;
+
   var htmlemoji = '';
 	for (var j=0;j<gameh;j++)
 	{
@@ -840,7 +844,8 @@ function initReal()
 			//html += '<g>';
       if (isLetter(matrix[j][i]))
       {
-				html += '<g style="transform-origin:' + midx + 'px ' + midy + 'px"><rect fill="white" id=letter' + i + '-' + j + ' data-i='+ i + ' data-j=' + j + ' class="letter" width=' + tilew + ' height=' + tilew + ' x=' + (off + i * tilew) + ' y=' + (off + j * tilew) + ' />';
+				html += '<g style="transform-origin:' + midx + 'px ' + midy + 'px">';
+				html += '<rect rx=' + rectBorderRadius + ' ry=' + rectBorderRadius + ' fill="white" id=letter' + i + '-' + j + ' data-i='+ i + ' data-j=' + j + ' class="letter" width=' + rectw + ' height=' + rectw + ' x=' + (rectBorder + off + i * tilew) + ' y=' + (rectBorder + off + j * tilew) + ' />';
         var display = rnd(2);
         if (display === 0 && letters.length < MAX_GUESS)
         {
@@ -882,13 +887,14 @@ function initReal()
   letters.sort(function() { return 0.5 - Math.random() });
 	var j = gameh+1;
 	var x = 0;
-	var solutionw = tilew;//(64+48)/2;
+	var solutionw = tilew;
+	
 	var solutionfont = (solutionw * 36 / tilew);
 	var offsetx = (sizew - (letters.length * solutionw))/2;
 	for (var i=0;i<letters.length;i++)
 	{
 	  html += '<g>';
-	  html += '<rect data-letter="' + letters[i] + '" class="solutionletter" fill="white" width=' + solutionw + ' height=' + solutionw + ' x=' + (offsetx + x * solutionw) + ' y=' + (off + j* tilew) + ' />';
+	  html += '<rect rx=' + rectBorderRadius + ' ry=' + rectBorderRadius + ' data-letter="' + letters[i] + '" class="solutionletter" fill="white" width=' + rectw + ' height=' + rectw + ' x=' + (rectBorder + offsetx + x * solutionw) + ' y=' + (rectBorder + off + j* tilew) + ' />';
 	  html += '<text style="font-size:' + solutionfont + 'px" x="' + (offsetx + x * solutionw+solutionw/2) + '" y="' + (off + j*48+solutionw/2) + '">' + letters[i] + '</text>';
 	  html += '</g>';
 	  x++;
@@ -908,11 +914,13 @@ function initReal()
     document.querySelectorAll('.solutionletter').forEach(r => r.classList.remove('selected'));
     document.querySelectorAll('.highlighted').forEach(r => r.classList.remove('highlighted'));
     highlightWord(index);
+    //wiggleWord(index);
   }));
 
-	grid.querySelectorAll('.letter').forEach(g => {
-	  g.style.stroke = backColor;
-    g.addEventListener(startEvent,function(e){
+	grid.querySelectorAll('.letter').forEach(rect => {
+	  //rect.style.stroke = backColor;
+	  removeAnimation(rect.parentNode,['wiggle','popup']);
+    rect.addEventListener(startEvent,function(e){
       e.preventDefault();
       e.stopPropagation();
       if (!e.target.dataset.i)
@@ -947,7 +955,7 @@ function initReal()
 	});
 
   grid.querySelectorAll('.solutionletter').forEach(l => {
-    l.style.stroke = backColor;
+    //l.style.stroke = backColor;
     l.addEventListener(startEvent,function(e){
       e.preventDefault();
       e.stopPropagation();
@@ -990,11 +998,9 @@ function initReal()
 
 function wrongLetter(letter)
 {
-  //does not work on mobile safari window.navigator.vibrate(200);
+  // vibrate is not supported on mobile safari
+  //window.navigator.vibrate(200);
   letter.classList.add('wiggle');
-  setTimeout(function () { letter.classList.remove('wiggle')}, 300);
-  //letter.classList.add('shake');
-  //setTimeout(function () { letter.classList.remove('shake')}, 820);
 }
 
 function isLetter(l)
@@ -1089,7 +1095,6 @@ function placeLetter(target,selectedLetter)
   else
   {
     dest.classList.add('popup');
-    setTimeout(function(){dest.classList.remove('popup')},820);
     audioCoin.currentTime = 0;
     audioCoin.play();
   }
@@ -1105,7 +1110,8 @@ function wiggleWord(idx)
 {
   var delay = 0;
   var wordLength = words[idx].length - 1;
-  var delayIncrement = 0.820 / wordLength / 2;
+  var duration = 0.3;//0.820;
+  var delayIncrement = duration / wordLength / 2;
   for (var r=0;r<cwgrid.length;r++)
   {
     for (var s=0;s<cwgrid[r].length;s++)
@@ -1123,9 +1129,7 @@ function wiggleWord(idx)
         var parent = g.parentNode; parent.appendChild(g);
         g.style.animationDelay = delay + 's';
         delay += delayIncrement;
-        g.classList.remove('popup');
         g.classList.add('popup');
-        //g.classList.add('wiggle');
       }
     }
   }
@@ -1154,6 +1158,30 @@ function unsolve()
 {
   var solutions = document.querySelectorAll('.guess');
   solutions.forEach(s => {if (!s.classList.contains('foundsolution')) {s.classList.remove('show')}});
+}
+
+// from http://blogs.sitepointstatic.com/examples/tech/animation-api/index.html
+var pfx = ["webkit", "moz", "MS", "o", ""];
+function PrefixedEvent(element, type, callback) {
+	for (var p = 0; p < pfx.length; p++) {
+		if (!pfx[p]) type = type.toLowerCase();
+		element.addEventListener(pfx[p]+type, callback, false);
+	}
+}
+
+function removeAnimation(element,classnames)
+{
+  var AnimationListener = function (e) {
+    for (var i=0;i<classnames.length;i++)
+    {
+      if (e.target.classList.contains(classnames[i]))
+      {
+        //console.log('removing classname=',classnames[i]);
+        e.target.classList.remove(classnames[i]);
+      }
+    }
+  }
+  PrefixedEvent(element, "AnimationEnd", AnimationListener);
 }
 
 if ('ontouchstart' in document.documentElement)
@@ -1242,6 +1270,17 @@ setTotalWords(totalWords);
 audioCoin = new Audio('coin.mp3');
 audioCoin2 = new Audio('win.mp3');
 audioWin = new Audio('endgame.mp3');
+
+removeAnimation(win,['win']);
+
+confirmdialog.addEventListener('transitionend',function (e) {
+  var opacity = +e.target.style.opacity;
+  if (opacity === 0)
+    confirmdialog.style.display = 'none';
+  else if (opacity === 1)
+    confirmdialog.style.display = 'flex';
+});
+
 </script>
 </body>
 </html>
