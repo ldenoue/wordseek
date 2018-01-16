@@ -1,11 +1,12 @@
-![wordseek screenshot](screenshot.jpg)
+![wordseek screenshot](wordseek-screenshot.jpg)
 
 # WordSeek
 A word search game implemented using modern web technologies, especially CSS flex box and SVG.
+Try the [live demo](https://ldenoue.github.io/wordseek/wordseek.html)
 
 ## Usage
 
-Open wordseek.html in your favorite browser or try the [live demo](https://ldenoue.github.io/wordseek/wordseek.html)
+Open wordseek.html in your favorite browser (testing on Chrome, Firefox, Safari and iOS)
 
 ## History
 
@@ -32,3 +33,18 @@ Again, the CSS pointer-events:none is used to prevent stealing events destined t
 element underneath.
 
 The CSS is responsive using media queries to detect device orientation and width.
+
+![crossword screenshot](crossword-screenshot.jpg)
+
+# CrossWord
+
+Similar architecture, but with CSS animations of SVG elements, including removing
+classnames when the animations end. Also how to rotate and apply CSS animations to SVG
+elements requires modifying the transform-origin property.
+
+Try the [live demo](https://ldenoue.github.io/wordseek/crossword.html)
+
+## Usage
+
+Open crossword.html in your favorite browser (testing on Chrome, Firefox, Safari and iOS)
+
