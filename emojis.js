@@ -53,7 +53,7 @@ var emojis={All:{
   Badminton:"🏸",Boxing:"🥊",
   Skating:"⛸",
   Fishing:"🎣",
-  Skis:"🎿",Sled:"🛷",Pool:"🎱",Die:"🎲",Palette:"🎨",Score:"🎼",Microphone:"🎤",Headphone:"🎧",
+  Skis:"🎿",Sled:"🛷",Pool:"🎱",Dice:"🎲",Palette:"🎨",Score:"🎼",Microphone:"🎤",Headphone:"🎧",
   Saxophone:"🎷",Guitar:"🎸",Keyboard:"🎹",Trumpet:"🎺",Violin:"🎻",Drum:"🥁",Clapper:"🎬",Bow:"🏹",
   Rowing:"🚣",Racing:"🏎",Motorcycle:"🏍",Mountain:"🏔",Fountain:"⛲",Volcano:"🌋",Fuji:"🗻",
   Camping:"🏕",Beach:"🏖",Desert:"🏜",Island:"🏝",

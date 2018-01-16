@@ -95,13 +95,13 @@ line{
 .wiggle{animation:wiggleAnimation .4s ease-in-out;}
 
 @keyframes popupAnimation {
-  10%   {transform:scale(1.0)}
-  20%   {transform:scale(0.9)}
-  50%   {transform:scale(1.3)}
-  100%  {transform:scale(1.0)}
+  10%   {transform:scale(1.1) rotate(10deg)}
+  20%   {transform:scale(1.2) rotate(-10deg)}
+  50%   {transform:scale(0.9) rotate(10deg)}
+  100%  {transform:scale(1.0) rotate(0deg)}
 }
 
-.popup{animation:popupAnimation 0.4s ease-in-out;}
+.popup{animation:popupAnimation 0.5s ease-in-out;}
 
 .rotate{animation:rotateAnimation linear .5s 1;}
 
@@ -128,8 +128,8 @@ line{
 #grid{
 padding:0px;
 width:840px;
-max-width:calc(100vmin - 16px);
-max-height:calc(100vmin - 16px);
+max-width:calc(100vw - 16px);
+max-height:calc(100vh - 16px);
 transition: opacity 1s ease-in-out;
 }
 
@@ -832,10 +832,10 @@ function initReal()
 	    {
 		    if (useTwitterEmoji)
 		    {
-		      htmlemoji += '<g><image class="emoji emojiimage" data-i='+ i + ' data-j=' + j + ' width=' + tilew + ' height=' + tilew + ' x=' + x + ' y=' + y + ' xlink:href="' + words_emojis[+matrix[j][i]] + '"/></g>';
+		      htmlemoji += '<g style="transform-origin:' + midx + 'px ' + midy + 'px"><image class="emoji emojiimage" data-i='+ i + ' data-j=' + j + ' width=' + tilew + ' height=' + tilew + ' x=' + x + ' y=' + y + ' xlink:href="' + words_emojis[+matrix[j][i]] + '"/></g>';
 		    }
 		    else
-	    	  htmlemoji += '<g><text class="emoji emojitext"data-i='+ i + ' data-j=' + j + ' x="' + midx + '" y="' + midy + '">' + words_emojis[+matrix[j][i]] + '</text></g>';
+	    	  htmlemoji += '<g style="transform-origin:' + midx + 'px ' + midy + 'px"><text class="emoji emojitext"data-i='+ i + ' data-j=' + j + ' x="' + midx + '" y="' + midy + '">' + words_emojis[+matrix[j][i]] + '</text></g>';
 	    }
 		}
 	}
@@ -856,7 +856,6 @@ function initReal()
 	
 	var solutionfont = (solutionw * 36 / tilew);
 	var offsetx = (sizew - (letters.length * solutionw))/2;
-	console.log(offsetx);
 	var offsetTop = j * tilew - 4;
 	for (var i=0;i<letters.length;i++)
 	{
@@ -869,24 +868,23 @@ function initReal()
 	  html += '<text style="font-size:' + solutionfont + 'px" x="' + midx + '" y="' + midy + '">' + letters[i] + '</text>';
 	  html += '</g>';
 	  x++;
-	  /*if ((x % gamew) === 0)
-	  {
-	    x = 0;
-	    j++;
-	  }*/
 	}
   grid.innerHTML = html;
 
-  grid.querySelectorAll('.emoji').forEach(g => g.addEventListener(startEvent,function (e){
-    var image = e.target;
-    var i = +image.dataset.i;
-    var j = +image.dataset.j;
-    var index = +matrix[j][i];
-    document.querySelectorAll('.solutionletter').forEach(r => r.classList.remove('selected'));
-    document.querySelectorAll('.highlighted').forEach(r => r.classList.remove('highlighted'));
-    highlightWord(index);
-    //wiggleWord(index);
-  }));
+  grid.querySelectorAll('.emoji').forEach(g => {
+    removeAnimation(g.parentElement,['popup']);
+    g.addEventListener(startEvent,function (e){
+      var image = e.target;
+      var i = +image.dataset.i;
+      var j = +image.dataset.j;
+      var index = +matrix[j][i];
+      image.parentNode.classList.add('popup');
+      document.querySelectorAll('.solutionletter').forEach(r => r.classList.remove('selected'));
+      document.querySelectorAll('.highlighted').forEach(r => r.classList.remove('highlighted'));
+      highlightWord(index);
+      //wiggleWord(index);
+    })
+  });
 
 	grid.querySelectorAll('.letter').forEach(rect => {
 	  removeAnimation(rect.parentNode,['wiggle','popup']);
@@ -1099,8 +1097,8 @@ function wiggleWord(idx)
         var parent = g.parentNode; parent.appendChild(g);
         g.style.animationDelay = delay + 's';
         delay += delayIncrement;
-        //g.classList.add('popup');//Laurent
-        g.classList.add('wiggle');//Elena
+        g.classList.add('popup');//Laurent
+        //g.classList.add('wiggle');//Elena
       }
     }
   }
@@ -1178,11 +1176,6 @@ document.body.addEventListener(startEvent,function (e){
   init();
 });
 
-confirmdialog.addEventListener(startEvent,function (e){
-  e.preventDefault();
-  e.stopPropagation();
-});
-
 /* for some reason, Chrome does not respect user-select without this */
 document.body.onselectstart= function () {return false;}
 
@@ -1248,6 +1241,8 @@ audioWin = new Audio('endgame.mp3');
 removeAnimation(win,['win']);
 
 confirmdialog.addEventListener(startEvent, function (e) {
+  e.preventDefault();
+  e.stopPropagation();
   dismissDialog(false);
 });
 

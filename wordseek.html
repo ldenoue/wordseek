@@ -248,12 +248,12 @@ menu{padding:16px}
 </div>
 <div id='win'>1</div>
 <div id='header'><div id='totalwordsdiv' class='topbutton'>0 words</div><div id='highscorediv' class='topbutton'>0</div></div>
-<div id='confirmdialog' ontouchstart='dismissDialog(false)' onclick='dismissDialog(false)'>
+<div id='confirmdialog'>
   <div id='dialog' class="hideDialog">
     <div>Reset score?</div>
     <menu>
-        <button ontouchstart='dismissDialog(false)' onclick='dismissDialog(false)'>Cancel</button>
-        <button ontouchstart='dismissDialog(true)' onclick='dismissDialog(true)'>Reset</button>
+        <button id='cancelbutton'>Cancel</button>
+        <button id='resetbutton'>Reset</button>
     </menu>
   </div>
 </div>
@@ -301,9 +301,6 @@ var names = Object.keys(emojis[category]);
 function dismissDialog(yes)
 {
   confirmdialog.style.opacity = 0;
-  setTimeout(function(){
-    confirmdialog.style.display = 'none';
-  },200);
   if (yes)
   {
     score = 0;
@@ -741,6 +738,23 @@ document.body.addEventListener(startEvent,function (e){
 confirmdialog.addEventListener(startEvent,function (e){
   e.preventDefault();
   e.stopPropagation();
+  dismissDialog(false);
+});
+
+cancelbutton.addEventListener(startEvent, function (e) {
+  dismissDialog(false);
+});
+
+resetbutton.addEventListener(startEvent, function (e) {
+  dismissDialog(true);
+});
+
+confirmdialog.addEventListener('transitionend',function (e) {
+  var opacity = +e.target.style.opacity;
+  if (opacity === 0)
+    confirmdialog.style.display = 'none';
+  else if (opacity === 1)
+    confirmdialog.style.display = 'flex';
 });
 
 document.addEventListener('keydown',function(e){
