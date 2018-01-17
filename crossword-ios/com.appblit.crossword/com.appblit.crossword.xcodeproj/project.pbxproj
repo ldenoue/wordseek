@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		F989F3F0200F43E00063DC7E /* Mute_Icon.svg in Resources */ = {isa = PBXBuildFile; fileRef = F989F3EE200F43DF0063DC7E /* Mute_Icon.svg */; };
+		F989F3F1200F43E00063DC7E /* Speaker_Icon.svg in Resources */ = {isa = PBXBuildFile; fileRef = F989F3EF200F43DF0063DC7E /* Speaker_Icon.svg */; };
 		F9F4F408200A4CB400CEA193 /* endgame.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = F9F4F407200A4CB400CEA193 /* endgame.mp3 */; };
 		F9F530FB200A12CE0068B6AC /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = F9F530FA200A12CE0068B6AC /* AppDelegate.m */; };
 		F9F530FE200A12CF0068B6AC /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = F9F530FD200A12CF0068B6AC /* ViewController.m */; };
@@ -25,6 +27,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		F989F3EE200F43DF0063DC7E /* Mute_Icon.svg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = Mute_Icon.svg; path = ../../../Mute_Icon.svg; sourceTree = "<group>"; };
+		F989F3EF200F43DF0063DC7E /* Speaker_Icon.svg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xml; name = Speaker_Icon.svg; path = ../../../Speaker_Icon.svg; sourceTree = "<group>"; };
 		F9F4F407200A4CB400CEA193 /* endgame.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; name = endgame.mp3; path = ../../../endgame.mp3; sourceTree = "<group>"; };
 		F9F530F6200A12CE0068B6AC /* com.appblit.crossword.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = com.appblit.crossword.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F9F530F9200A12CE0068B6AC /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -80,6 +84,8 @@
 				F9F530FA200A12CE0068B6AC /* AppDelegate.m */,
 				F9F530FC200A12CE0068B6AC /* ViewController.h */,
 				F9F530FD200A12CF0068B6AC /* ViewController.m */,
+				F989F3EE200F43DF0063DC7E /* Mute_Icon.svg */,
+				F989F3EF200F43DF0063DC7E /* Speaker_Icon.svg */,
 				F9F53113200A13290068B6AC /* coin.mp3 */,
 				F9F53116200A13290068B6AC /* win.mp3 */,
 				F9F4F407200A4CB400CEA193 /* endgame.mp3 */,
@@ -163,6 +169,8 @@
 				F9F53106200A12CF0068B6AC /* LaunchScreen.storyboard in Resources */,
 				F9F53103200A12CF0068B6AC /* Assets.xcassets in Resources */,
 				F9F53101200A12CF0068B6AC /* Main.storyboard in Resources */,
+				F989F3F1200F43E00063DC7E /* Speaker_Icon.svg in Resources */,
+				F989F3F0200F43E00063DC7E /* Mute_Icon.svg in Resources */,
 				F9F4F408200A4CB400CEA193 /* endgame.mp3 in Resources */,
 				F9F53117200A13290068B6AC /* crossword.html in Resources */,
 				F9F53119200A13290068B6AC /* emojis.js in Resources */,

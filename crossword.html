@@ -285,6 +285,15 @@ var audioCoin = null;
 var audioCoin2 = null;
 var audioWin = null;
 
+var rectBorder = 1;
+var rectBorderRadius = 2;
+var squareLetters = false;
+if (squareLetters)
+{
+  rectBorder = 1;
+  rectBorderRadius = 0;
+}
+
 var useTwitterEmoji = true;
 var selectedLetter = null;
 var letters = [];
@@ -778,8 +787,6 @@ function initReal()
     wordCounts[i] = words[i].length - 1;
   }
 
-  var rectBorder = 2;
-  var rectBorderRadius = 2;
   var rectw = tilew - 2 * rectBorder;
 
   var htmlemoji = '';
