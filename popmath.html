@@ -720,8 +720,12 @@ function goodMatch(i,j)
 	} catch (evalue) {
 		console.log(evalue,i,j);
 	}
-	if (bubbles[i].qtype == bubbles[j].qtype)
-		return false;
+	try {
+		if (bubbles[i].qtype === bubbles[j].qtype)
+			return false;
+	} catch (etype) {
+		console.log('etype',etype,i,j);
+	}
 	return true;
 }
 
@@ -750,6 +754,7 @@ function selectBubble(i)
 		winner = { first: i, second: selectedAnswer, dx: dx, dy: dy, steps: WINNER_STEPS };
 		//bubbles[i] = null;
 		//bubbles[selectedAnswer] = null;
+		bubbles[i].div.style.pointerEvents = 'none';
 		bubbles[i].popping = true;
 		bubbles[selectedAnswer].popping = true;
 		selectedAnswer = -1;
