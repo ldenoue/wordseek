@@ -258,13 +258,13 @@ var TOTALTIME = 0;
 var MINR = 25;
 var MAXR = 30;
 var INITSPEED = 25.0;
-var speed_limit = 100.0;
+var speed_limit = 150.0;
 var DT = 10; // every 50 ms
 var ADDBALLSTEPS = 1;
 var selectedAnswer = -1;
 var bubbles = null;
 var interval = null;
-
+var reqID = null;
 
 var MIX = 0;
 var ADD = 1;
@@ -288,7 +288,7 @@ var fontImg = null;
 
 var score = 0;
 
-var colors = 'blue,bluesky,cyan,fuchsia,green,greenblue,orange,pink,red,turquoise'.split(',');
+var colors = 'lime,blue,bluesky,cyan,fuchsia,green,greenblue,orange,pink,red,turquoise'.split(',');
 
 var backgroundindex = 0;
 var newbackgrounds = `lighthouse.jpg
@@ -328,14 +328,11 @@ function drawBubble(bubble, sel)
 	if (winner === null && sel)
 	{
 		bubble.selected = true;
-		//bubble.div.style.backgroundColor = 'yellow';
-		//bubble.div.style.backgroundImage = 'url(buttons/lime.png)';
 		bubble.div.style.opacity = 1.0;
 	}
 	else
 	{
 		bubble.div.style.opacity = 0.9;
-		//bubble.div.style.backgroundImage = 'url(buttons/' + colors[bubble.color] + '.png)';
 	}
 
 	if (bubble.popping)
@@ -359,16 +356,17 @@ var fontOffset = [0,12,23,34,44,56,67,78,89,99,110];
 var fontW = 10;
 var fontH = 14;
 var nMistakes = 0;
-var oldTime = -1;
+//var oldTime = -1;
 var addBallStep = 0;
 
 var divs = new Array();
 
 var WINDINTERVAL = 3000;
-var WINDSPEED = 50.0;
+var WINDSPEED = 100.0;
 var windinterval = null;
 function blow()
 {
+	//console.log('blowing wind');
 	var nbubbles = bubbles.length;
 	for (var i=0;i<nbubbles;i++)
 	{
@@ -594,7 +592,7 @@ function addBall()
 	var color2 = random2(0,colors.length-1);
 	var r2 = 32;
 
-	var minwidth = w / 10;
+	var minwidth = w / 11;
 	var r = minwidth;
 	var r2 = minwidth+random(minwidth/2);
 	addBallNow(r,QUESTION,res.value+'',res.value,color);
@@ -613,20 +611,23 @@ function limitSpeed(i)
 		bubbles[i].vspeed = -speed_limit;
 }
 
+var BLOW_STEPS = 0;
+var isHidden = false;
+
 function draw()
 {
-	var newTime = new Date().getTime();
-	var dt = newTime-oldTime;
-	if (score > 1)
-	{
-		setScore(score + ' points');
-	}
-	else if (score<=1)
-		setScore(score + ' point');
-	//else
-		//setScore('pop a pair of bubbles!');
-	oldTime = newTime;
+	if (isHidden)
+		return;
+	//var newTime = new Date().getTime();
+	//var dt = newTime-oldTime;
+	//oldTime = newTime;
 
+	if (BLOW_STEPS > 50)
+	{
+		BLOW_STEPS = 0;
+		blow();
+	}
+	BLOW_STEPS++;
 	addBallStep--;
 	if (bubbles.length < 2*total && addBallStep<0)
 	{
@@ -652,13 +653,15 @@ function draw()
 			winner.steps = winner.steps-1;
 			if (winner.steps <= 0)
 			{
-				bubbles[winner.first].div.style.visibility = 'hidden';
+				//bubbles[winner.first].div.style.visibility = 'hidden';
+				bubbles[winner.first].div.parentElement.removeChild(bubbles[winner.first].div);
 				bubbles[winner.first] = null;
-				bubbles[winner.second].div.style.visibility = 'hidden';
+				//bubbles[winner.second].div.style.visibility = 'hidden';
+				bubbles[winner.second].div.parentElement.removeChild(bubbles[winner.second].div);
 				bubbles[winner.second] = null;
 				winner = null;
 			}
-			if (winner!=null && (i==winner.first || i==winner.second))
+			if (winner !== null && (i === winner.first || i === winner.second))
 				drawSelected = true;
 		}
 		drawBubble(bubbles[i],drawSelected);
@@ -670,7 +673,7 @@ function draw()
 	if (nbubbles==2*total && allDone)
 		gameDone();
 	else
-		requestAnimationFrame(draw);
+		reqID = requestAnimationFrame(draw);
 }
 
 var messages = ['Awesome','Great','Super','You rock','Unbelievable','Bravissimo'];
@@ -751,6 +754,7 @@ function selectBubble(i)
 		dx = (bubbles[selectedAnswer].x - bubbles[i].x) / WINNER_STEPS / 2;
 		dy = (bubbles[selectedAnswer].y - bubbles[i].y) / WINNER_STEPS / 2;
 		score += 1;//bubbles[selectedAnswer].v + bubbles[i].v;
+		displayScoreLevel();
 		winner = { first: i, second: selectedAnswer, dx: dx, dy: dy, steps: WINNER_STEPS };
 		//bubbles[i] = null;
 		//bubbles[selectedAnswer] = null;
@@ -794,9 +798,12 @@ function onBubble(b,x,y)
 	return (x >= b.x-b.r && x <= b.x+b.r && y>= b.y-b.r && y<=b.y+b.r);
 }*/
 
-function setScore(text) {
-	$('scorediv').innerHTML = text;// + (newTime-TOTALTIME);
-	$('leveldiv').innerHTML = 'Level ' + LEVEL;
+function displayScoreLevel() {
+	if (score > 1)
+		scorediv.textContent = score + ' points';
+	else
+		scorediv.textContent = score + ' point';
+	leveldiv.textContent = 'Level ' + LEVEL;
 }
 
 function newGame()
@@ -813,12 +820,13 @@ function newGame()
 	bubbles = new Array();
 	addBallStep = ADDBALLSTEPS;
 	sum = 0;
-	oldTime = new Date().getTime();
+	//oldTime = new Date().getTime();
 	TOTALTIME = new Date().getTime();
 	//interval = setInterval(draw,DT);
-	requestAnimationFrame(draw);
-	windinterval = setInterval(blow,WINDINTERVAL);
+	reqID = requestAnimationFrame(draw);
+	//windinterval = setInterval(blow,WINDINTERVAL);
 	LEVEL+=1;
+	displayScoreLevel();
 	gameStarted = true;
 }
 
@@ -842,6 +850,7 @@ function init()
 	subheader.textContent = 'Find matching bubbles!';
 	centered.style.visibility = 'visible';
 	choices.style.visibility = 'visible';
+	displayScoreLevel();
 }
 
 function changeRange(value)
@@ -852,6 +861,30 @@ function changeRange(value)
 	else
 		table.textContent = 'Tables of ' + tableValue;
 }
+
+/*function handleVisibilityChange() {
+  if (document[hidden]) {
+  	isHidden = true;
+  	console.error('cancelling animation');
+  } else {
+  	isHidden = false;
+  }
+}
+
+// Set the name of the hidden property and the change event for visibility
+var hidden, visibilityChange; 
+if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support 
+  hidden = "hidden";
+  visibilityChange = "visibilitychange";
+} else if (typeof document.msHidden !== "undefined") {
+  hidden = "msHidden";
+  visibilityChange = "msvisibilitychange";
+} else if (typeof document.webkitHidden !== "undefined") {
+  hidden = "webkitHidden";
+  visibilityChange = "webkitvisibilitychange";
+}
+document.addEventListener(visibilityChange, handleVisibilityChange, false);*/
+
 </script>
 </head><body onload="init()">
 <div id='container'>
