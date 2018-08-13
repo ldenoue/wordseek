@@ -1,0 +1,855 @@
+<html lang='en'>
+<head>
+<meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover'>
+<meta name='apple-mobile-web-app-capable' content='yes'>
+<meta name='mobile-web-app-capable' content='yes'>
+<meta name='apple-mobile-web-app-status-bar-style' content='black-translucent'>
+<meta name='apple-mobile-web-app-title' content='CrossWord'>
+<link rel='apple-touch-icon' sizes='192x192' href='popmath-icon.png'>
+<link rel='icon' href='popmath-icon.png'>
+<title>PopMath</title>
+<style>
+@font-face {
+  font-family: 'Ubuntu';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Ubuntu Regular'), local('Ubuntu-Regular'), url('ubuntu.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2212, U+2215;
+}
+
+@font-face {
+  font-family: 'Arial Rounded MT Bold';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Arial Rounded MT Bold'), url('ARLRDBD.TTF') format('ttf');
+}
+
+body, * {
+cursor: pointer;
+color: white;
+font-weight: 100;
+font-size: 20px;
+font-family: 'Arial Rounded MT Bold', Arial;
+margin:0px; padding:0px;
+overflow:hidden;
+}
+body{display: flex;background-color:black}
+#backgroundimg{
+ position:absolute;left:0;top:0;width:100%;height:100%;
+}
+
+#container{
+	text-align:center;
+	margin-left:auto;margin-right:auto;
+	background-color:red;
+	height:100vh;position:relative;
+	width:65vh;
+	background-size:cover;
+}
+
+#canvas { width: 100%; height: 100%; position:relative;}
+
+#centered{
+position:absolute;
+text-align:center;
+margin-left:auto;
+margin-right:auto;
+background-color:transparent;
+width:80%;
+left:calc(50% - 40%);
+top:calc(50% - 100px);
+}
+
+.sub{	font-weight: bold;font-size: 24px;
+	color:white;
+	text-align:center;
+}
+.bubble {
+	position: absolute;
+	overflow: hidden;
+	padding-top: 32px;
+}
+
+.btnbubble {
+	border-radius: 100%;
+	color: #333;
+	font-size:22px;
+	font-weight:100;
+	border:0px solid black;
+	display: block;
+	position: absolute;
+	width:64px;
+	height:64px;
+	text-align:center;
+	background-color: transparent;
+  background-size: 100%;
+  transition: all 0.1s ease-in-out;
+}
+
+/*from https://cssanimation.rocks/spheres/ */
+/*.btnbubble:before {
+  content: "";
+  position: absolute;
+  top: 1%;
+  left: 5%;
+  width: 90%;
+  height: 90%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 0px, #ffffff, rgba(255, 255, 255, 0) 58%);
+  -webkit-filter: blur(5px);
+  z-index: 2;
+}
+.btnbubble:after {
+  content: "";
+  position: absolute;
+  border-radius: 100%;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background: radial-gradient(circle at 50% 30%, rgba(245, 237, 48, 0), rgba(200, 190, 20, 0.2) 50%, #575300 100%);
+}*/
+
+#leveldiv {
+	text-align:left;
+	position: absolute;
+	left: 0pt;
+	top: 0pt;
+	margin:4px;
+	transform:scale(1.0);
+	transform-origin:left;
+}
+
+#scorediv{
+	text-align:right;
+	position: absolute;
+	right: 0pt;
+	top: 0pt;
+	margin:4px;
+	transform:scale(1.0);
+	transform-origin:right;
+}
+
+#bravodiv {
+	border-radius: 8px;
+	font-size:46px;
+	text-align:center;
+	margin:8px;
+}
+
+#subheader {
+	border-radius: 8px;
+	font-size:24px;
+	text-align:center;
+	margin:8px;
+}
+
+#startgame {
+	font-weight: bold;
+	font-size: 24px;
+	border: 0px solid white;
+	background-color: rgba(0,0,0,0.1);
+	border-radius: 7px;
+	color:white;
+	text-align:center;
+	margin:8px;
+	padding:8px 16px 8px 16px;
+}
+
+#choices{
+position:absolute;
+bottom:0;
+left:0;
+width:100%;
+text-align:center;
+margin:8px;
+}
+
+.flight-types {
+  display: flex;
+  max-width: 336px;
+  width: 100%;
+  position: relative;
+  user-select: none;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  position: relative;
+  z-index: 1;
+  margin: 0 auto;
+  font-size: 12px;
+  border: 2px solid #fff;
+  border-radius: 3px;
+  color: #fff;
+  background-color:rgba(0,0,0,0.2);
+}
+.flight-types > input {
+  display: none;
+  
+
+}
+.flight-types > input:checked + label {
+  color: #3395DE;
+  border-left:0;border-right:0;
+}
+
+.flight-types > input:nth-of-type(1):checked ~ label:last-of-type:before {
+  transform: translateX(0);
+}
+.flight-types > input:nth-of-type(2):checked ~ label:last-of-type:before {
+  transform: translateX(calc(100% + 0px));
+}
+.flight-types > input:nth-of-type(3):checked ~ label:last-of-type:before {
+  transform: translateX(calc(200% + 0px));
+}
+.flight-types > input:nth-of-type(4):checked ~ label:last-of-type:before {
+  transform: translateX(calc(300% + 0px));
+}
+.flight-types > input:nth-of-type(5):checked ~ label:last-of-type:before {
+  transform: translateX(calc(400% + 0px));
+}
+.flight-types label {
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  cursor: pointer;
+  font-size:18px;
+}
+.flight-types label:last-of-type:before {
+  content: "";
+  display: block;
+  max-width: calc(20% - 0px);
+  margin: 0px;
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: -1;
+  transform: translateX(0);
+}
+.flight-types label {
+  padding: 6px 3px;
+  /*transition: color 250ms cubic-bezier(0, 0.95, 0.38, 0.98);*/
+}
+.flight-types label:before {
+  background: #fff;
+  /*transition: all 250ms cubic-bezier(0, 0.95, 0.38, 0.98);*/
+}
+.flight-types label:not(:last-child) {
+  border-right: 2px solid #fff;
+}
+</style>
+<script>
+var QUESTION = 0;
+var REPONSE = 1;
+var gameStarted = false;
+var BORDER_WIDTH = 2;
+var MS = 1000.0;
+var LEVEL = 0;
+var TOTALTIME = 0;
+var MINR = 25;
+var MAXR = 30;
+var INITSPEED = 25.0;
+var speed_limit = 100.0;
+var DT = 10; // every 50 ms
+var ADDBALLSTEPS = 1;
+var selectedAnswer = -1;
+var bubbles = null;
+var interval = null;
+
+var tableValue = 5;
+var w = 320;
+var h = 356;
+
+var total = 4;
+var eps = 10;
+
+var canvasLeft = 0;
+var canvasTop = 0;
+
+var img = null;
+var fontImg = null;
+
+var score = 0;
+
+var colors = 'blue,bluesky,cyan,fuchsia,green,greenblue,orange,pink,red'.split(',');
+
+var backgroundindex = 0;
+var newbackgrounds = `lighthouse.jpg
+halloween.jpg
+dolphins.jpg
+butterfly.jpg
+christmas.jpg
+desert.jpg
+field.jpg
+green.jpg
+leaves.jpg
+rainbow.jpg
+red_flower.jpg
+seashore.jpg
+sky.jpg
+whiteflowers.jpg`.split('\n');
+
+var FONTCOLOR = 'black';
+
+function $(id) { return document.getElementById(id); }
+
+function drawBubble(bubble, sel)
+{
+	if (bubble==null)
+		return;
+	var x = bubble.x;
+	var y = bubble.y;
+	var r = bubble.r;
+	var t = bubble.t;
+
+	//bubble.div.style.left = Math.round(x-r);
+	//bubble.div.style.top = Math.round(y-r);
+	var cx = x - r;
+	var cy = y - r;
+
+	bubble.selected = false;
+	if (winner==null && sel)
+	{
+		bubble.selected = true;
+		//bubble.div.style.backgroundColor = 'yellow';
+		bubble.div.style.backgroundImage = 'url(buttons/lime.png)';
+	}
+	else
+	{
+		//bubble.div.style.backgroundColor = colors[bubble.color];//bubble.color;
+		bubble.div.style.backgroundImage = 'url(buttons/' + colors[bubble.color] + '.png)';
+	}
+
+	if (bubble.popping)
+	{
+		//bubble.div.style.transition = 'all 2s ease-in-out';
+		bubble.div.style.transform = 'translate(' + cx + 'px,' + cy + 'px) scale(2.2)'; 
+		bubble.div.style.opacity = 0;
+		
+	}
+	else if (bubble.selected)
+		bubble.div.style.transform = 'translate(' + cx + 'px,' + cy + 'px) scale(1.2)'; 
+	else
+		bubble.div.style.transform = 'translate(' + cx + 'px,' + cy + 'px) scale(1.0)'; 
+
+}
+
+var goodSound = new Audio('pop.mp3');
+var badSound = new Audio('stretch.mp3');
+var volumeOn = true;
+var fontOffset = [0,12,23,34,44,56,67,78,89,99,110];
+var fontW = 10;
+var fontH = 14;
+var nMistakes = 0;
+var oldTime = -1;
+var addBallStep = 0;
+
+var divs = new Array();
+
+var WINDINTERVAL = 3000;
+var WINDSPEED = 50.0;
+var windinterval = null;
+function blow()
+{
+	var nbubbles = bubbles.length;
+	for (var i=0;i<nbubbles;i++)
+	{
+		if (bubbles[i] == null)
+			continue;
+		if (bubbles[i].y < (3*h/4))
+			continue;
+		bubbles[i].vspeed -= WINDSPEED;
+		if (bubbles[i].vspeed < -speed_limit)
+			bubbles[i].vspeed = -speed_limit;
+	}
+}
+
+// http://www.silverlightexamples.net/post/Silverlight-8-Ball-Game.aspx
+function doCollide(a, b)
+{
+	// calculate some vectors 
+	var dx = a.x - b.x;
+	var dy = a.y - b.y;
+	var dvx = a.hspeed - b.hspeed;
+	var dvy = a.vspeed - b.vspeed;
+	var distance2 = dx * dx + dy * dy;
+
+	if (Math.abs(dx) > a.d || Math.abs(dy) > a.d)
+		return false;
+	if (distance2 > a.d2)
+		return false;
+
+	// make absolutely elastic collision
+	var mag = dvx * dx + dvy * dy;
+
+	// test that balls move towards each other	
+	if (mag > 0)
+		return false;
+
+	mag /= distance2;
+
+	var delta_vx = dx * mag;
+	var delta_vy = dy * mag;
+
+	a.hspeed -= delta_vx;
+	a.vspeed -= delta_vy;
+
+	b.hspeed += delta_vx;
+	b.vspeed += delta_vy;
+	return true;
+}
+
+function manageballs()
+{
+	var number_of_balls = bubbles.length;
+	for (var x=0; x<number_of_balls-1; x++) {
+		for (var y=x+1; y<number_of_balls; y++) {
+			if (bubbles[x] == null || bubbles[y]==null)
+				continue;
+			if (bubbles[x].collision==0 && bubbles[y].collision==0 && doCollide(bubbles[x],bubbles[y]))
+			{
+				bubbles[x].collision = 1;
+				bubbles[y].collision = 1;
+			}
+			else
+			{
+				bubbles[x].collision = 0;
+				bubbles[y].collision = 0;
+			}
+		}
+	}
+}
+
+function random2(min, max)
+{
+	var n = min+Math.round((max-min)*Math.random());
+	if (n>max)
+		n = max;
+	if (n<min)
+		n = min;
+	return n;
+}
+
+function overlaps(bubble,x,y,r)
+{
+	var distance_x = Math.abs(bubble.x-x);
+	var distance_y = Math.abs(bubble.y-y);
+	distance = Math.sqrt(distance_x*distance_x+distance_y*distance_y);
+	if (distance > 4+r+bubble.r)
+		return false;
+	else
+		return true;
+}
+
+function initSpeed(r)
+{
+	return (r - random(2*r))*1.0;
+}
+
+function clickBubble(i)
+{
+	selectBubble(i);
+	//$('iphone').focus();
+	return false;
+}
+
+function addBallNow(r,type,t,v,c)
+{
+	var added = false;
+	var n = 100;
+	while (true)
+	{
+		n--;
+		var x = 0.0+random2(r,w-r);
+		var y = 0.0+random2(r,h-r);
+		var overlap = false;
+		for (var i=0;!overlap && i<bubbles.length;i++)
+		{
+			if (overlaps(bubbles[i],x,y,r))
+				overlap = true;
+		}
+		if (!overlap || n<=0)
+		{
+			//var div = document.createElement('div');
+			var div = document.createElement('button');
+			var id = bubbles.length;
+			div.onmousedown = function () { return clickBubble(id); };
+			div.className = 'btnbubble';
+			$('canvas').appendChild(div);
+			//div.innerHTML = t.replace(' ','<BR>');
+			div.textContent = t;
+			//div.appendChild(img);
+			var d = 2.0*(r+2*BORDER_WIDTH);
+			var d2 = d*d;
+			div.style.width = d + 'px';
+			div.style.height = d + 'px';
+			div.style.backgroundImage = 'url(buttons/' + colors[c] + '.png)';
+			bubbles.push( { d:d, d2:d2, oldTime: new Date().getTime(), div:div, img: img, mass: 1, collision:0, vspeed:initSpeed(r), hspeed: initSpeed(r), x: x, y: y, r: r, t: t, qtype:type, value: v, color: c } );
+			return;
+		}
+	}
+}
+
+function moveBall(i)
+{
+	if (bubbles[i] == null)
+		return;
+	var newTime = new Date().getTime();
+	var dt = newTime - bubbles[i].oldTime;
+	bubbles[i].oldTime = newTime;
+	//limitSpeed(i);
+	//dt = MS; //NOTIME
+	bubbles[i].x += (dt*bubbles[i].hspeed)/MS;
+	bubbles[i].y += (dt*bubbles[i].vspeed)/MS;
+	if (bubbles[i].y > h-bubbles[i].r || bubbles[i].y < bubbles[i].r)
+	{
+		bubbles[i].vspeed *= -1;
+		if (bubbles[i].y > h-bubbles[i].r)
+			bubbles[i].y = h-bubbles[i].r;
+		else
+			bubbles[i].y = bubbles[i].r;
+	}
+	if (bubbles[i].x < bubbles[i].r || bubbles[i].x > w-bubbles[i].r)
+	{
+		bubbles[i].hspeed *= -1;
+		if (bubbles[i].x < bubbles[i].r)
+			bubbles[i].x = bubbles[i].r;
+		else
+			bubbles[i].x = w-bubbles[i].r;
+	}
+	drawBubble(bubbles[i]);
+}
+
+var francais = ['beurre','gateau','cuisine','chaise','serviette','assiette','pain','couteau','la table','fourchette','cuillere','oven'];
+var anglais = ['butter','cake','kitchen','chair','napkin','plate','bread','knife','the table','fork','spoon','four'];
+
+function rad(t)
+{
+	var i = t.indexOf(' ');
+	if (i==-1)
+		return t.length*5.6;
+	var words = t.split(' ');
+	var max = 0;
+	for (var i=0;i<words.length;i++)
+		if (words[i].length>max)
+			max = words[i].length;
+	return max * 6;
+}
+function addBall()
+{
+	var r = 32;//random2(MINR,MAXR);
+	//var x = random2(r,w-r);
+	//var y = random2(r,h-r);
+	var first = random2(1,4+2*LEVEL-1);
+	var second = random2(1,4+2*LEVEL);
+	var value = first + second;
+	var t = first+'+'+second;
+	var color = random2(0,colors.length-1);//"rgb(" + random(255) + "," + random(255) + "," + random(255) + ")";//, 0.8)";
+
+	var color2 = random2(0,colors.length-1);"rgb(" + random(255) + "," + random(255) + "," + random(255) + ")";//, 0.8)";
+	var r2 = 32;//random2(MINR,MAXR);
+
+	var t2 = ''+value;
+
+	var value1 = random2(1,11);
+	var value2 = random2(1,11);
+	t = eval(value1 + value2) + '';
+	t2 = value1 + '+' + value2;
+	//value = random2(0,francais.length-1);
+	//t = francais[value];
+	//t2 = anglais[value];
+
+
+	var minwidth = w / 10;
+	r = minwidth;
+	r2 = minwidth+random(minwidth/2);
+	addBallNow(r,QUESTION,t,value,color);
+	addBallNow(r2,REPONSE,t2,value,color2);
+}
+
+function limitSpeed(i)
+{
+	if (bubbles[i].hspeed > speed_limit)
+		bubbles[i].hspeed = speed_limit;
+	if (bubbles[i].hspeed < -speed_limit)
+		bubbles[i].hspeed = -speed_limit;
+	if (bubbles[i].vspeed > speed_limit)
+		bubbles[i].vspeed = speed_limit;
+	if (bubbles[i].vspeed < -speed_limit)
+		bubbles[i].vspeed = -speed_limit;
+}
+
+function draw()
+{
+	var newTime = new Date().getTime();
+	var dt = newTime-oldTime;
+	if (score > 1)
+	{
+		setScore(score + ' points');
+	}
+	else if (score<=1)
+		setScore(score + ' point');
+	//else
+		//setScore('pop a pair of bubbles!');
+	oldTime = newTime;
+
+	addBallStep--;
+	if (bubbles.length < 2*total && addBallStep<0)
+	{
+		addBallStep = ADDBALLSTEPS;
+		addBall();
+	}
+
+	var nbubbles = bubbles.length;
+	var allDone = true;
+	
+	//manageballs();
+	for (var i=0;i<nbubbles;i++)
+	{
+		if (bubbles[i] == null)
+			continue;
+		allDone = false;
+		var r = bubbles[i].r;
+		
+		var drawSelected = i == selectedAnswer;
+		moveBall(i);
+		if (winner!=null)
+		{
+			winner.steps = winner.steps-1;
+			if (winner.steps <= 0)
+			{
+				bubbles[winner.first].div.style.visibility = 'hidden';
+				bubbles[winner.first] = null;
+				bubbles[winner.second].div.style.visibility = 'hidden';
+				bubbles[winner.second] = null;
+				winner = null;
+			}
+			if (winner!=null && (i==winner.first || i==winner.second))
+				drawSelected = true;
+		}
+		drawBubble(bubbles[i],drawSelected);
+	}
+
+	manageballs();
+
+
+	if (nbubbles==2*total && allDone)
+		gameDone();
+}
+
+var messages = ['Awesome','Great','Super','You rock','Unbelievable','Bravissimo'];
+function pickRandomMessage()
+{
+	return messages[random2(0,messages.length-1)] + '!!';
+}
+
+function timeSecs(ms)
+{
+	var secs = ms/1000;
+	return Math.round(secs);
+}
+
+function gameDone()
+{
+	gameStarted = false;
+	if (interval != null)
+		clearInterval(interval);
+	if (windinterval != null)
+		clearInterval(windinterval);
+	var newTime = new Date().getTime();
+	bravodiv.textContent = pickRandomMessage();
+	if (nMistakes === 0)
+		subheader.textContent = timeSecs(newTime-TOTALTIME) + ' seconds, no mistakes!';
+	else
+		subheader.textContent = timeSecs(newTime-TOTALTIME) + ' seconds, ' + nMistakes + ' mistakes';
+	centered.style.visibility = 'visible';
+	choices.style.visibility = 'visible';
+	startgame.value = 'Go to Level ' + (LEVEL+1);
+	//setTimeout('newGame()',4000);
+	//newGame();
+}
+function random(n)
+{
+	return Math.round(n*Math.random());
+}
+
+
+function goodMatch(i,j)
+{
+	if (i==j)
+		return false;
+	//$('status').innerHTML = i + '=' + bubbles[i].value + ',' + j + '=' + bubbles[j].value;
+	if (bubbles[i].value != bubbles[j].value)
+		return false;
+	//alert('true');
+	else if (bubbles[i].qtype == bubbles[j].qtype)
+		return false;
+	else
+		return true;
+}
+
+var winner = null;
+var WINNER_STEPS = 64;
+
+function play(audio) {
+  if (volumeOn)
+  {
+    audio.currentTime = 0;
+    audio.play();
+  }
+}
+
+function selectBubble(i)
+{
+	//document.body.removeChild(bubbles[i].div);
+	//$('status').innerHTML = selectedAnswer + ',' + i;
+	if (selectedAnswer == -1)
+		selectedAnswer = i;
+	else if (goodMatch(i,selectedAnswer))
+	{
+		dx = (bubbles[selectedAnswer].x - bubbles[i].x) / WINNER_STEPS / 2;
+		dy = (bubbles[selectedAnswer].y - bubbles[i].y) / WINNER_STEPS / 2;
+		score += 1;//bubbles[selectedAnswer].v + bubbles[i].v;
+		winner = { first: i, second: selectedAnswer, dx: dx, dy: dy, steps: WINNER_STEPS };
+		//bubbles[i] = null;
+		//bubbles[selectedAnswer] = null;
+		bubbles[i].popping = true;
+		bubbles[selectedAnswer].popping = true;
+		selectedAnswer = -1;
+		play(goodSound);
+	}
+	else
+	{
+		if (selectedAnswer !== i)
+		{
+			nMistakes += 1;
+			play(badSound);
+		}
+		selectedAnswer = -1;
+	}
+}
+
+/*function getBubbleAt(x,y)
+{
+	x -= canvasLeft;
+	y -= canvasTop;
+
+	var nbubbles = bubbles.length;
+	for (var i=nbubbles-1;i>=0;--i)
+	{
+		if (onBubble(bubbles[i],x,y))
+		{
+			return i;
+		}
+	}
+	return -1;
+}
+
+function onBubble(b,x,y)
+{
+	if (b==null)
+		return false;
+	return (x >= b.x-b.r && x <= b.x+b.r && y>= b.y-b.r && y<=b.y+b.r);
+}*/
+
+function setScore(text) {
+	$('scorediv').innerHTML = text;// + (newTime-TOTALTIME);
+	$('leveldiv').innerHTML = 'Level ' + LEVEL;
+}
+
+function newGame()
+{
+	nMistakes = 0;
+	centered.style.visibility = 'hidden';
+	choices.style.visibility = 'hidden';
+	var url = 'url(backgrounds/' + newbackgrounds[backgroundindex] + ')';
+	container.style.backgroundImage = url;
+	backgroundindex++;
+	if (backgroundindex>=newbackgrounds.length)
+		backgroundindex = 0;
+	$('canvas').innerHTML = '';
+	bubbles = new Array();
+	addBallStep = ADDBALLSTEPS;
+	sum = 0;
+	oldTime = new Date().getTime();
+	TOTALTIME = new Date().getTime();
+	interval = setInterval(draw,DT);
+	windinterval = setInterval(blow,WINDINTERVAL);
+	LEVEL+=1;
+	gameStarted = true;
+}
+
+function init()
+{
+	//preload();
+	var c = $('canvas');
+	w = c.offsetWidth;
+	h = c.offsetHeight;
+	//c.style.width = w;
+	//c.style.height = h;
+	canvasLeft = c.offsetLeft;
+	canvasTop = c.offsetTop;
+	nMistakes = 0;
+	var BB = 4;
+	var BBBB = 8;
+	var url = 'url(backgrounds/' + newbackgrounds[backgroundindex] + ')';
+	container.style.backgroundImage = url;
+
+	bravodiv.textContent ='PopMath';
+	subheader.textContent = 'Find matching bubbles!';
+	centered.style.visibility = 'visible';
+	choices.style.visibility = 'visible';
+}
+
+function changeRange(value)
+{
+	//console.log(value);
+	tableValue = value;
+	if (value > 12)
+		table.textContent = 'Any Table';
+	else
+		table.textContent = 'Tables of ' + value;
+}
+</script>
+</head><body onload="init()">
+<div id='container'>
+	<div id='canvas'></div>
+	<div id='leveldiv'></div>
+	<div id='scorediv'></div>
+	<div id='centered'>
+		<div id='bravodiv'></div>
+		<div id='subheader'></div>
+		<input type='button' id='startgame' onmousedown='newGame();return false' value='Go to Level 1'>
+	</div>
+	<div id='choices'>
+		<div id='table'>Table of 5</div>
+		<input type=range min=2 max=13 value=5 oninput='changeRange(this.value)'>
+		<br>
+		<div class="flight-types">
+			<input type="radio" name="flight-type" value="0" id="op0" checked />
+			<label for="op0">
+					mix
+			</label>
+			<input type="radio" name="flight-type" value="1" id="op1"/>
+			<label for="op1">
+					+
+			</label>
+			<input type="radio" name="flight-type" value="2" id="op2" />
+			<label for="op2">
+					-
+			</label>
+			<input type="radio" name="flight-type" value="3" id="op3"/>
+			<label for="op3">
+					×
+			</label>
+			<input type="radio" name="flight-type" value="4" id="op4" />
+			<label for="op4">
+					÷
+			</label>
+	</div>
+</div>
+</body>
+</html>
