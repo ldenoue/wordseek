@@ -1,4 +1,4 @@
-<html lang='en'>
+<html lang='en' manifest='popmath.appcache'>
 <head>
 <meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover'>
@@ -10,31 +10,17 @@
 <link rel='icon' href='popmath-icon.png'>
 <title>PopMath</title>
 <style>
-@font-face {
-  font-family: 'Ubuntu';
-  font-style: normal;
-  font-weight: 400;
-  src: local('Ubuntu Regular'), local('Ubuntu-Regular'), url('ubuntu.woff2') format('woff2');
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2212, U+2215;
-}
-
-@font-face {
-  font-family: 'Arial Rounded MT Bold';
-  font-style: normal;
-  font-weight: 400;
-  src: local('Arial Rounded MT Bold'), url('ARLRDBD.TTF') format('ttf');
-}
-
 body, * {
 cursor: pointer;
 color: white;
 font-weight: 100;
 font-size: 20px;
-font-family: 'Arial Rounded MT Bold', Arial;
+font-family: 'Arial Rounded MT Bold', Arial, Helvetica;
 margin:0px; padding:0px;
 overflow:hidden;
+user-select:none;
 }
-body{display: flex;background-color:black}
+body{position:fixed;top:0;left:0;width:100vw;display: flex;background-color:black}
 #backgroundimg{
  position:absolute;left:0;top:0;width:100%;height:100%;
 }
@@ -76,6 +62,7 @@ top:calc(50% - 100px);
 	color: #333;
 	font-size:22px;
 	font-weight:100;
+	outline:none;
 	border:0px solid black;
 	display: block;
 	position: absolute;
@@ -85,6 +72,7 @@ top:calc(50% - 100px);
 	background-color: transparent;
   background-size: 100%;
   transition: all 0.1s ease-in-out;
+  opacity:0.9;
 }
 
 /*from https://cssanimation.rocks/spheres/ */
@@ -145,6 +133,11 @@ top:calc(50% - 100px);
 	margin:8px;
 }
 
+@keyframes action {
+	0% { transform: scale(1.05); }
+	100% { transform: scale(1.0); }
+}
+
 #startgame {
 	font-weight: bold;
 	font-size: 24px;
@@ -154,16 +147,20 @@ top:calc(50% - 100px);
 	color:white;
 	text-align:center;
 	margin:8px;
+	outline:none;
+	-webkit-appearance: none;
 	padding:8px 16px 8px 16px;
+	animation: action 0.33s infinite alternate;
 }
 
 #choices{
 position:absolute;
-bottom:0;
+bottom:8px;
 left:0;
 width:100%;
 text-align:center;
-margin:8px;
+padding:8px;
+background-color:rgba(0,0,0,0.1);
 }
 
 .flight-types {
@@ -240,6 +237,15 @@ margin:8px;
 .flight-types label:not(:last-child) {
   border-right: 2px solid #fff;
 }
+
+@media only screen 
+and (min-device-width : 300px) and (-webkit-device-pixel-ratio : 3)
+and (orientation : portrait) {
+	#container{
+		height:85vh;
+		width:65vh;background-color:red;
+	}
+}
 </style>
 <script>
 var QUESTION = 0;
@@ -259,7 +265,15 @@ var selectedAnswer = -1;
 var bubbles = null;
 var interval = null;
 
-var tableValue = 5;
+
+var MIX = 0;
+var ADD = 1;
+var SUB = 2;
+var MUL = 3;
+var DIV = 4;
+var operationType = MIX;
+var tableValue = 13;
+
 var w = 320;
 var h = 356;
 
@@ -274,7 +288,7 @@ var fontImg = null;
 
 var score = 0;
 
-var colors = 'blue,bluesky,cyan,fuchsia,green,greenblue,orange,pink,red'.split(',');
+var colors = 'blue,bluesky,cyan,fuchsia,green,greenblue,orange,pink,red,turquoise'.split(',');
 
 var backgroundindex = 0;
 var newbackgrounds = `lighthouse.jpg
@@ -311,16 +325,17 @@ function drawBubble(bubble, sel)
 	var cy = y - r;
 
 	bubble.selected = false;
-	if (winner==null && sel)
+	if (winner === null && sel)
 	{
 		bubble.selected = true;
 		//bubble.div.style.backgroundColor = 'yellow';
-		bubble.div.style.backgroundImage = 'url(buttons/lime.png)';
+		//bubble.div.style.backgroundImage = 'url(buttons/lime.png)';
+		bubble.div.style.opacity = 1.0;
 	}
 	else
 	{
-		//bubble.div.style.backgroundColor = colors[bubble.color];//bubble.color;
-		bubble.div.style.backgroundImage = 'url(buttons/' + colors[bubble.color] + '.png)';
+		bubble.div.style.opacity = 0.9;
+		//bubble.div.style.backgroundImage = 'url(buttons/' + colors[bubble.color] + '.png)';
 	}
 
 	if (bubble.popping)
@@ -523,51 +538,67 @@ function moveBall(i)
 	drawBubble(bubbles[i]);
 }
 
-var francais = ['beurre','gateau','cuisine','chaise','serviette','assiette','pain','couteau','la table','fourchette','cuillere','oven'];
-var anglais = ['butter','cake','kitchen','chair','napkin','plate','bread','knife','the table','fork','spoon','four'];
-
-function rad(t)
+function getValueText()
 {
-	var i = t.indexOf(' ');
-	if (i==-1)
-		return t.length*5.6;
-	var words = t.split(' ');
-	var max = 0;
-	for (var i=0;i<words.length;i++)
-		if (words[i].length>max)
-			max = words[i].length;
-	return max * 6;
+	var first, second;
+	if (tableValue > 12)
+	{
+		first = random2(1,4+2*LEVEL-1);
+		second = random2(1,4+2*LEVEL);
+	}
+	else
+	{
+		first = random2(1,4+2*LEVEL);
+		second = tableValue;
+	}
+
+	var operator = 0;
+	if (operationType === MIX)
+		operator = random2(0,3);
+	else
+		operator = operationType - 1;
+	if (operator === 0)
+		return {value:first+second,text:first+'+'+second};
+	else if (operator === 1)
+	{
+		second = Math.min(second,first);
+		return {value:first-second,text:first+'-'+second};
+	}
+	else if (operator === 2)
+	{
+		first = Math.min(first,20); // cap multiply at 20
+		return {value:first*second,text:first+'×'+second};
+	}
+	else if (operator === 3)
+	{
+		if (tableValue < 13)
+		{
+			second = tableValue;
+			first = random2(1,Math.min(20,4+2*LEVEL));
+		}
+		else
+		{
+			second = random2(1,Math.min(20,4+2*LEVEL));
+			first = random2(1,Math.min(20,4+2*LEVEL));
+		}
+		var multiply = first * second;
+		return {value:first,text:multiply+'/'+second};
+	}
 }
+
 function addBall()
 {
-	var r = 32;//random2(MINR,MAXR);
-	//var x = random2(r,w-r);
-	//var y = random2(r,h-r);
-	var first = random2(1,4+2*LEVEL-1);
-	var second = random2(1,4+2*LEVEL);
-	var value = first + second;
-	var t = first+'+'+second;
-	var color = random2(0,colors.length-1);//"rgb(" + random(255) + "," + random(255) + "," + random(255) + ")";//, 0.8)";
+	var res = getValueText();
 
-	var color2 = random2(0,colors.length-1);"rgb(" + random(255) + "," + random(255) + "," + random(255) + ")";//, 0.8)";
-	var r2 = 32;//random2(MINR,MAXR);
-
-	var t2 = ''+value;
-
-	var value1 = random2(1,11);
-	var value2 = random2(1,11);
-	t = eval(value1 + value2) + '';
-	t2 = value1 + '+' + value2;
-	//value = random2(0,francais.length-1);
-	//t = francais[value];
-	//t2 = anglais[value];
-
+	var color = random2(0,colors.length-1);
+	var color2 = random2(0,colors.length-1);
+	var r2 = 32;
 
 	var minwidth = w / 10;
-	r = minwidth;
-	r2 = minwidth+random(minwidth/2);
-	addBallNow(r,QUESTION,t,value,color);
-	addBallNow(r2,REPONSE,t2,value,color2);
+	var r = minwidth;
+	var r2 = minwidth+random(minwidth/2);
+	addBallNow(r,QUESTION,res.value+'',res.value,color);
+	addBallNow(r2,REPONSE,res.text,res.value,color2);
 }
 
 function limitSpeed(i)
@@ -616,7 +647,7 @@ function draw()
 		
 		var drawSelected = i == selectedAnswer;
 		moveBall(i);
-		if (winner!=null)
+		if (winner !== null)
 		{
 			winner.steps = winner.steps-1;
 			if (winner.steps <= 0)
@@ -638,6 +669,8 @@ function draw()
 
 	if (nbubbles==2*total && allDone)
 		gameDone();
+	else
+		requestAnimationFrame(draw);
 }
 
 var messages = ['Awesome','Great','Super','You rock','Unbelievable','Bravissimo'];
@@ -655,8 +688,8 @@ function timeSecs(ms)
 function gameDone()
 {
 	gameStarted = false;
-	if (interval != null)
-		clearInterval(interval);
+	//if (interval != null)
+	//	clearInterval(interval);
 	if (windinterval != null)
 		clearInterval(windinterval);
 	var newTime = new Date().getTime();
@@ -679,16 +712,17 @@ function random(n)
 
 function goodMatch(i,j)
 {
-	if (i==j)
+	if (i === j)
 		return false;
-	//$('status').innerHTML = i + '=' + bubbles[i].value + ',' + j + '=' + bubbles[j].value;
-	if (bubbles[i].value != bubbles[j].value)
+	try {
+		if (bubbles[i].value != bubbles[j].value)
+			return false;
+	} catch (evalue) {
+		console.log(evalue,i,j);
+	}
+	if (bubbles[i].qtype == bubbles[j].qtype)
 		return false;
-	//alert('true');
-	else if (bubbles[i].qtype == bubbles[j].qtype)
-		return false;
-	else
-		return true;
+	return true;
 }
 
 var winner = null;
@@ -776,7 +810,8 @@ function newGame()
 	sum = 0;
 	oldTime = new Date().getTime();
 	TOTALTIME = new Date().getTime();
-	interval = setInterval(draw,DT);
+	//interval = setInterval(draw,DT);
+	requestAnimationFrame(draw);
 	windinterval = setInterval(blow,WINDINTERVAL);
 	LEVEL+=1;
 	gameStarted = true;
@@ -806,12 +841,11 @@ function init()
 
 function changeRange(value)
 {
-	//console.log(value);
-	tableValue = value;
-	if (value > 12)
+	tableValue = +value;
+	if (tableValue > 12)
 		table.textContent = 'Any Table';
 	else
-		table.textContent = 'Tables of ' + value;
+		table.textContent = 'Tables of ' + tableValue;
 }
 </script>
 </head><body onload="init()">
@@ -825,29 +859,29 @@ function changeRange(value)
 		<input type='button' id='startgame' onmousedown='newGame();return false' value='Go to Level 1'>
 	</div>
 	<div id='choices'>
-		<div id='table'>Table of 5</div>
-		<input type=range min=2 max=13 value=5 oninput='changeRange(this.value)'>
+		<div id='table'>Any Table</div>
+		<input type=range min=2 max=13 value=13 oninput='changeRange(this.value)'>
 		<br>
 		<div class="flight-types">
-			<input type="radio" name="flight-type" value="0" id="op0" checked />
+			<input onchange="operationType=+this.value" type="radio" name="flight-type" value="0" id="op0" checked />
 			<label for="op0">
 					mix
 			</label>
-			<input type="radio" name="flight-type" value="1" id="op1"/>
+			<input onchange="operationType=+this.value" type="radio" name="flight-type" value="1" id="op1"/>
 			<label for="op1">
 					+
 			</label>
-			<input type="radio" name="flight-type" value="2" id="op2" />
+			<input onchange="operationType=+this.value" type="radio" name="flight-type" value="2" id="op2" />
 			<label for="op2">
 					-
 			</label>
-			<input type="radio" name="flight-type" value="3" id="op3"/>
+			<input onchange="operationType=+this.value" type="radio" name="flight-type" value="3" id="op3"/>
 			<label for="op3">
 					×
 			</label>
-			<input type="radio" name="flight-type" value="4" id="op4" />
+			<input onchange="operationType=+this.value" type="radio" name="flight-type" value="4" id="op4" />
 			<label for="op4">
-					÷
+					/
 			</label>
 	</div>
 </div>
