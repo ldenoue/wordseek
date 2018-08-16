@@ -28,13 +28,18 @@ body{position:fixed;top:0;left:0;width:100vw;display: flex;background-color:blac
 #container{
 	text-align:center;
 	margin-left:auto;margin-right:auto;
-	background-color:red;
-	height:100vh;position:relative;
-	width:65vh;
-	background-size:cover;
+	background-color:black;
+	position:relative;
+	height:100vh;
+	width:100vw;
+	background-repeat:no-repeat;
+	background-size:100% 100%;
+	background-position:center;
 }
 
-#canvas { width: 100%; height: 100%; position:relative;}
+#canvas { width: 100%; height: 100%; position:relative;
+	backdrop-filter: blur(2px);
+}
 
 #centered{
 position:absolute;
@@ -163,7 +168,7 @@ padding:8px;
 background-color:rgba(0,0,0,0.1);
 }
 
-.flight-types {
+.operation-types {
   display: flex;
   max-width: 336px;
   width: 100%;
@@ -179,32 +184,32 @@ background-color:rgba(0,0,0,0.1);
   color: #fff;
   background-color:rgba(0,0,0,0.2);
 }
-.flight-types > input {
+.operation-types > input {
   display: none;
   
 
 }
-.flight-types > input:checked + label {
+.operation-types > input:checked + label {
   color: #3395DE;
   border-left:0;border-right:0;
 }
 
-.flight-types > input:nth-of-type(1):checked ~ label:last-of-type:before {
+.operation-types > input:nth-of-type(1):checked ~ label:last-of-type:before {
   transform: translateX(0);
 }
-.flight-types > input:nth-of-type(2):checked ~ label:last-of-type:before {
+.operation-types > input:nth-of-type(2):checked ~ label:last-of-type:before {
   transform: translateX(calc(100% + 0px));
 }
-.flight-types > input:nth-of-type(3):checked ~ label:last-of-type:before {
+.operation-types > input:nth-of-type(3):checked ~ label:last-of-type:before {
   transform: translateX(calc(200% + 0px));
 }
-.flight-types > input:nth-of-type(4):checked ~ label:last-of-type:before {
+.operation-types > input:nth-of-type(4):checked ~ label:last-of-type:before {
   transform: translateX(calc(300% + 0px));
 }
-.flight-types > input:nth-of-type(5):checked ~ label:last-of-type:before {
+.operation-types > input:nth-of-type(5):checked ~ label:last-of-type:before {
   transform: translateX(calc(400% + 0px));
 }
-.flight-types label {
+.operation-types label {
   flex: 1;
   text-align: center;
   white-space: nowrap;
@@ -213,7 +218,7 @@ background-color:rgba(0,0,0,0.1);
   cursor: pointer;
   font-size:18px;
 }
-.flight-types label:last-of-type:before {
+.operation-types label:last-of-type:before {
   content: "";
   display: block;
   max-width: calc(20% - 0px);
@@ -226,15 +231,15 @@ background-color:rgba(0,0,0,0.1);
   z-index: -1;
   transform: translateX(0);
 }
-.flight-types label {
+.operation-types label {
   padding: 6px 3px;
   /*transition: color 250ms cubic-bezier(0, 0.95, 0.38, 0.98);*/
 }
-.flight-types label:before {
+.operation-types label:before {
   background: #fff;
   /*transition: all 250ms cubic-bezier(0, 0.95, 0.38, 0.98);*/
 }
-.flight-types label:not(:last-child) {
+.operation-types label:not(:last-child) {
   border-right: 2px solid #fff;
 }
 
@@ -592,7 +597,7 @@ function addBall()
 	var color2 = random2(0,colors.length-1);
 	var r2 = 32;
 
-	var minwidth = w / 11;
+	var minwidth = Math.min(w,h) / 11;
 	var r = minwidth;
 	var r2 = minwidth+random(minwidth/2);
 	addBallNow(r,QUESTION,res.value+'',res.value,color);
@@ -830,27 +835,60 @@ function newGame()
 	gameStarted = true;
 }
 
+function preload(callback)
+{
+	var n = colors.length + newbackgrounds.length;
+
+	for (var i=0;i<colors.length;i++)
+	{
+		var link = 'buttons/' + colors[i] + '.png';
+		var img = new Image();
+		img.onload = function () {
+			n--;
+			if (n <= 0)
+				callback();
+		}
+		img.src = link;
+	}
+
+	for (var i=0;i<newbackgrounds.length;i++)
+	{
+		var link = 'backgrounds/' + newbackgrounds[i];
+		var img = new Image();
+		img.onload = function () {
+			n--;
+			if (n <= 0)
+				callback();
+		}
+		img.src = link;
+	}
+}
+
 function init()
 {
-	//preload();
-	var c = $('canvas');
-	w = c.offsetWidth;
-	h = c.offsetHeight;
-	//c.style.width = w;
-	//c.style.height = h;
-	canvasLeft = c.offsetLeft;
-	canvasTop = c.offsetTop;
-	nMistakes = 0;
-	var BB = 4;
-	var BBBB = 8;
-	var url = 'url(backgrounds/' + newbackgrounds[backgroundindex] + ')';
-	container.style.backgroundImage = url;
+	document.body.style.display = 'none';
+	preload(function () {
+		document.body.style.display = 'block';
+		console.log('loaded');
+		var c = $('canvas');
+		w = c.offsetWidth;
+		h = c.offsetHeight;
+		//c.style.width = w;
+		//c.style.height = h;
+		canvasLeft = c.offsetLeft;
+		canvasTop = c.offsetTop;
+		nMistakes = 0;
+		var BB = 4;
+		var BBBB = 8;
+		var url = 'url(backgrounds/' + newbackgrounds[backgroundindex] + ')';
+		container.style.backgroundImage = url;
 
-	bravodiv.textContent ='PopMath';
-	subheader.textContent = 'Find matching bubbles!';
-	centered.style.visibility = 'visible';
-	choices.style.visibility = 'visible';
-	displayScoreLevel();
+		bravodiv.textContent ='PopMath';
+		subheader.textContent = 'Find matching bubbles!';
+		centered.style.visibility = 'visible';
+		choices.style.visibility = 'visible';
+		displayScoreLevel();
+	});
 }
 
 function changeRange(value)
@@ -900,7 +938,7 @@ document.addEventListener(visibilityChange, handleVisibilityChange, false);*/
 		<div id='table'>Any Table</div>
 		<input type=range min=2 max=13 value=13 oninput='changeRange(this.value)'>
 		<br>
-		<div class="flight-types">
+		<div class="operation-types">
 			<input onchange="operationType=+this.value" type="radio" name="flight-type" value="0" id="op0" checked />
 			<label for="op0">
 					mix
