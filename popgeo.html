@@ -1,15 +1,22 @@
-<html lang='en' manifest='popmath.appcache'>
+<html lang='en' manifest='popgeo.appcache'>
 <head>
 <meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover'>
 <meta name='apple-mobile-web-app-capable' content='yes'>
 <meta name='mobile-web-app-capable' content='yes'>
 <meta name='apple-mobile-web-app-status-bar-style' content='black-translucent'>
-<meta name='apple-mobile-web-app-title' content='PopMath'>
-<link rel='apple-touch-icon' sizes='192x192' href='popmath-icon.png'>
-<link rel='icon' href='popmath-icon.png'>
-<title>PopMath</title>
+<meta name='apple-mobile-web-app-title' content='PopGeo USA Geography'>
+<link rel='apple-touch-icon' sizes='192x192' href='popgeo/popgeo-icon.png'>
+<link rel='icon' href='popgeo/popgeo-icon.png'>
+<title>PopGeo USA Geography</title>
 <style>
+@font-face {
+  font-family: 'FontAwesome';
+  font-style: normal;
+  font-weight: 400;
+  src: url('popgeo/FontAwesome.otf') format('otf');
+}
+
 body, * {
 cursor: pointer;
 color: white;
@@ -33,12 +40,13 @@ body{position:fixed;top:0;left:0;width:100vw;display: flex;background-color:blac
 	height:100vh;
 	width:100vw;
 	background-repeat:no-repeat;
-	background-size:100% 100%;
+	background-size:cover;
 	background-position:center;
+	background-image:url(popgeo/popgeo_usa_480x320.png);
 }
 
 #canvas { width: 100%; height: 100%; position:relative;
-	backdrop-filter: blur(2px);
+	/*backdrop-filter: blur(2px);*/
 }
 
 #centered{
@@ -56,70 +64,46 @@ top:calc(50% - 100px);
 	color:white;
 	text-align:center;
 }
-.bubble {
-	position: absolute;
-	overflow: hidden;
-	padding-top: 32px;
+
+.answer {
+	position:absolute;
+	color:yellow;
+	font-family:'FontAwesome';
 }
 
-.btnbubble {
-	border-radius: 100%;
-	color: #333;
+.question {
+	color: #3395DE;
 	font-size:22px;
 	font-weight:100;
 	outline:none;
 	border:0px solid black;
 	display: block;
 	position: absolute;
-	width:64px;
-	height:64px;
 	text-align:center;
 	background-color: transparent;
-  background-size: 100%;
   transition: all 0.1s ease-in-out;
   opacity:0.9;
 }
 
-/*from https://cssanimation.rocks/spheres/ */
-/*.btnbubble:before {
-  content: "";
-  position: absolute;
-  top: 1%;
-  left: 5%;
-  width: 90%;
-  height: 90%;
-  border-radius: 50%;
-  background: radial-gradient(circle at 50% 0px, #ffffff, rgba(255, 255, 255, 0) 58%);
-  -webkit-filter: blur(5px);
-  z-index: 2;
-}
-.btnbubble:after {
-  content: "";
-  position: absolute;
-  border-radius: 100%;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  background: radial-gradient(circle at 50% 30%, rgba(245, 237, 48, 0), rgba(200, 190, 20, 0.2) 50%, #575300 100%);
-}*/
-
-#leveldiv {
+#milesdiv {
 	text-align:left;
 	position: absolute;
 	left: 0pt;
 	top: 0pt;
 	margin:4px;
+	letter-spacing:1px;
 	transform:scale(1.0);
 	transform-origin:left;
 }
 
-#scorediv{
+#livesdiv{
 	text-align:right;
 	position: absolute;
 	right: 0pt;
 	top: 0pt;
+	font-family:'FontAwesome';
 	margin:4px;
+	letter-spacing:4px;
 	transform:scale(1.0);
 	transform-origin:right;
 }
@@ -147,7 +131,8 @@ top:calc(50% - 100px);
 	font-weight: bold;
 	font-size: 24px;
 	border: 0px solid white;
-	background-color: rgba(0,0,0,0.1);
+	/*background-color: rgba(0,0,0,0.1);*/
+	background-color:#3395DE;
 	border-radius: 7px;
 	color:white;
 	text-align:center;
@@ -156,6 +141,7 @@ top:calc(50% - 100px);
 	-webkit-appearance: none;
 	padding:8px 16px 8px 16px;
 	animation: action 0.33s infinite alternate;
+	text-transform: uppercase;
 }
 
 #choices{
@@ -165,12 +151,12 @@ left:0;
 width:100%;
 text-align:center;
 padding:8px;
-background-color:rgba(0,0,0,0.1);
+/*background-color:rgba(0,0,0,0.1);*/
 }
 
 .operation-types {
   display: flex;
-  max-width: 336px;
+  max-width: 60%;
   width: 100%;
   position: relative;
   user-select: none;
@@ -206,9 +192,6 @@ background-color:rgba(0,0,0,0.1);
 .operation-types > input:nth-of-type(4):checked ~ label:last-of-type:before {
   transform: translateX(calc(300% + 0px));
 }
-.operation-types > input:nth-of-type(5):checked ~ label:last-of-type:before {
-  transform: translateX(calc(400% + 0px));
-}
 .operation-types label {
   flex: 1;
   text-align: center;
@@ -221,7 +204,7 @@ background-color:rgba(0,0,0,0.1);
 .operation-types label:last-of-type:before {
   content: "";
   display: block;
-  max-width: calc(20% - 0px);
+  max-width: calc(25% - 0px);
   margin: 0px;
   position: absolute;
   top: 0;
@@ -233,6 +216,7 @@ background-color:rgba(0,0,0,0.1);
 }
 .operation-types label {
   padding: 6px 3px;
+  text-transform:uppercase;
   /*transition: color 250ms cubic-bezier(0, 0.95, 0.38, 0.98);*/
 }
 .operation-types label:before {
@@ -271,13 +255,11 @@ var bubbles = null;
 var interval = null;
 var reqID = null;
 
-var MIX = 0;
-var ADD = 1;
-var SUB = 2;
-var MUL = 3;
-var DIV = 4;
-var operationType = MIX;
-var tableValue = 13;
+var OP_STATES = 0;
+var OP_CAPITALS = 1;
+var OP_PARKS = 2;
+var OP_CITIES = 3;
+var operationType = OP_STATES;
 
 var w = 320;
 var h = 356;
@@ -291,7 +273,8 @@ var canvasTop = 0;
 var img = null;
 var fontImg = null;
 
-var score = 0;
+var miles = 0;
+var lives = 5;
 
 var colors = 'lime,blue,bluesky,cyan,fuchsia,green,greenblue,orange,pink,red,turquoise'.split(',');
 
@@ -474,10 +457,14 @@ function clickBubble(i)
 	return false;
 }
 
-function addBallNow(r,type,t,v,c)
+function addQuestionNow(question)
 {
 	var added = false;
 	var n = 100;
+	var r = 120;
+	var type = 0;
+	var d = 120;
+	var d2 = d * d;
 	while (true)
 	{
 		n--;
@@ -495,17 +482,10 @@ function addBallNow(r,type,t,v,c)
 			var div = document.createElement('button');
 			var id = bubbles.length;
 			div.onmousedown = function () { return clickBubble(id); };
-			div.className = 'btnbubble';
+			div.className = 'question';
 			$('canvas').appendChild(div);
-			//div.innerHTML = t.replace(' ','<BR>');
-			div.textContent = t;
-			//div.appendChild(img);
-			var d = 2.0*(r+2*BORDER_WIDTH);
-			var d2 = d*d;
-			div.style.width = d + 'px';
-			div.style.height = d + 'px';
-			div.style.backgroundImage = 'url(buttons/' + colors[c] + '.png)';
-			bubbles.push( { d:d, d2:d2, oldTime: new Date().getTime(), div:div, img: img, mass: 1, collision:0, vspeed:initSpeed(r), hspeed: initSpeed(r), x: x, y: y, r: r, t: t, qtype:type, value: v, color: c } );
+			div.textContent = question;
+			bubbles.push( { d:d, d2:d2, oldTime: new Date().getTime(), div:div, img: img, mass: 1, collision:0, vspeed:initSpeed(r), hspeed: initSpeed(r), x: x, y: y, r: r, value: question } );
 			return;
 		}
 	}
@@ -543,67 +523,43 @@ function moveBall(i)
 
 function getValueText()
 {
-	var first, second;
-	if (tableValue > 12)
+	switch (operationType)
 	{
-		first = random2(1,4+2*LEVEL-1);
-		second = random2(1,4+2*LEVEL);
-	}
-	else
-	{
-		first = random2(1,4+2*LEVEL);
-		second = tableValue;
-	}
-
-	var operator = 0;
-	if (operationType === MIX)
-		operator = random2(0,3);
-	else
-		operator = operationType - 1;
-	if (operator === 0)
-		return {value:first+second,text:first+'+'+second};
-	else if (operator === 1)
-	{
-		second = Math.min(second,first);
-		return {value:first-second,text:first+'-'+second};
-	}
-	else if (operator === 2)
-	{
-		first = Math.min(first,20); // cap multiply at 20
-		return {value:first*second,text:first+'×'+second};
-	}
-	else if (operator === 3)
-	{
-		if (tableValue < 13)
-		{
-			second = tableValue;
-			first = random2(1,Math.min(20,4+2*LEVEL));
-		}
-		else
-		{
-			second = random2(1,Math.min(20,4+2*LEVEL));
-			first = random2(1,Math.min(20,4+2*LEVEL));
-		}
-		var multiply = first * second;
-		return {value:first,text:multiply+'/'+second};
+		case OP_STATES:
+			var idx = random2(0,ncapitals);
+			var state = capitals_names[idx * capitals_data_width + 2];
+			var x = capitals_coords[idx*2];
+			var y = capitals_coords[idx*2+1];
+			return {question:state,x:x,y:y};
+			break;
+		default:
+			return null;
 	}
 }
 
 function addBall()
 {
 	var res = getValueText();
+	if (!res)
+		return;
 
-	var color = random2(0,colors.length-1);
-	var color2 = random2(0,colors.length-1);
-	var r2 = 32;
-
-	var minwidth = Math.min(w,h) / 11;
-	var r = minwidth;
-	var r2 = minwidth+random(minwidth/2);
-	addBallNow(r,QUESTION,res.value+'',res.value,color);
-	addBallNow(r2,REPONSE,res.text,res.value,color2);
+	
+	addAnswerNow(res.question,res.x,res.y);
+	addQuestionNow(res.question);
 }
 
+function addAnswerNow(question,x,y)
+{
+		var div = document.createElement('div');
+		div.className = 'answer';
+		var size = Math.min(w,h)/16;
+		div.style.fontSize = size + 'px';
+		div.textContent = STAR_ICON;
+		div.style.left = x + 'px';
+		div.style.top = y + 'px';
+		canvas.appendChild(div);
+		console.log(question,x,y);
+}
 function limitSpeed(i)
 {
 	if (bubbles[i].hspeed > speed_limit)
@@ -708,7 +664,8 @@ function gameDone()
 		subheader.textContent = timeSecs(newTime-TOTALTIME) + ' seconds, ' + nMistakes + ' mistakes';
 	centered.style.visibility = 'visible';
 	choices.style.visibility = 'visible';
-	startgame.value = 'Go to Level ' + (LEVEL+1);
+	//startgame.value = 'Go to Level ' + (LEVEL+1);
+	setType(operationType);
 	//setTimeout('newGame()',4000);
 	//newGame();
 }
@@ -758,7 +715,7 @@ function selectBubble(i)
 	{
 		dx = (bubbles[selectedAnswer].x - bubbles[i].x) / WINNER_STEPS / 2;
 		dy = (bubbles[selectedAnswer].y - bubbles[i].y) / WINNER_STEPS / 2;
-		score += 1;//bubbles[selectedAnswer].v + bubbles[i].v;
+		miles += 1;//bubbles[selectedAnswer].v + bubbles[i].v;
 		displayScoreLevel();
 		winner = { first: i, second: selectedAnswer, dx: dx, dy: dy, steps: WINNER_STEPS };
 		//bubbles[i] = null;
@@ -804,11 +761,8 @@ function onBubble(b,x,y)
 }*/
 
 function displayScoreLevel() {
-	if (score > 1)
-		scorediv.textContent = score + ' points';
-	else
-		scorediv.textContent = score + ' point';
-	leveldiv.textContent = 'Level ' + LEVEL;
+	milesdiv.textContent = miles + ' miles';
+	livesdiv.textContent = '\uf005'.repeat(lives);
 }
 
 function newGame()
@@ -816,11 +770,6 @@ function newGame()
 	nMistakes = 0;
 	centered.style.visibility = 'hidden';
 	choices.style.visibility = 'hidden';
-	var url = 'url(backgrounds/' + newbackgrounds[backgroundindex] + ')';
-	container.style.backgroundImage = url;
-	backgroundindex++;
-	if (backgroundindex>=newbackgrounds.length)
-		backgroundindex = 0;
 	$('canvas').innerHTML = '';
 	bubbles = new Array();
 	addBallStep = ADDBALLSTEPS;
@@ -837,11 +786,11 @@ function newGame()
 
 function preload(callback)
 {
-	var n = colors.length + newbackgrounds.length;
+	var n = parks_names.length/parks_data_width + capitals_names.length/capitals_data_width;
 
-	for (var i=0;i<colors.length;i++)
+	for (var i=0;i<parks_names.length;i+=parks_data_width)
 	{
-		var link = 'buttons/' + colors[i] + '.png';
+		var link = 'popgeo/our-national-parks/' + parks_names[i+6] + '.jpg';
 		var img = new Image();
 		img.onload = function () {
 			n--;
@@ -851,9 +800,9 @@ function preload(callback)
 		img.src = link;
 	}
 
-	for (var i=0;i<newbackgrounds.length;i++)
+	for (var i=0;i<capitals_names.length;i+=capitals_data_width)
 	{
-		var link = 'backgrounds/' + newbackgrounds[i];
+		var link = 'popgeo/stamps-cropped/' + capitals_names[i+2] + '-stamp.jpg';
 		var img = new Image();
 		img.onload = function () {
 			n--;
@@ -866,6 +815,7 @@ function preload(callback)
 
 function init()
 {
+	setType(operationType);
 	document.body.style.display = 'none';
 	preload(function () {
 		document.body.style.display = 'block';
@@ -880,84 +830,448 @@ function init()
 		nMistakes = 0;
 		var BB = 4;
 		var BBBB = 8;
-		var url = 'url(backgrounds/' + newbackgrounds[backgroundindex] + ')';
-		container.style.backgroundImage = url;
 
-		bravodiv.textContent ='PopMath';
-		subheader.textContent = 'Find matching bubbles!';
+		bravodiv.textContent ='PopGeo USA Geography';
+		subheader.textContent = 'How far will you travel today?';
 		centered.style.visibility = 'visible';
 		choices.style.visibility = 'visible';
 		displayScoreLevel();
 	});
 }
 
-function changeRange(value)
+const FA_MARKER = '\uf041';
+const STAR_ICON = '\uf005'
+const nparks = 50;
+const ncapitals = 48;
+const ncities = 41;//51;
+
+const numberOfPairs = [48,48,50,41];
+
+const capitals_data_width = 4;
+const parks_data_width = 7;
+const cities_data_width = 4;
+
+const parks_names = [
+"Grand Canyon","AZ","Arizona","1919","1902","4927","grand-canyon",
+"Petrified Forest","AZ","Arizona","1962","341","885","petrified-forest",
+"Saguaro","AZ","Arizona","1994","143","370","saguaro",
+"Hot Springs","AR","Arkansas","1921","9","22","hot-springs",
+"Channel Islands","CA","California","1980","390","1010","channel-islands",
+"Death Valley","CA","California","1994","5219","13518","death-valley",
+"Joshua Tree","CA","California","1994","1234","3196","joshua-trees",
+"Kings Canyon","CA","California","1940","722","1869","kings-canyon",
+"Lassen Volcanic","CA","California","1916","166","429","lassen-volcanic",
+"Redwood","CA","California","1968","176","455","redwood",
+"Sequoia","CA","California","1890","631","163","sequoia",
+"Yosemite","CA","California","1890","1189","3081","yosemite",
+"Black Canyon","CO","Colorado","1999","51","133","black-canyon",
+"Sand Dunes","CO","Colorado","2004","133","343","great-sand-dunes",
+"Mesa Verde","CO","Colorado","1906","81","211","mesa-verde",
+"Rocky Mtn.","CO","Colorado","1915","415","1078","rocky-mountain",
+"Biscayne","FL","Florida","1980","207","700","biscayne",
+"Dry Tortugas","FL","Florida","1992","101","262","dry-tortugas",
+"Everglades","FL","Florida","1947","2357","6105","everglades",
+"Yellowstone","ID","Idaho","1872","3470","8980","yellowstone",
+"Mammoth Cave","KY","Kentucky","1941","83","214","mammoth-cave",
+"Acadia","ME","Maine","1919","47","123","acadia",
+"Isle Royale","MI","Michigan","1940","894","2314","isle-royale",
+"Voyageurs","MN","Minnesota","1975","341","882","voyageurs",
+"Glacier","MT","Montana","1910","1584","4101","glacier",
+"Yellowstone","MT","Montana","1872","3470","8980","yellowstone",
+"Death Valley","NV","Nevada","1994","5219","13518","death-valley",
+"Great Basin","NV","Nevada","1986","120","312","great-basin",
+"Carlsbad Caverns","NM","New Mexico","1930","73","189","carlsbad-caverns",
+"Great Smokey Mtn.","NC","North Carolina","1934","814","210","great-smokey-mountains",
+"T. Roosevelt","ND","North Dakota","1978","110","285","theodor-roosevelt",
+"Cuyahoga Valley","OH","Ohio","2000","51","134","cuyahoga-valley",
+"Crater Lake","OR","Oregon","1902","286","741","crater-lake",
+"Congaree","SC","South Carolina","2003","33","88","congaree",
+"Badlands","SD","South Dakota","1978","379","982","badlands",
+"Wind Cave","SD","South Dakota","1903","44","114","wind-cave",
+"Great Smokey Mtn.","TN","Tennessee","1934","814","2108","great-smokey-mountains",
+"Big Bend","TX","Texas","1944","1252","3242","bigbend",
+"Guadalupe Mtn.","TX","Texas","1966","135","350","guadalupe-mountains",
+"Arches","UT","Utah","1971","119","309","arches",
+"Bryce Canyon","UT","Utah","1928","56","145","bryce-canyon",
+"Capitol Reef","UT","Utah","1971","378","979","capitol-reef",
+"Canyonlands","UT","Utah","1964","527","1366","canyonland",
+"Zion","UT","Utah","1919","229","593","zion",
+"Shenandoah","VA","Virginia","1935","311","805","shenandoah",
+"Mt. Rainier","WA","Washington","1899","368","954","mount-rainier",
+"North Cascades","WA","Washington","1968","789","2045","north-cascades",
+"Olympic","WA","Washington","1938","1442","3734","olympic",
+"Grand Teton","WY","Wyoming","1929","484","1255","grand-teton",
+"Yellowstone","WY","Wyoming","1872","3470","8980","yellowstone",
+];
+
+const parks_coords = [
+114,206,
+138,228,
+134,249,
+299,220,
+46,229,
+68,202,
+85,237,
+52,189,
+42,152,
+17,152,
+51,194,
+50,187,
+160,174,
+182,191,
+152,191,
+180,162,
+450,290,
+424,293,
+439,283,
+134,113,
+360,160,
+462,32,
+302,55,
+273,56,
+113,65,
+132,112,
+72,198,
+100,179,
+196,254,
+390,180,
+194,72,
+385,109,
+35,118,
+418,190,
+199,113,
+195,120,
+385,178,
+212,286,
+196,263,
+141,180,
+122,180,
+131,185,
+142,182,
+111,188,
+421,134,
+47,73,
+53,57,
+28,63,
+133,117,
+132,112
+];
+
+const capitals_names = [
+"Montgomery","Alabama","AL","montgomery",
+"Phoenix","Arizona","AZ","phoenix",
+"Little Rock","Arkansas","AR","littlerock",
+"Sacramento","California","CA","sacramento",
+"Denver","Colorado","CO","denver",
+"Hartford","Connecticut","CT","hartford",
+"Dover","Delaware","DE","dover",
+"Tallahassee","Florida","FL","tallahassee",
+"Atlanta","Georgia","GA","atlanta",
+"Boise","Idaho","ID","boise",
+"Springfield","Illinois","IL","springfield",
+"Indianapolis","Indiana","IN","indianapolis",
+"Des Moines","Iowa","IA","desmoines",
+"Topeka","Kansas","KS","topeka",
+"Frankfort","Kentucky","KY","frankfort",
+"Baton Rouge","Louisiana","LA","batonrouge",
+"Augusta","Maine","ME","augusta",
+"Annapolis","Maryland","MD","annapolis",
+"Boston","Massachusetts","MA","boston",
+"Lansing","Michigan","MI","lansing",
+"St. Paul","Minnesota","MN","saintpaul",
+"Jackson","Mississippi","MS","jackson",
+"Jefferson City","Missouri","MO","jeffersoncity",
+"Helena","Montana","MT","helena",
+"Lincoln","Nebraska","NE","lincoln",
+"Carson City","Nevada","NV","carsoncity",
+"Concord","New Hampshire","NH","concord",
+"Trenton","New Jersey","NJ","trenton",
+"Santa Fe","New Mexico","NM","santafe",
+"Albany","New York","NY","albany",
+"Raleigh","North Carolina","NC","raleigh",
+"Bismarck","North Dakota","ND","bismarck",
+"Columbus","Ohio","OH","columbus",
+"Oklahoma City","Oklahoma","OK","oklahomacity",
+"Salem","Oregon","OR","salem",
+"Harrisburg","Pennsylvania","PA","harrisburg",
+"Providence","Rhode Island","RI","providence",
+"Columbia","South Carolina","SC","columbia",
+"Pierre","South Dakota","SD","pierre",
+"Nashville","Tennessee","TN","nashville",
+"Austin","Texas","TX","austin",
+"Salt Lake City","Utah","UT","saltlakecity",
+"Montpelier","Vermont","VT","montpelier",
+"Richmond","Virginia","VA","richmond",
+"Olympia","Washington","WA","olympia",
+"Charleston","West Virginia","WV","charleston",
+"Madison","Wisconsin","WI","madison",
+"Cheyenne","Wyoming","WY","cheyenne"
+];
+
+const capitals_coords = [
+377,302,
+130,311,
+314,286,
+44,251,
+192,242,
+458,149,
+446,189,
+406,316,
+394,280,
+99,194,
+331,222,
+359,212,
+292,207,
+273,241,
+379,228,
+335,334,
+466,106,
+440,194,
+467,138,
+361,172,
+285,168,
+343,308,
+311,244,
+134,162,
+259,223,
+63,242,
+459,127,
+450,177,
+187,290,
+442,142,
+438,238,
+224,151,
+388,199,
+268,285,
+43,177,
+430,181,
+469,145,
+423,265,
+230,185,
+368,257,
+267,343,
+131,234,
+446,122,
+438,214,
+44,149,
+404,218,
+320,177,
+189,219
+];
+
+const cities_names = [
+"Albuquerque","New Mexico","NM","albuquerque",
+"Arlington","Texas","TX","arlington",
+//atlanta
+//austin
+"Baltimore","Maryland","MD","baltimore",
+//boston
+"Charlotte","North Carolina","NC","charlotte",
+"Chicago","Illinois","IL","chicago",
+"Cleveland","Ohio","OH","cleveland",
+"Colorado Springs","Colorado","CO","coloradosprings",
+//columbus
+"Dallas","Texas","TX","dallas",
+//denver
+"Detroit","Michigan","MI","detroit",
+"El Paso","Texas","TX","elpaso",
+"Fort Worth","Texas","TX","fortworth",
+"Fresno","California","CA","fresno",
+//honolulu
+"Houston","Texas","TX","houston",
+//indianapolis
+"Jacksonville","Florida","FL","jacksonville",
+"Kansas City","Missouri","MO","kansascity",
+"Las Vegas","Nevada","NV","lasvegas",
+"Long Beach","California","CA","longbeach",
+"Los Angeles","California","CA","losangeles",
+"Louisville","Kentucky","KY","louisville",
+"Memphis","Tennessee","TN","memphis",
+"Mesa","Arizona","AZ","mesa",
+"Miami","Florida","FL","miami",
+"Milwaukee","Wisconsin","WI","milwaukee",
+"Minneapolis","Minnesota","MN","minneapolis",
+//"Nashville","Tennessee","TN","nashville",
+"New Orleans","Louisiana","LA","neworleans",
+"New York","New York","NY","newyork",
+"Oakland","California","CA","oakland",
+//oklahoma
+"Philadelphia","Pennsylviana","PA","philadelphia",
+"Omaha","Nebraska","NE","omaha",
+//phoenix
+"Portland","Oregon","OR","portland",
+//sacramento
+"St. Louis","Missouri","MO","saintlouis",
+"San Antonio","Texas","TX","sanantonio",
+"San Diego","California","CA","sandiego",
+"San Francisco","California","CA","sanfrancisco",
+"San Jose","California","CA","sanjose",
+"Seattle","Washington","WA","seattle",
+"Tucson","Arizona","AZ","tucson",
+"Tulsa","Oklahoma","OK","tulsa",
+"Virginia Beach","Virginia","VA","virginiabeach",
+"Washington","District of Columbia","DC","washington",
+"Wichita","Kansas","KS","wichita"
+];
+
+const cities_coords = [
+180,299,
+270,319,
+//390,276,
+//264,341,
+435,193,
+//466,139,
+416,249,
+338,195,
+392,183,
+196,258,
+//385,201,
+284,315,
+//195,245,
+373,174,
+185,337,
+266,315,
+57,267,
+//28,384,
+290,343,
+//359,211,
+429,313,
+284,240,
+101,280,
+66,306,
+68,305,
+368,233,
+340,274,
+134,310,
+454,356,
+332,178,
+285,169,
+//368,257,
+352,338,
+456,165,
+41,256, //27
+//270,284,
+441,181,
+267,216,
+//132,312,
+50,174,
+//48,252,
+324,241,
+261,354,
+79,322,
+36,261,
+38,265,
+54,143,
+139,326,
+278,280,
+452,220,
+436,197,
+261,258
+];
+
+const nicknames = [
+"Yellowhammer","1819","",
+//"Last Frontier","1959","",
+"Grand Canyon","1912","",
+"Natural","1836","",
+"Golden","1850","",
+"Centennial","1876","",
+"Constitution","1788","",
+"First","1787","",
+"Sunshine","1845","",
+"Peach","1788","",
+//"Aloha","1959","",
+"Gem","1890","",
+"Prairie","1818","",
+"Hoosier","1816","",
+"Hawkeye","1846","",
+"Sunflower","1861","",
+"Bluegrass","1792","",
+"Pelican","1812","",
+"Pine Tree","1820","",
+"Old Line","1788","",
+"Bay","1788","",
+"Great Lakes","1837","",
+"North Star","1858","",
+"Magnolia","1817","",
+"Show Me","1821","",
+"Treasure","1889","",
+"Cornhusker","1867","",
+"Silver","1864","",
+"Granite","1788","",
+"Garden","1787","",
+"Land of Enchantment","1912","",
+"Empire","1788","",
+"Tar Heel","1789","",
+"Peace Garden","1889","",
+"Buckeye","1803","",
+"Sooner","1907","",
+"Beaver","1859","",
+"Keystone","1787","",
+"Ocean","1790","",
+"Palmetto","1788","",
+"Mt. Rushmore","1889","",
+"Volunteer","1796","",
+"Lone Star","1845","",
+"Beehive","1896","",
+"Green Mtn.","1791","",
+"Old Dominion","1788","",
+"Evergreen","1889","",
+"Mountain","1863","",
+"Badger","1848","",
+"Equality","1890",""
+];
+
+function setType(value)
 {
-	tableValue = +value;
-	if (tableValue > 12)
-		table.textContent = 'Any Table';
-	else
-		table.textContent = 'Tables of ' + tableValue;
+	operationType = value;
+	switch (operationType)
+	{
+		case OP_STATES:
+			startgame.value = 'PLAY STATES';
+			break;
+		case OP_CAPITALS:
+			startgame.value = 'PLAY CAPITALS';
+			break;
+		case OP_PARKS:
+			startgame.value = 'PLAY PARKS';
+			break;
+		case OP_CITIES:
+			startgame.value = 'PLAY CITIES';
+			break;
+		default:
+			operationType = OP_STATES;
+			startgame.value = 'PLAY_STATES';
+	}
 }
-
-/*function handleVisibilityChange() {
-  if (document[hidden]) {
-  	isHidden = true;
-  	console.error('cancelling animation');
-  } else {
-  	isHidden = false;
-  }
-}
-
-// Set the name of the hidden property and the change event for visibility
-var hidden, visibilityChange; 
-if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support 
-  hidden = "hidden";
-  visibilityChange = "visibilitychange";
-} else if (typeof document.msHidden !== "undefined") {
-  hidden = "msHidden";
-  visibilityChange = "msvisibilitychange";
-} else if (typeof document.webkitHidden !== "undefined") {
-  hidden = "webkitHidden";
-  visibilityChange = "webkitvisibilitychange";
-}
-document.addEventListener(visibilityChange, handleVisibilityChange, false);*/
-
 </script>
 </head><body onload="init()">
 <div id='container'>
 	<div id='canvas'></div>
-	<div id='leveldiv'></div>
-	<div id='scorediv'></div>
+	<div id='milesdiv'></div>
+	<div id='livesdiv'></div>
 	<div id='centered'>
 		<div id='bravodiv'></div>
 		<div id='subheader'></div>
-		<input type='button' id='startgame' onmousedown='newGame();return false' value='Go to Level 1'>
+		<input type='button' id='startgame' onmousedown='newGame();return false' value='PLAY STATES'>
 	</div>
 	<div id='choices'>
-		<div id='table'>Any Table</div>
-		<input type=range min=2 max=13 value=13 oninput='changeRange(this.value)'>
-		<br>
 		<div class="operation-types">
-			<input onchange="operationType=+this.value" type="radio" name="flight-type" value="0" id="op0" checked />
+			<input onchange="setType(+this.value)" type="radio" name="flight-type" value="0" id="op0" checked />
 			<label for="op0">
-					mix
+					states
 			</label>
-			<input onchange="operationType=+this.value" type="radio" name="flight-type" value="1" id="op1"/>
+			<input onchange="setType(+this.value)" type="radio" name="flight-type" value="1" id="op1"/>
 			<label for="op1">
-					+
+					capitals
 			</label>
-			<input onchange="operationType=+this.value" type="radio" name="flight-type" value="2" id="op2" />
+			<input onchange="setType(+this.value)" type="radio" name="flight-type" value="2" id="op2" />
 			<label for="op2">
-					-
+					parks
 			</label>
-			<input onchange="operationType=+this.value" type="radio" name="flight-type" value="3" id="op3"/>
+			<input onchange="setType(+this.value)" type="radio" name="flight-type" value="3" id="op3"/>
 			<label for="op3">
-					×
-			</label>
-			<input onchange="operationType=+this.value" type="radio" name="flight-type" value="4" id="op4" />
-			<label for="op4">
-					/
+					cities
 			</label>
 	</div>
 </div>
