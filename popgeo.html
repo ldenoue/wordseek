@@ -18,7 +18,6 @@
 }
 
 body, * {
-cursor: pointer;
 color: white;
 font-weight: 100;
 font-size: 20px;
@@ -40,8 +39,11 @@ body{position:fixed;top:0;left:0;width:100vw;display: flex;background-color:blac
 	max-width:50%;
 	max-height:50%;
 	z-index:2000;
-	display:none;
+	display:block;
+	opacity:0.0;
+	pointer-events:none;
 	object-fit:contain;
+	transition: opacity 0.2s ease-in-out;
 }
 #container{
 	text-align:center;
@@ -71,9 +73,13 @@ text-align:center;
 margin-left:auto;
 margin-right:auto;
 background-color:transparent;
-width:80%;
-left:calc(50% - 40%);
+width:60%;
+left:calc(50% - 30%);
 top:calc(50% - 100px);
+z-index:3000;
+padding:16px;
+background-color:rgba(0,0,0,0.1);
+border-radius:16px;
 }
 
 .sub{	font-weight: bold;font-size: 24px;
@@ -100,6 +106,7 @@ top:calc(50% - 100px);
 	font-size:24px;
 	color:yellow;
 	text-align:left;width:100%;
+	transition: transform 0.1s ease-in;
 }
 
 .wobble{
@@ -182,6 +189,7 @@ animation: action 0.33s infinite alternate;
 	padding:8px 16px 8px 16px;
 	animation: action 0.33s infinite alternate;
 	text-transform: uppercase;
+	cursor:pointer;
 }
 
 #choices{
@@ -334,8 +342,6 @@ whiteflowers.jpg`.split('\n');
 
 var FONTCOLOR = 'black';
 
-function $(id) { return document.getElementById(id); }
-
 function drawBubble(bubble, sel)
 {
 	if (bubble==null)
@@ -351,7 +357,7 @@ function drawBubble(bubble, sel)
 	var cy = y - r;
 
 	bubble.selected = false;
-	if (winner === null && sel)
+	/*if (winner === null && sel)
 	{
 		bubble.selected = true;
 		bubble.div.style.opacity = 1.0;
@@ -359,10 +365,8 @@ function drawBubble(bubble, sel)
 	else
 	{
 		bubble.div.style.opacity = 0.9;
-	}
+	}*/
 
-	//bubble.div.style.left = x + 'px';
-	//bubble.div.style.top = y + 'px';
 	if (bubble.popping)
 	{
 		bubble.div.style.transform = 'translate(' + cx + 'px,' + cy + 'px) scale(2.2)'; 
@@ -508,30 +512,41 @@ function upBubble()
 		b.vspeed = initSpeed(b.d)
 		b.hspeed = initSpeed(b.d);
 		var answers = document.querySelectorAll('.answer');
-		answers.forEach(a => {
-			if (a.dataset.question === b.div.dataset.question)
+		var found = false;
+		for (var i=0;!found && i<answers.length;i++)
+		{
+			var a = answers[i];
+			var ax = +a.dataset.x;//offsetLeft;
+			var ay = +a.dataset.y;//offsetTop;
+			var bx = b.x;
+			var by = b.y;
+			var d = distance(ax,ay,bx,by);
+			if (d < w/8)
 			{
-				var ax = +a.dataset.x;//offsetLeft;
-				var ay = +a.dataset.y;//offsetTop;
-				var bx = b.x;
-				var by = b.y;
-				var d = distance(ax,ay,bx,by);
-				console.log(d);
-				if (d < w/8)
+				if (a.dataset.question === b.div.dataset.question)
 				{
+					found = true;
 					popBubble(b);
 					var pin = a.querySelector('.pin');
 					pin.textContent = STAR_ICON;
 					pin.classList.add('wobble');
-					pin.addEventListener('click',function (event) {
-						bigImage.src = this.parentElement.dataset.image;
-						bigImage.style.display = 'block';
-					},false);
 					a.querySelector('.clue').textContent = a.dataset.answer;
-					console.log('found!')
+					nAnswered++;
+					if (nAnswered>=total)
+					{
+						gameDone();
+					}
+				}
+				else
+				{
+					found = true;
+					nMistakes += 1;
+					lives -= 1;
+					displayScoreLevel();
+					play(badSound);
 				}
 			}
-		});
+		}
 	}
 	selectedAnswer = -1;
 	return false;
@@ -539,13 +554,12 @@ function upBubble()
 
 function popBubble(b)
 {
-		miles += 1;//bubbles[selectedAnswer].v + bubbles[i].v;
-		displayScoreLevel();
-		//winner = { first: i, second: i, dx: dx, dy: dy, steps: WINNER_STEPS };
-		b.div.style.pointerEvents = 'none';
-		b.popping = true;
-		selectedAnswer = -1;
-		play(goodSound);
+	miles += 1;//bubbles[selectedAnswer].v + bubbles[i].v;
+	displayScoreLevel();
+	b.div.style.pointerEvents = 'none';
+	b.popping = true;
+	selectedAnswer = -1;
+	play(goodSound);
 }
 function distance(ax,ay,bx,by)
 {
@@ -555,6 +569,7 @@ function distance(ax,ay,bx,by)
 }
 
 var questions = [];
+var nAnswered = 0;
 
 function addQuestionNow(question)
 {
@@ -584,10 +599,12 @@ function addQuestionNow(question)
 			div.onmouseup = upBubble;
 			div.className = 'question';
 			div.dataset.id = id;
+			div.style.opacity = 0;
 			div.dataset.question = question;
-			$('canvas').appendChild(div);
+			canvas.appendChild(div);
 			div.textContent = question;
 			bubbles.push( { d:d, d2:d2, oldTime: new Date().getTime(), div:div, img: img, mass: 1, collision:0, vspeed:initSpeed(r), hspeed: initSpeed(r), x: x, y: y, r: r, value: question } );
+			setTimeout(function () { div.style.opacity = 1.0; },2000);
 			return;
 		}
 	}
@@ -722,22 +739,40 @@ function addAnswerNow(question,clue,answer,image,x,y)
 		div.dataset.y = y;
 		div.dataset.image = image;
 		var size = Math.min(w,h)/16;
-		//div.style.fontSize = size + 'px';
-		div.innerHTML = '<div class="pin" style="font-size:' + size + 'px">' + FA_MARKER + '</div><div class="clue">' + clue + '</div';
+		div.innerHTML = '<div onclick="showImage(this)" class="pin" style="font-size:' + size + 'px">' + FA_MARKER + '</div><div class="clue">' + clue + '</div';
 		div.style.left = (x-size/2) + 'px';
-		//div.style.top = (y-size/2) + 'px';
-		div.style.top = (-size) + 'px';
-		//div.style.transitionDelay = random2(100,500)/1000 + 's';
+		div.style.top = (-size*2) + 'px';
 
 		canvas.appendChild(div);
+
 		setTimeout(function () {
-			var dest = (y - size/2);
-			console.log(dest);
+			var dest = y+size;//(y - size/2 + size);
 			div.style.transform = 'translateY(' + dest + 'px)';
 			play(downSound);
 		},300*document.querySelectorAll('.answer').length);
-		//console.log(question,x,y);
 }
+
+function showImage(elem) {
+	if (!elem.classList.contains('wobble'))
+	{
+		console.log('no wobble');
+		return;
+	}
+	if (bigImageShown)
+		return showBigImage(false);
+	console.log('showing');
+	bigImage.src = elem.parentElement.dataset.image;
+	setTimeout(function(){
+		var imgw = bigImage.offsetWidth;
+		var imgh = bigImage.offsetHeight;
+		var x = Math.min(w-16-imgw,Math.max(16,(elem.parentElement.dataset.x-imgw/2)));
+		var y = Math.min(h-16-imgh,Math.max(16,(elem.parentElement.dataset.y - imgh - 32)));
+		bigImage.style.left = x + 'px';
+		bigImage.style.top = y + 'px';
+		showBigImage(true);
+	},20);
+}
+
 function limitSpeed(i)
 {
 	if (bubbles[i].hspeed > speed_limit)
@@ -885,8 +920,6 @@ function play(audio) {
 
 function selectBubble(i,x,y)
 {
-	//document.body.removeChild(bubbles[i].div);
-	//$('status').innerHTML = selectedAnswer + ',' + i;
 	bubbles[i].div.style.zIndex = 2000;
 	dx = x - bubbles[i].x;
 	dy = y - bubbles[i].y;
@@ -897,48 +930,25 @@ function selectBubble(i,x,y)
 	bubbles[i].vspeed = 0;
 
 	selectedAnswer = i;
-	
-	/*if (selectedAnswer === -1)
-		selectedAnswer = i;
-	else if (goodMatch(i,selectedAnswer))
-	{
-		dx = (bubbles[selectedAnswer].x - bubbles[i].x) / WINNER_STEPS / 2;
-		dy = (bubbles[selectedAnswer].y - bubbles[i].y) / WINNER_STEPS / 2;
-		miles += 1;//bubbles[selectedAnswer].v + bubbles[i].v;
-		displayScoreLevel();
-		winner = { first: i, second: selectedAnswer, dx: dx, dy: dy, steps: WINNER_STEPS };
-		//bubbles[i] = null;
-		//bubbles[selectedAnswer] = null;
-		bubbles[i].div.style.pointerEvents = 'none';
-		bubbles[i].popping = true;
-		bubbles[selectedAnswer].popping = true;
-		selectedAnswer = -1;
-		play(goodSound);
-	}
-	else
-	{
-		if (selectedAnswer !== i)
-		{
-			nMistakes += 1;
-			play(badSound);
-		}
-		selectedAnswer = -1;
-	}*/
 }
 
 
 function displayScoreLevel() {
 	milesdiv.textContent = miles + ' miles';
-	livesdiv.textContent = '\uf005'.repeat(lives);
+	if (lives > 0)
+		livesdiv.textContent = '\uf005'.repeat(lives);
+	else
+		livesdiv.textContent = '';
 }
 
 function newGame()
 {
 	questions = [];
+	nAnswered = 0;
 	nMistakes = 0;
 	centered.style.visibility = 'hidden';
 	choices.style.visibility = 'hidden';
-	$('canvas').innerHTML = '';
+	canvas.innerHTML = '';
 	bubbles = new Array();
 	addBallStep = ADDBALLSTEPS;
 	sum = 0;
@@ -994,19 +1004,42 @@ function dragBubble(event)
 	bubbles[selectedAnswer].x = x - dx;
 	bubbles[selectedAnswer].y = y - dy;
 }
+
+var bigImageShown = false;
+
+function showBigImage(yes)
+{
+	bigImageShown = yes;
+	if (yes)
+	{
+		//bigImage.style.display = 'block';
+		bigImage.style.opacity = 1.0;
+		bigImage.style.pointerEvents = 'all';
+	}
+	else
+	{
+		bigImage.style.opacity = 0.0;
+		bigImage.style.pointerEvents = 'none';
+	}
+}
+
 function init()
 {
 	questions = [];
+	nAnswered = 0;
 	canvas.addEventListener('mousemove',dragBubble,false);
 	canvas.addEventListener('mouseup',upBubble,false);
+	canvas.addEventListener('click',function() {
+		if (bigImageShown)
+			showBigImage(false);
+	},false);
 	setType(operationType);
 	document.body.style.display = 'none';
 	preload(function () {
 		document.body.style.display = 'block';
 		console.log('loaded');
-		var c = $('canvas');
-		w = c.offsetWidth;
-		h = c.offsetHeight;
+		w = canvas.offsetWidth;
+		h = canvas.offsetHeight;
 		nMistakes = 0;
 		bravodiv.textContent ='PopGeo USA Geography';
 		subheader.textContent = 'How far will you travel today?';
@@ -1426,7 +1459,7 @@ function setType(value)
 <div id='container'>
 	<img id='map' src='popgeo/popgeo_usa_480x320.png'>
 	<div id='canvas'></div>
-	<img id='bigImage' onclick='this.style.display="none"'/>
+	<img id='bigImage'/>
 	<div id='milesdiv'></div>
 	<div id='livesdiv'></div>
 	<div id='centered'>
@@ -1454,5 +1487,8 @@ function setType(value)
 			</label>
 	</div>
 </div>
+<script>
+bigImage.addEventListener('click',function () {console.log('clicked');showBigImage(false)},false);
+</script>
 </body>
 </html>
