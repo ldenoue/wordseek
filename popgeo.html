@@ -33,17 +33,20 @@ body{position:fixed;top:0;left:0;width:100vw;display: flex;background-color:blac
 
 #bigImage{
 	border-radius:8px;
-	padding:4px;background-color:white;
+	padding:8px;
+	background-color:white;
 	position:absolute;
 	top:0;left:0;
 	max-width:50%;
-	max-height:50%;
-	z-index:2000;
+	max-height:80%;
+	z-index:5000;
 	display:block;
 	opacity:0.0;
 	pointer-events:none;
 	object-fit:contain;
 	transition: opacity 0.2s ease-in-out;
+	box-shadow:10px 10px 50px #444;
+	cursor:pointer;
 }
 #container{
 	text-align:center;
@@ -78,8 +81,7 @@ left:calc(50% - 30%);
 top:calc(50% - 100px);
 z-index:3000;
 padding:16px;
-background-color:rgba(0,0,0,0.1);
-border-radius:16px;
+pointer-events:none;
 }
 
 .sub{	font-weight: bold;font-size: 24px;
@@ -107,10 +109,14 @@ border-radius:16px;
 	color:yellow;
 	text-align:left;width:100%;
 	transition: transform 0.1s ease-in;
+	padding:16px;
+	text-shadow:1px 1px 5px #222;
 }
 
 .wobble{
+cursor:pointer;
 animation: action 0.33s infinite alternate;
+transform-origin:top left;
 }
 .question {
 	color: #3395DE;
@@ -160,6 +166,7 @@ animation: action 0.33s infinite alternate;
 	font-size:46px;
 	text-align:center;
 	margin:8px;
+	color:#3395DE;
 }
 
 #subheader {
@@ -167,6 +174,7 @@ animation: action 0.33s infinite alternate;
 	font-size:24px;
 	text-align:center;
 	margin:8px;
+	color:#3395DE;
 }
 
 @keyframes action {
@@ -190,6 +198,7 @@ animation: action 0.33s infinite alternate;
 	animation: action 0.33s infinite alternate;
 	text-transform: uppercase;
 	cursor:pointer;
+	pointer-events:all;
 }
 
 #choices{
@@ -283,6 +292,7 @@ and (orientation : portrait) {
 }
 </style>
 <script>
+'use strict';
 var QUESTION = 0;
 var REPONSE = 1;
 var gameStarted = false;
@@ -480,6 +490,7 @@ function random2(min, max)
 	return n;
 }
 
+
 function overlaps(bubble,x,y,r)
 {
 	var distance_x = Math.abs(bubble.x-x);
@@ -498,7 +509,6 @@ function initSpeed(r)
 
 function downBubble(event)
 {
-	console.log('down',+event.target.dataset.id);
 	selectBubble(+event.target.dataset.id,event.clientX,event.clientY);
 	return false;
 }
@@ -512,20 +522,19 @@ function upBubble()
 		b.vspeed = initSpeed(b.d)
 		b.hspeed = initSpeed(b.d);
 		var answers = document.querySelectorAll('.answer');
+
+		var rect = b.div.getBoundingClientRect();
 		var found = false;
+		var badMatch = false;
 		for (var i=0;!found && i<answers.length;i++)
 		{
 			var a = answers[i];
-			var ax = +a.dataset.x;//offsetLeft;
-			var ay = +a.dataset.y;//offsetTop;
-			var bx = b.x;
-			var by = b.y;
-			var d = distance(ax,ay,bx,by);
-			if (d < w/8)
+			if (a.dataset.found !== 'yes' && goodMatch(a.getBoundingClientRect(),rect))
 			{
 				if (a.dataset.question === b.div.dataset.question)
 				{
 					found = true;
+					a.dataset.found = 'yes';
 					popBubble(b);
 					var pin = a.querySelector('.pin');
 					pin.textContent = STAR_ICON;
@@ -538,14 +547,15 @@ function upBubble()
 					}
 				}
 				else
-				{
-					found = true;
-					nMistakes += 1;
-					lives -= 1;
-					displayScoreLevel();
-					play(badSound);
-				}
+					badMatch = true;
 			}
+		}
+		if (badMatch)
+		{
+			nMistakes += 1;
+			lives -= 1;
+			displayScoreLevel();
+			play(badSound);
 		}
 	}
 	selectedAnswer = -1;
@@ -554,7 +564,11 @@ function upBubble()
 
 function popBubble(b)
 {
-	miles += 1;//bubbles[selectedAnswer].v + bubbles[i].v;
+	var dcx = cities_coords[cities_coords.length-4];
+	var dcy = cities_coords[cities_coords.length-3];
+	var d = distance((b.x*480)/w,(b.y*320)/h,dcx,dcy);
+	d = ((d * 3000) / 300) | 0;
+	miles += d;
 	displayScoreLevel();
 	b.div.style.pointerEvents = 'none';
 	b.popping = true;
@@ -565,7 +579,7 @@ function distance(ax,ay,bx,by)
 {
 	var dx = bx - ax;
 	var dy = by - ay;
-	return Math.sqrt((dx * dx) + (dy * dy));
+	return Math.sqrt((dx * dx) + (dy * dy)) | 0;
 }
 
 var questions = [];
@@ -680,14 +694,14 @@ function getValueText()
 			var idx = getNewIndex(ncapitals);
 			var capitalName = capitals_names[idx * capitals_data_width + 0];
 			var stateName = capitals_names[idx * capitals_data_width + 1];
-			var state2 = parks_names[idx * parks_data_width + 2];
+			var state2 = capitals_names[idx * capitals_data_width + 2];
 			var x = capitals_coords[idx*2];
 			var y = capitals_coords[idx*2+1];
 			x -= 11;
 			y -= 74;
 			x = (x * w) / 480;
 			y = (y * h) / 320;
-			return {question:capitalName,clue:stateName,answer:capitalName + ',' + state2,image:getStateImage(state2),x:x,y:y};
+			return {question:capitalName,clue:'',answer:capitalName + ',' + state2,image:getStateImage(state2),x:x,y:y};
 			break;
 		case OP_CITIES:
 			var idx = getNewIndex(ncities);
@@ -700,7 +714,7 @@ function getValueText()
 			y -= 74;
 			x = (x * w) / 480;
 			y = (y * h) / 320;
-			return {question:cityName,clue:stateName,answer:cityName + ',' + state2, image:getStateImage(state2), x:x,y:y};
+			return {question:cityName,clue:'',answer:cityName + ',' + state2, image:getStateImage(state2), x:x,y:y};
 			break;
 		case OP_PARKS:
 			var idx = getNewIndex(nparks);
@@ -712,7 +726,7 @@ function getValueText()
 			var y = parks_coords[idx*2+1];
 			x = (x * w) / 480;
 			y = (y * h) / 320;
-			return {question:parkName,clue:stateName,answer:parkName + ',' + state2,image:parkimage,x:x,y:y};
+			return {question:parkName,clue:'',answer:parkName + ',' + state2,image:parkimage,x:x,y:y};
 			break;
 		default:
 			return null;
@@ -760,7 +774,6 @@ function showImage(elem) {
 	}
 	if (bigImageShown)
 		return showBigImage(false);
-	console.log('showing');
 	bigImage.src = elem.parentElement.dataset.image;
 	setTimeout(function(){
 		var imgw = bigImage.offsetWidth;
@@ -879,8 +892,6 @@ function gameDone()
 	choices.style.visibility = 'visible';
 	//startgame.value = 'Go to Level ' + (LEVEL+1);
 	setType(operationType);
-	//setTimeout('newGame()',4000);
-	//newGame();
 }
 function random(n)
 {
@@ -888,22 +899,16 @@ function random(n)
 }
 
 
-function goodMatch(i,j)
+function goodMatch(rect1,rect2)
 {
-	if (i === j)
+	if (rect1.right < rect2.left)
 		return false;
-	try {
-		if (bubbles[i].value != bubbles[j].value)
-			return false;
-	} catch (evalue) {
-		console.log(evalue,i,j);
-	}
-	try {
-		if (bubbles[i].qtype === bubbles[j].qtype)
-			return false;
-	} catch (etype) {
-		console.log('etype',etype,i,j);
-	}
+	if (rect1.left > rect2.right)
+		return false;
+	if (rect1.bottom < rect2.top)
+		return false;
+	if (rect1.top > rect2.bottom)
+		return false;
 	return true;
 }
 
@@ -935,14 +940,15 @@ function selectBubble(i,x,y)
 
 function displayScoreLevel() {
 	milesdiv.textContent = miles + ' miles';
-	if (lives > 0)
+	/*if (lives > 0)
 		livesdiv.textContent = '\uf005'.repeat(lives);
-	else
+	else*/
 		livesdiv.textContent = '';
 }
 
 function newGame()
 {
+	showBigImage(false);
 	questions = [];
 	nAnswered = 0;
 	nMistakes = 0;
@@ -951,7 +957,7 @@ function newGame()
 	canvas.innerHTML = '';
 	bubbles = new Array();
 	addBallStep = ADDBALLSTEPS;
-	sum = 0;
+	var sum = 0;
 	//oldTime = new Date().getTime();
 	TOTALTIME = new Date().getTime();
 	//interval = setInterval(draw,DT);
@@ -964,6 +970,7 @@ function newGame()
 
 function preload(callback)
 {
+	return callback();
 	var n = parks_names.length/parks_data_width + capitals_names.length/capitals_data_width;
 
 	for (var i=0;i<parks_names.length;i+=parks_data_width)
@@ -1013,6 +1020,14 @@ function showBigImage(yes)
 	if (yes)
 	{
 		//bigImage.style.display = 'block';
+		if (bigImage.src.indexOf('stamps') !== -1)
+		{
+			bigImage.style.padding = '8px';
+		}
+		else
+		{
+			bigImage.style.padding = '0px';
+		}
 		bigImage.style.opacity = 1.0;
 		bigImage.style.pointerEvents = 'all';
 	}
@@ -1037,7 +1052,7 @@ function init()
 	document.body.style.display = 'none';
 	preload(function () {
 		document.body.style.display = 'block';
-		console.log('loaded');
+		//console.log('loaded');
 		w = canvas.offsetWidth;
 		h = canvas.offsetHeight;
 		nMistakes = 0;
@@ -1488,7 +1503,7 @@ function setType(value)
 	</div>
 </div>
 <script>
-bigImage.addEventListener('click',function () {console.log('clicked');showBigImage(false)},false);
+bigImage.addEventListener('click',function () {showBigImage(false)},false);
 </script>
 </body>
 </html>
