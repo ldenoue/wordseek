@@ -110,7 +110,7 @@ pointer-events:none;
 	text-align:left;width:100%;
 	transition: transform 0.1s ease-in;
 	padding:16px;
-	text-shadow:1px 1px 5px #222;
+	text-shadow:1px 1px 3px #444;
 }
 
 .wobble{
@@ -769,7 +769,6 @@ function addAnswerNow(question,clue,answer,image,x,y)
 function showImage(elem) {
 	if (!elem.classList.contains('wobble'))
 	{
-		console.log('no wobble');
 		return;
 	}
 	if (bigImageShown)
