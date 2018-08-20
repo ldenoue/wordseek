@@ -16,7 +16,14 @@
   font-weight: 400;
   src: url('popgeo/fontawesome-webfont.woff2') format('woff2');
 }
-
+*{
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
 body, * {
 color: white;
 font-weight: 100;
@@ -280,15 +287,6 @@ padding:8px;
 }
 .operation-types label:not(:last-child) {
   border-right: 2px solid #fff;
-}
-
-@media only screen 
-and (min-device-width : 300px) and (-webkit-device-pixel-ratio : 3)
-and (orientation : portrait) {
-	#container{
-		height:85vh;
-		width:65vh;background-color:red;
-	}
 }
 </style>
 <script>
@@ -887,10 +885,9 @@ function downBubble(event)
 	event.preventDefault();
 	var pos = getPos(event);
 	selectBubble(+event.target.dataset.id,pos.x,pos.y);
-	return false;
 }
 
-function upBubble()
+function upBubble(event)
 {
 	event.stopPropagation();
 	event.preventDefault();
@@ -988,9 +985,11 @@ function addQuestionNow(question)
 			//var div = document.createElement('div');
 			var div = document.createElement('button');
 			var id = bubbles.length;
-			div.addEventListener('touchstart',downBubble,{passive:false});
+			if ('ontouchstart' in document.documentElement)
+				div.addEventListener('touchstart',downBubble,{passive:false});
 			div.addEventListener('mousedown',downBubble,false);
-			div.addEventListener('touchend',upBubble,false);
+			if ('ontouchstart' in document.documentElement)
+				div.addEventListener('touchend',upBubble,false);
 			div.addEventListener('mouseup',upBubble,false);
 			div.className = 'question';
 			div.dataset.id = id;
@@ -1150,8 +1149,9 @@ function addAnswerNow(question,clue,answer,image,x,y)
 		div.style.top = (-size*2) + 'px';
 
 		canvas.appendChild(div);
+		if ('ontouchstart' in document.documentElement)
+			div.querySelector('.pin').addEventListener('touchstart',showImage,{passive:false});
 		div.querySelector('.pin').addEventListener('click',showImage,false);
-		div.querySelector('.pin').addEventListener('touchstart',showImage,{passive:false});
 		setTimeout(function () {
 			var dest = pos.y+size;//(y - size/2 + size);
 			div.style.transform = 'translateY(' + dest + 'px)';
@@ -1305,7 +1305,6 @@ function selectBubble(i,x,y)
 	selectedAnswer = i;
 }
 
-
 function displayScoreLevel() {
 	milesdiv.textContent = miles + ' miles';
 	/*if (lives > 0)
@@ -1341,7 +1340,7 @@ function newGame(event)
 function preload(callback)
 {
 	return callback();
-	var n = parks_names.length/parks_data_width + capitals_names.length/capitals_data_width;
+	/*var n = parks_names.length/parks_data_width + capitals_names.length/capitals_data_width;
 
 	for (var i=0;i<parks_names.length;i+=parks_data_width)
 	{
@@ -1365,7 +1364,7 @@ function preload(callback)
 				callback();
 		}
 		img.src = link;
-	}
+	}*/
 }
 
 function getPos(event)
@@ -1418,7 +1417,7 @@ function hideImage(e)
 	{
 		e.stopPropagation();
 		showBigImage(false);
-	}		
+	}
 }
 
 function init()
@@ -1438,16 +1437,21 @@ function init()
     });
 	},false);
 	bigImage.addEventListener('click',hideImage,false);
-	bigImage.addEventListener('touchend',hideImage,false);
-	startgame.addEventListener('touchstart',newGame,{passive:false});
+	if ('ontouchstart' in document.documentElement)
+		bigImage.addEventListener('touchend',hideImage,false);
+	if ('ontouchstart' in document.documentElement)
+		startgame.addEventListener('touchstart',newGame,{passive:false});
 	startgame.addEventListener('click',newGame,false);
 	questions = [];
 	nAnswered = 0;
-	canvas.addEventListener('touchmove',dragBubble,{ passive: false });
+	if ('ontouchstart' in document.documentElement)
+		canvas.addEventListener('touchmove',dragBubble,{ passive: false });
 	canvas.addEventListener('mousemove',dragBubble,false);
-	canvas.addEventListener('touchend',upBubble,false);
+	if ('ontouchstart' in document.documentElement)
+		canvas.addEventListener('touchend',upBubble,false);
 	canvas.addEventListener('mouseup',upBubble,false);
-	canvas.addEventListener('touchstart',hideImage,{passive:false});
+	if ('ontouchstart' in document.documentElement)
+		canvas.addEventListener('touchstart',hideImage,{passive:false});
 	canvas.addEventListener('click',hideImage,false);
 	setType(operationType);
 	document.body.style.display = 'none';
