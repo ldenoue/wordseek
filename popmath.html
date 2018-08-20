@@ -35,6 +35,7 @@ body{position:fixed;top:0;left:0;width:100vw;display: flex;background-color:blac
 	background-repeat:no-repeat;
 	background-size:100% 100%;
 	background-position:center;
+	background-image:url(backgrounds/lighthouse.jpg);
 }
 
 #canvas { width: 100%; height: 100%; position:relative;
@@ -79,30 +80,6 @@ top:calc(50% - 100px);
   transition: all 0.1s ease-in-out;
   opacity:0.9;
 }
-
-/*from https://cssanimation.rocks/spheres/ */
-/*.btnbubble:before {
-  content: "";
-  position: absolute;
-  top: 1%;
-  left: 5%;
-  width: 90%;
-  height: 90%;
-  border-radius: 50%;
-  background: radial-gradient(circle at 50% 0px, #ffffff, rgba(255, 255, 255, 0) 58%);
-  -webkit-filter: blur(5px);
-  z-index: 2;
-}
-.btnbubble:after {
-  content: "";
-  position: absolute;
-  border-radius: 100%;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  background: radial-gradient(circle at 50% 30%, rgba(245, 237, 48, 0), rgba(200, 190, 20, 0.2) 50%, #575300 100%);
-}*/
 
 #leveldiv {
 	text-align:left;
@@ -253,6 +230,7 @@ and (orientation : portrait) {
 }
 </style>
 <script>
+'use strict';
 var QUESTION = 0;
 var REPONSE = 1;
 var gameStarted = false;
@@ -284,9 +262,6 @@ var h = 356;
 
 var total = 4;
 var eps = 10;
-
-var canvasLeft = 0;
-var canvasTop = 0;
 
 var img = null;
 var fontImg = null;
@@ -326,8 +301,8 @@ function drawBubble(bubble, sel)
 
 	//bubble.div.style.left = Math.round(x-r);
 	//bubble.div.style.top = Math.round(y-r);
-	var cx = x - r;
-	var cy = y - r;
+	var cx = Math.floor(x - r);
+	var cy = Math.floor(y - r);
 
 	bubble.selected = false;
 	if (winner === null && sel)
@@ -455,7 +430,7 @@ function overlaps(bubble,x,y,r)
 {
 	var distance_x = Math.abs(bubble.x-x);
 	var distance_y = Math.abs(bubble.y-y);
-	distance = Math.sqrt(distance_x*distance_x+distance_y*distance_y);
+	var distance = Math.sqrt(distance_x*distance_x+distance_y*distance_y);
 	if (distance > 4+r+bubble.r)
 		return false;
 	else
@@ -494,7 +469,8 @@ function addBallNow(r,type,t,v,c)
 			//var div = document.createElement('div');
 			var div = document.createElement('button');
 			var id = bubbles.length;
-			div.onmousedown = function () { return clickBubble(id); };
+			div.id = id;
+			div.addEventListener('mousedown',function (event) { event.stopPropagation(); event.preventDefault(); clickBubble(+event.target.id);},false);;
 			div.className = 'btnbubble';
 			$('canvas').appendChild(div);
 			//div.innerHTML = t.replace(' ','<BR>');
@@ -502,6 +478,7 @@ function addBallNow(r,type,t,v,c)
 			//div.appendChild(img);
 			var d = 2.0*(r+2*BORDER_WIDTH);
 			var d2 = d*d;
+			div.dataset.size = d;
 			div.style.width = d + 'px';
 			div.style.height = d + 'px';
 			div.style.backgroundImage = 'url(buttons/' + colors[c] + '.png)';
@@ -538,7 +515,6 @@ function moveBall(i)
 		else
 			bubbles[i].x = w-bubbles[i].r;
 	}
-	drawBubble(bubbles[i]);
 }
 
 function getValueText()
@@ -643,7 +619,6 @@ function draw()
 	var nbubbles = bubbles.length;
 	var allDone = true;
 	
-	//manageballs();
 	for (var i=0;i<nbubbles;i++)
 	{
 		if (bubbles[i] == null)
@@ -675,7 +650,7 @@ function draw()
 	manageballs();
 
 
-	if (nbubbles==2*total && allDone)
+	if (nbubbles == 2*total && allDone)
 		gameDone();
 	else
 		reqID = requestAnimationFrame(draw);
@@ -756,8 +731,8 @@ function selectBubble(i)
 		selectedAnswer = i;
 	else if (goodMatch(i,selectedAnswer))
 	{
-		dx = (bubbles[selectedAnswer].x - bubbles[i].x) / WINNER_STEPS / 2;
-		dy = (bubbles[selectedAnswer].y - bubbles[i].y) / WINNER_STEPS / 2;
+		var dx = (bubbles[selectedAnswer].x - bubbles[i].x) / WINNER_STEPS / 2;
+		var dy = (bubbles[selectedAnswer].y - bubbles[i].y) / WINNER_STEPS / 2;
 		score += 1;//bubbles[selectedAnswer].v + bubbles[i].v;
 		displayScoreLevel();
 		winner = { first: i, second: selectedAnswer, dx: dx, dy: dy, steps: WINNER_STEPS };
@@ -780,34 +755,8 @@ function selectBubble(i)
 	}
 }
 
-/*function getBubbleAt(x,y)
-{
-	x -= canvasLeft;
-	y -= canvasTop;
-
-	var nbubbles = bubbles.length;
-	for (var i=nbubbles-1;i>=0;--i)
-	{
-		if (onBubble(bubbles[i],x,y))
-		{
-			return i;
-		}
-	}
-	return -1;
-}
-
-function onBubble(b,x,y)
-{
-	if (b==null)
-		return false;
-	return (x >= b.x-b.r && x <= b.x+b.r && y>= b.y-b.r && y<=b.y+b.r);
-}*/
-
 function displayScoreLevel() {
-	if (score > 1)
-		scorediv.textContent = score + ' points';
-	else
-		scorediv.textContent = score + ' point';
+	scorediv.textContent = score + ' points';
 	leveldiv.textContent = 'Level ' + LEVEL;
 }
 
@@ -824,7 +773,7 @@ function newGame()
 	$('canvas').innerHTML = '';
 	bubbles = new Array();
 	addBallStep = ADDBALLSTEPS;
-	sum = 0;
+	var sum = 0;
 	//oldTime = new Date().getTime();
 	TOTALTIME = new Date().getTime();
 	//interval = setInterval(draw,DT);
@@ -837,7 +786,8 @@ function newGame()
 
 function preload(callback)
 {
-	var n = colors.length + newbackgrounds.length;
+	return callback();
+	/*var n = colors.length + newbackgrounds.length;
 
 	for (var i=0;i<colors.length;i++)
 	{
@@ -861,30 +811,44 @@ function preload(callback)
 				callback();
 		}
 		img.src = link;
-	}
+	}*/
 }
 
 function init()
 {
-	document.body.style.display = 'none';
+	window.addEventListener('resize', function(event) {
+		var oldw = w;
+    w = canvas.offsetWidth;
+    h = canvas.offsetHeight;
+    if (bubbles && bubbles.length > 0)
+    {
+			for (var i=0;i<bubbles.length;i++)
+			{
+				var b = bubbles[i];
+				if (!b)
+					continue;
+				b.d = (b.d * w) / oldw;
+				b.d = Math.max(80,b.d);
+				b.d2 = b.d * b.d;
+				var size = Math.floor(b.d);
+				var a = b.div;
+				a.style.width = size + 'px';
+				a.style.height = size + 'px';
+			}
+		}
+	},false);
+
+	//document.body.style.display = 'none';
 	preload(function () {
-		document.body.style.display = 'block';
-		console.log('loaded');
-		var c = $('canvas');
-		w = c.offsetWidth;
-		h = c.offsetHeight;
-		//c.style.width = w;
-		//c.style.height = h;
-		canvasLeft = c.offsetLeft;
-		canvasTop = c.offsetTop;
+		//document.body.style.display = 'block';
+		w = canvas.offsetWidth;
+		h = canvas.offsetHeight;
 		nMistakes = 0;
-		var BB = 4;
-		var BBBB = 8;
 		var url = 'url(backgrounds/' + newbackgrounds[backgroundindex] + ')';
 		container.style.backgroundImage = url;
 
-		bravodiv.textContent ='PopMath';
-		subheader.textContent = 'Find matching bubbles!';
+		//bravodiv.textContent ='PopMath';
+		//subheader.textContent = 'Find matching bubbles!';
 		centered.style.visibility = 'visible';
 		choices.style.visibility = 'visible';
 		displayScoreLevel();
@@ -900,38 +864,15 @@ function changeRange(value)
 		table.textContent = 'Tables of ' + tableValue;
 }
 
-/*function handleVisibilityChange() {
-  if (document[hidden]) {
-  	isHidden = true;
-  	console.error('cancelling animation');
-  } else {
-  	isHidden = false;
-  }
-}
-
-// Set the name of the hidden property and the change event for visibility
-var hidden, visibilityChange; 
-if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support 
-  hidden = "hidden";
-  visibilityChange = "visibilitychange";
-} else if (typeof document.msHidden !== "undefined") {
-  hidden = "msHidden";
-  visibilityChange = "msvisibilitychange";
-} else if (typeof document.webkitHidden !== "undefined") {
-  hidden = "webkitHidden";
-  visibilityChange = "webkitvisibilitychange";
-}
-document.addEventListener(visibilityChange, handleVisibilityChange, false);*/
-
 </script>
 </head><body onload="init()">
 <div id='container'>
 	<div id='canvas'></div>
-	<div id='leveldiv'></div>
-	<div id='scorediv'></div>
+	<div id='leveldiv'>Level 0</div>
+	<div id='scorediv'>0 points</div>
 	<div id='centered'>
-		<div id='bravodiv'></div>
-		<div id='subheader'></div>
+		<div id='bravodiv'>PopMath</div>
+		<div id='subheader'>Find matching bubbles!</div>
 		<input type='button' id='startgame' onmousedown='newGame();return false' value='Go to Level 1'>
 	</div>
 	<div id='choices'>

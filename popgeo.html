@@ -364,21 +364,21 @@ function drawBubble(bubble, sel)
 	var r = bubble.r;
 	var t = bubble.t;
 
-	//bubble.div.style.left = Math.round(x-r);
-	//bubble.div.style.top = Math.round(y-r);
+	bubble.div.style.left = Math.round(x-r);
+	bubble.div.style.top = Math.round(y-r);
 	var cx = x;// - r;
 	var cy = y;// - r;
 
 	if (bubble.popping)
 	{
-		bubble.div.style.transform = 'translate(' + cx + 'px,' + cy + 'px) scale(2.2)'; 
+		//bubble.div.style.transform = 'translate(' + cx + 'px,' + cy + 'px) scale(2.2)'; 
 		bubble.div.style.opacity = 0;
 		
 	}
-	else if (sel)
+	/*else if (sel)
 		bubble.div.style.transform = 'translate(' + cx + 'px,' + cy + 'px) scale(1.2)'; 
 	else
-		bubble.div.style.transform = 'translate(' + cx + 'px,' + cy + 'px) scale(1.0)';
+		bubble.div.style.transform = 'translate(' + cx + 'px,' + cy + 'px) scale(1.0)';*/
 
 }
 
@@ -1033,7 +1033,7 @@ function moveBall(i)
 		else
 			bubbles[i].x = w-bubbles[i].r;
 	}
-	drawBubble(bubbles[i]);
+	//drawBubble(bubbles[i]);
 }
 
 function getNewIndex(n)
@@ -1422,6 +1422,7 @@ function hideImage(e)
 
 function init()
 {
+	document.querySelector('#op' + operationType).checked = true;
 	window.addEventListener('resize', function(event) {
     w = canvas.offsetWidth;
     h = canvas.offsetHeight;
@@ -1507,7 +1508,7 @@ function setType(value)
 	</div>
 	<div id='choices'>
 		<div class="operation-types">
-			<input onchange="setType(+this.value)" type="radio" name="flight-type" value="0" id="op0" checked />
+			<input onchange="setType(+this.value)" type="radio" name="flight-type" value="0" id="op0"/>
 			<label for="op0">
 					states
 			</label>
