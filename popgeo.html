@@ -1,4 +1,4 @@
-<html lang='en' manifest='popgeo.appcache'>
+<html lang='en'>
 <head>
 <meta charset='utf-8'>
 <meta name='viewport' content='width=device-width, initial-scale=1.0, maximum-scale=1, minimum-scale=1, user-scalable=no, viewport-fit=cover'>
@@ -6,22 +6,22 @@
 <meta name='mobile-web-app-capable' content='yes'>
 <meta name='apple-mobile-web-app-status-bar-style' content='black-translucent'>
 <meta name='apple-mobile-web-app-title' content='PopGeo USA Geography'>
-<link rel='apple-touch-icon' sizes='192x192' href='popgeo/popgeo-icon.png'>
+<link rel='apple-touch-icon' sizes='152x152' href='popgeo/popgeo-icon.png'>
 <link rel='icon' href='popgeo/popgeo-icon.png'>
 <title>PopGeo USA Geography</title>
 <style>
 @font-face {
-  font-family: 'FontAwesome';
+  font-family: 'awe';
   font-style: normal;
   font-weight: 400;
-  src: url('popgeo/FontAwesome.otf') format('otf');
+  src: url('popgeo/fontawesome-webfont.woff2') format('woff2');
 }
 
 body, * {
 color: white;
 font-weight: 100;
 font-size: 20px;
-font-family: 'Arial Rounded MT Bold', Arial, Helvetica;
+font-family: 'Arial Rounded MT Bold', arial, Helvetica;
 margin:0px; padding:0px;
 overflow:hidden;
 user-select:none;
@@ -76,7 +76,7 @@ text-align:center;
 margin-left:auto;
 margin-right:auto;
 background-color:transparent;
-width:60%;
+width:70%;
 left:calc(50% - 30%);
 top:calc(50% - 100px);
 z-index:3000;
@@ -104,7 +104,7 @@ pointer-events:none;
 
 .pin
 {
-	font-family:'FontAwesome';
+	font-family:'awe';
 	font-size:24px;
 	color:yellow;
 	text-align:left;width:100%;
@@ -154,7 +154,7 @@ transform-origin:top left;
 	position: absolute;
 	right: 0pt;
 	top: 0pt;
-	font-family:'FontAwesome';
+	font-family:'awe';
 	margin:4px;
 	letter-spacing:4px;
 	transform:scale(1.0);
@@ -213,7 +213,7 @@ padding:8px;
 
 .operation-types {
   display: flex;
-  max-width: 60%;
+  max-width: 80%;
   width: 100%;
   position: relative;
   user-select: none;
@@ -509,12 +509,14 @@ function initSpeed(r)
 
 function downBubble(event)
 {
+	event.stopPropagation();
 	selectBubble(+event.target.dataset.id,event.clientX,event.clientY);
 	return false;
 }
 
 function upBubble()
 {
+	event.stopPropagation();
 	if (selectedAnswer !== -1)
 	{
 		var b = bubbles[selectedAnswer];
@@ -550,7 +552,7 @@ function upBubble()
 					badMatch = true;
 			}
 		}
-		if (badMatch)
+		if (!found && badMatch)
 		{
 			nMistakes += 1;
 			lives -= 1;
@@ -609,8 +611,10 @@ function addQuestionNow(question)
 			//var div = document.createElement('div');
 			var div = document.createElement('button');
 			var id = bubbles.length;
-			div.onmousedown = downBubble;
-			div.onmouseup = upBubble;
+			div.addEventListener('touchstart',downBubble,false);
+			div.addEventListener('mousedown',downBubble,false);
+			div.addEventListener('touchend',upBubble,false);
+			div.addEventListener('mouseup',upBubble,false);
 			div.className = 'question';
 			div.dataset.id = id;
 			div.style.opacity = 0;
@@ -753,12 +757,13 @@ function addAnswerNow(question,clue,answer,image,x,y)
 		div.dataset.y = y;
 		div.dataset.image = image;
 		var size = Math.min(w,h)/16;
-		div.innerHTML = '<div onclick="showImage(this)" class="pin" style="font-size:' + size + 'px">' + FA_MARKER + '</div><div class="clue">' + clue + '</div';
+		div.innerHTML = '<div class="pin" style="font-size:' + size + 'px">' + FA_MARKER + '</div><div class="clue">' + clue + '</div';
 		div.style.left = (x-size/2) + 'px';
 		div.style.top = (-size*2) + 'px';
 
 		canvas.appendChild(div);
-
+		div.querySelector('.pin').addEventListener('click',showImage,false);
+		div.querySelector('.pin').addEventListener('touchstart',showImage,false);
 		setTimeout(function () {
 			var dest = y+size;//(y - size/2 + size);
 			div.style.transform = 'translateY(' + dest + 'px)';
@@ -766,7 +771,9 @@ function addAnswerNow(question,clue,answer,image,x,y)
 		},300*document.querySelectorAll('.answer').length);
 }
 
-function showImage(elem) {
+function showImage(event) {
+	event.stopPropagation();
+	var elem = event.target;
 	if (!elem.classList.contains('wobble'))
 	{
 		return;
@@ -925,14 +932,13 @@ function play(audio) {
 function selectBubble(i,x,y)
 {
 	bubbles[i].div.style.zIndex = 2000;
-	dx = x - bubbles[i].x;
-	dy = y - bubbles[i].y;
-	bubbles[i].x = x;
-	bubbles[i].y = y;
+	deltax = x - bubbles[i].x;
+	deltay = y - bubbles[i].y;
+	bubbles[i].x = x - deltax;
+	bubbles[i].y = y - deltay;
 	bubbles[i].div.style.transition = 'none';
 	bubbles[i].hspeed = 0;
 	bubbles[i].vspeed = 0;
-
 	selectedAnswer = i;
 }
 
@@ -945,8 +951,9 @@ function displayScoreLevel() {
 		livesdiv.textContent = '';
 }
 
-function newGame()
+function newGame(event)
 {
+	event.stopPropagation();
 	showBigImage(false);
 	questions = [];
 	nAnswered = 0;
@@ -997,18 +1004,19 @@ function preload(callback)
 	}
 }
 
-var dx = 0;
-var dy = 0;
+var deltax = 0;
+var deltay = 0;
+
 function dragBubble(event)
 {
 	if (selectedAnswer === -1)
 		return;
-
+	event.stopPropagation();
 	var x = event.clientX;
 	var y = event.clientY;
 	//console.log(x,y);
-	bubbles[selectedAnswer].x = x - dx;
-	bubbles[selectedAnswer].y = y - dy;
+	bubbles[selectedAnswer].x = x - deltax;
+	bubbles[selectedAnswer].y = y - deltay;
 }
 
 var bigImageShown = false;
@@ -1037,16 +1045,25 @@ function showBigImage(yes)
 	}
 }
 
+function hideImage(e)
+{
+	if (bigImageShown)
+	{
+		e.stopPropagation();
+		showBigImage(false);
+	}		
+}
+
 function init()
 {
 	questions = [];
 	nAnswered = 0;
 	canvas.addEventListener('mousemove',dragBubble,false);
+	canvas.addEventListener('touchmove',dragBubble,false);
 	canvas.addEventListener('mouseup',upBubble,false);
-	canvas.addEventListener('click',function() {
-		if (bigImageShown)
-			showBigImage(false);
-	},false);
+	canvas.addEventListener('touchend',upBubble,false);
+	canvas.addEventListener('click',hideImage,false);
+	canvas.addEventListener('touchstart',hideImage,false);
 	setType(operationType);
 	document.body.style.display = 'none';
 	preload(function () {
@@ -1479,7 +1496,7 @@ function setType(value)
 	<div id='centered'>
 		<div id='bravodiv'></div>
 		<div id='subheader'></div>
-		<input type='button' id='startgame' onmousedown='newGame();return false' value='PLAY STATES'>
+		<input type='button' id='startgame' value='PLAY STATES'>
 	</div>
 	<div id='choices'>
 		<div class="operation-types">
@@ -1502,7 +1519,10 @@ function setType(value)
 	</div>
 </div>
 <script>
-bigImage.addEventListener('click',function () {showBigImage(false)},false);
+bigImage.addEventListener('click',hideImage,false);
+bigImage.addEventListener('touchend',hideImage,false);
+startgame.addEventListener('touchstart',newGame,false);
+startgame.addEventListener('click',newGame,false);
 </script>
 </body>
 </html>
