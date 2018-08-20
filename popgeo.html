@@ -317,6 +317,10 @@ var OP_PARKS = 2;
 var OP_CITIES = 3;
 var operationType = OP_STATES;
 
+var bigImageShown = false;
+var deltax = 0;
+var deltay = 0;
+
 var w = 320;
 var h = 356;
 
@@ -356,6 +360,7 @@ function drawBubble(bubble, sel)
 {
 	if (bubble==null)
 		return;
+
 	var x = bubble.x;
 	var y = bubble.y;
 	var r = bubble.r;
@@ -363,19 +368,8 @@ function drawBubble(bubble, sel)
 
 	//bubble.div.style.left = Math.round(x-r);
 	//bubble.div.style.top = Math.round(y-r);
-	var cx = x - r;
-	var cy = y - r;
-
-	bubble.selected = false;
-	/*if (winner === null && sel)
-	{
-		bubble.selected = true;
-		bubble.div.style.opacity = 1.0;
-	}
-	else
-	{
-		bubble.div.style.opacity = 0.9;
-	}*/
+	var cx = x;// - r;
+	var cy = y;// - r;
 
 	if (bubble.popping)
 	{
@@ -383,7 +377,7 @@ function drawBubble(bubble, sel)
 		bubble.div.style.opacity = 0;
 		
 	}
-	else if (bubble.selected)
+	else if (sel)
 		bubble.div.style.transform = 'translate(' + cx + 'px,' + cy + 'px) scale(1.2)'; 
 	else
 		bubble.div.style.transform = 'translate(' + cx + 'px,' + cy + 'px) scale(1.0)';
@@ -393,691 +387,13 @@ function drawBubble(bubble, sel)
 var downSound = new Audio('popgeo/m_arrow.mp3');
 var goodSound = new Audio('popgeo/jackpoti.mp3');
 var badSound = new Audio('stretch.mp3');
-var volumeOn = false;
-var fontOffset = [0,12,23,34,44,56,67,78,89,99,110];
-var fontW = 10;
-var fontH = 14;
+var volumeOn = true;
 var nMistakes = 0;
-//var oldTime = -1;
 var addBallStep = 0;
-
-var divs = new Array();
 
 var WINDINTERVAL = 3000;
 var WINDSPEED = 100.0;
 var windinterval = null;
-function blow()
-{
-	//console.log('blowing wind');
-	var nbubbles = bubbles.length;
-	for (var i=0;i<nbubbles;i++)
-	{
-		if (bubbles[i] == null)
-			continue;
-		if (bubbles[i].y < (3*h/4))
-			continue;
-		bubbles[i].vspeed -= WINDSPEED;
-		if (bubbles[i].vspeed < -speed_limit)
-			bubbles[i].vspeed = -speed_limit;
-	}
-}
-
-// http://www.silverlightexamples.net/post/Silverlight-8-Ball-Game.aspx
-function doCollide(a, b)
-{
-	// calculate some vectors 
-	var dx = a.x - b.x;
-	var dy = a.y - b.y;
-	var dvx = a.hspeed - b.hspeed;
-	var dvy = a.vspeed - b.vspeed;
-	var distance2 = dx * dx + dy * dy;
-
-	if (Math.abs(dx) > a.d || Math.abs(dy) > a.d)
-		return false;
-	if (distance2 > a.d2)
-		return false;
-
-	// make absolutely elastic collision
-	var mag = dvx * dx + dvy * dy;
-
-	// test that balls move towards each other	
-	if (mag > 0)
-		return false;
-
-	mag /= distance2;
-
-	var delta_vx = dx * mag;
-	var delta_vy = dy * mag;
-
-	a.hspeed -= delta_vx;
-	a.vspeed -= delta_vy;
-
-	b.hspeed += delta_vx;
-	b.vspeed += delta_vy;
-	return true;
-}
-
-function manageballs()
-{
-	var number_of_balls = bubbles.length;
-	for (var x=0; x<number_of_balls-1; x++) {
-		for (var y=x+1; y<number_of_balls; y++) {
-			if (bubbles[x] == null || bubbles[y]==null)
-				continue;
-			if (x===selectedAnswer || y===selectedAnswer)
-				continue;
-			if (bubbles[x].collision==0 && bubbles[y].collision==0 && doCollide(bubbles[x],bubbles[y]))
-			{
-				bubbles[x].collision = 1;
-				bubbles[y].collision = 1;
-			}
-			else
-			{
-				bubbles[x].collision = 0;
-				bubbles[y].collision = 0;
-			}
-		}
-	}
-}
-
-function random2(min, max)
-{
-	var n = min+Math.round((max-min)*Math.random());
-	if (n>max)
-		n = max;
-	if (n<min)
-		n = min;
-	return n;
-}
-
-
-function overlaps(bubble,x,y,r)
-{
-	var distance_x = Math.abs(bubble.x-x);
-	var distance_y = Math.abs(bubble.y-y);
-	var distance = Math.sqrt(distance_x*distance_x+distance_y*distance_y);
-	if (distance > 4+r+bubble.r)
-		return false;
-	else
-		return true;
-}
-
-function initSpeed(r)
-{
-	return (r - random(2*r))*1.0;
-}
-
-function downBubble(event)
-{
-	event.stopPropagation();
-	selectBubble(+event.target.dataset.id,event.clientX,event.clientY);
-	return false;
-}
-
-function upBubble()
-{
-	event.stopPropagation();
-	if (selectedAnswer !== -1)
-	{
-		var b = bubbles[selectedAnswer];
-		b.div.style.transition = 'transform 0.2s linear';
-		b.vspeed = initSpeed(b.d)
-		b.hspeed = initSpeed(b.d);
-		var answers = document.querySelectorAll('.answer');
-
-		var rect = b.div.getBoundingClientRect();
-		var found = false;
-		var badMatch = false;
-		for (var i=0;!found && i<answers.length;i++)
-		{
-			var a = answers[i];
-			if (a.dataset.found !== 'yes' && goodMatch(a.getBoundingClientRect(),rect))
-			{
-				if (a.dataset.question === b.div.dataset.question)
-				{
-					found = true;
-					a.dataset.found = 'yes';
-					popBubble(b);
-					var pin = a.querySelector('.pin');
-					pin.textContent = STAR_ICON;
-					pin.classList.add('wobble');
-					a.querySelector('.clue').textContent = a.dataset.answer;
-					nAnswered++;
-					if (nAnswered>=total)
-					{
-						gameDone();
-					}
-				}
-				else
-					badMatch = true;
-			}
-		}
-		if (!found && badMatch)
-		{
-			nMistakes += 1;
-			lives -= 1;
-			displayScoreLevel();
-			play(badSound);
-		}
-	}
-	selectedAnswer = -1;
-	return false;
-}
-
-function popBubble(b)
-{
-	var dcx = cities_coords[cities_coords.length-4];
-	var dcy = cities_coords[cities_coords.length-3];
-	var d = distance((b.x*480)/w,(b.y*320)/h,dcx,dcy);
-	d = ((d * 3000) / 300) | 0;
-	miles += d;
-	displayScoreLevel();
-	b.div.style.pointerEvents = 'none';
-	b.popping = true;
-	selectedAnswer = -1;
-	play(goodSound);
-}
-function distance(ax,ay,bx,by)
-{
-	var dx = bx - ax;
-	var dy = by - ay;
-	return Math.sqrt((dx * dx) + (dy * dy)) | 0;
-}
-
-var questions = [];
-var nAnswered = 0;
-
-function addQuestionNow(question)
-{
-	var added = false;
-	var n = 100;
-	var r = 120;
-	var type = 0;
-	var d = 120;
-	var d2 = d * d;
-	while (true)
-	{
-		n--;
-		var x = 0.0+random2(r,w-r);
-		var y = 0.0+random2(r,h-r);
-		var overlap = false;
-		for (var i=0;!overlap && i<bubbles.length;i++)
-		{
-			if (overlaps(bubbles[i],x,y,r))
-				overlap = true;
-		}
-		if (!overlap || n<=0)
-		{
-			//var div = document.createElement('div');
-			var div = document.createElement('button');
-			var id = bubbles.length;
-			div.addEventListener('touchstart',downBubble,false);
-			div.addEventListener('mousedown',downBubble,false);
-			div.addEventListener('touchend',upBubble,false);
-			div.addEventListener('mouseup',upBubble,false);
-			div.className = 'question';
-			div.dataset.id = id;
-			div.style.opacity = 0;
-			div.dataset.question = question;
-			canvas.appendChild(div);
-			div.textContent = question;
-			bubbles.push( { d:d, d2:d2, oldTime: new Date().getTime(), div:div, img: img, mass: 1, collision:0, vspeed:initSpeed(r), hspeed: initSpeed(r), x: x, y: y, r: r, value: question } );
-			setTimeout(function () { div.style.opacity = 1.0; },2000);
-			return;
-		}
-	}
-}
-
-function moveBall(i)
-{
-	if (bubbles[i] == null)
-		return;
-	if (i === selectedAnswer)
-		return;
-	var newTime = new Date().getTime();
-	var dt = newTime - bubbles[i].oldTime;
-	bubbles[i].oldTime = newTime;
-	//limitSpeed(i);
-	//dt = MS; //NOTIME
-	bubbles[i].x += (dt*bubbles[i].hspeed)/MS;
-	bubbles[i].y += (dt*bubbles[i].vspeed)/MS;
-	if (bubbles[i].y > h-bubbles[i].r || bubbles[i].y < bubbles[i].r)
-	{
-		bubbles[i].vspeed *= -1;
-		if (bubbles[i].y > h-bubbles[i].r)
-			bubbles[i].y = h-bubbles[i].r;
-		else
-			bubbles[i].y = bubbles[i].r;
-	}
-	if (bubbles[i].x < bubbles[i].r || bubbles[i].x > w-bubbles[i].r)
-	{
-		bubbles[i].hspeed *= -1;
-		if (bubbles[i].x < bubbles[i].r)
-			bubbles[i].x = bubbles[i].r;
-		else
-			bubbles[i].x = w-bubbles[i].r;
-	}
-	drawBubble(bubbles[i]);
-}
-
-function getNewIndex(n)
-{
-	while (true)
-	{
-		var idx = random2(0,n-1);
-		if (questions.indexOf(idx) === -1)
-		{
-			questions.push(idx);
-			return idx;
-		}
-	}
-}
-
-function getStateImage(state)
-{
-	return 'popgeo/stamps-cropped/' + state + '-stamp.jpg';
-}
-
-function getValueText()
-{
-	switch (operationType)
-	{
-		case OP_STATES:
-			var idx = getNewIndex(ncapitals);
-			var stateName = capitals_names[idx * capitals_data_width + 1];
-			var state2 = capitals_names[idx * capitals_data_width + 2];
-			var x = capitals_coords[idx*2];
-			var y = capitals_coords[idx*2+1];
-			x -= 11;
-			y -= 74;
-			x = (x * w) / 480;
-			y = (y * h) / 320;
-			return {question:stateName,clue:'',answer:stateName,image:getStateImage(state2),x:x,y:y};
-			break;
-		case OP_CAPITALS:
-			var idx = getNewIndex(ncapitals);
-			var capitalName = capitals_names[idx * capitals_data_width + 0];
-			var stateName = capitals_names[idx * capitals_data_width + 1];
-			var state2 = capitals_names[idx * capitals_data_width + 2];
-			var x = capitals_coords[idx*2];
-			var y = capitals_coords[idx*2+1];
-			x -= 11;
-			y -= 74;
-			x = (x * w) / 480;
-			y = (y * h) / 320;
-			return {question:capitalName,clue:'',answer:capitalName + ',' + state2,image:getStateImage(state2),x:x,y:y};
-			break;
-		case OP_CITIES:
-			var idx = getNewIndex(ncities);
-			var cityName = cities_names[idx * cities_data_width + 0];
-			var stateName = cities_names[idx * cities_data_width + 1];
-			var state2 = cities_names[idx * cities_data_width + 2];
-			var x = cities_coords[idx*2];
-			var y = cities_coords[idx*2+1];
-			x -= 11;
-			y -= 74;
-			x = (x * w) / 480;
-			y = (y * h) / 320;
-			return {question:cityName,clue:'',answer:cityName + ',' + state2, image:getStateImage(state2), x:x,y:y};
-			break;
-		case OP_PARKS:
-			var idx = getNewIndex(nparks);
-			var parkName = parks_names[idx * parks_data_width + 0];
-			var stateName = parks_names[idx * parks_data_width + 2];
-			var state2 = parks_names[idx * parks_data_width + 1];
-			var parkimage = 'popgeo/our-national-parks/' + parks_names[idx * parks_data_width + 6] + '.jpg';
-			var x = parks_coords[idx*2];
-			var y = parks_coords[idx*2+1];
-			x = (x * w) / 480;
-			y = (y * h) / 320;
-			return {question:parkName,clue:'',answer:parkName + ',' + state2,image:parkimage,x:x,y:y};
-			break;
-		default:
-			return null;
-	}
-}
-
-function addBall()
-{
-	var res = getValueText();
-	if (!res)
-		return;
-
-	addAnswerNow(res.question,res.clue,res.answer,res.image,res.x,res.y);
-	addQuestionNow(res.question);
-}
-
-function addAnswerNow(question,clue,answer,image,x,y)
-{
-		var div = document.createElement('div');
-		div.className = 'answer';
-		div.dataset.question = question;
-		div.dataset.answer = answer;
-		div.dataset.x = x;
-		div.dataset.y = y;
-		div.dataset.image = image;
-		var size = Math.min(w,h)/16;
-		div.innerHTML = '<div class="pin" style="font-size:' + size + 'px">' + FA_MARKER + '</div><div class="clue">' + clue + '</div';
-		div.style.left = (x-size/2) + 'px';
-		div.style.top = (-size*2) + 'px';
-
-		canvas.appendChild(div);
-		div.querySelector('.pin').addEventListener('click',showImage,false);
-		div.querySelector('.pin').addEventListener('touchstart',showImage,false);
-		setTimeout(function () {
-			var dest = y+size;//(y - size/2 + size);
-			div.style.transform = 'translateY(' + dest + 'px)';
-			play(downSound);
-		},300*document.querySelectorAll('.answer').length);
-}
-
-function showImage(event) {
-	event.stopPropagation();
-	var elem = event.target;
-	if (!elem.classList.contains('wobble'))
-	{
-		return;
-	}
-	if (bigImageShown)
-		return showBigImage(false);
-	bigImage.src = elem.parentElement.dataset.image;
-	setTimeout(function(){
-		var imgw = bigImage.offsetWidth;
-		var imgh = bigImage.offsetHeight;
-		var x = Math.min(w-16-imgw,Math.max(16,(elem.parentElement.dataset.x-imgw/2)));
-		var y = Math.min(h-16-imgh,Math.max(16,(elem.parentElement.dataset.y - imgh - 32)));
-		bigImage.style.left = x + 'px';
-		bigImage.style.top = y + 'px';
-		showBigImage(true);
-	},20);
-}
-
-function limitSpeed(i)
-{
-	if (bubbles[i].hspeed > speed_limit)
-		bubbles[i].hspeed = speed_limit;
-	if (bubbles[i].hspeed < -speed_limit)
-		bubbles[i].hspeed = -speed_limit;
-	if (bubbles[i].vspeed > speed_limit)
-		bubbles[i].vspeed = speed_limit;
-	if (bubbles[i].vspeed < -speed_limit)
-		bubbles[i].vspeed = -speed_limit;
-}
-
-var BLOW_STEPS = 0;
-var isHidden = false;
-
-function draw()
-{
-	if (isHidden)
-		return;
-	//var newTime = new Date().getTime();
-	//var dt = newTime-oldTime;
-	//oldTime = newTime;
-
-	if (BLOW_STEPS > 50)
-	{
-		BLOW_STEPS = 0;
-		blow();
-	}
-	BLOW_STEPS++;
-	addBallStep--;
-	if (bubbles.length < total && addBallStep<0)
-	{
-		addBallStep = ADDBALLSTEPS;
-		addBall();
-	}
-
-	var nbubbles = bubbles.length;
-	var allDone = true;
-	
-	//manageballs();
-	for (var i=0;i<nbubbles;i++)
-	{
-		if (bubbles[i] == null)
-			continue;
-		allDone = false;
-		var r = bubbles[i].r;
-		
-		var drawSelected = i == selectedAnswer;
-		moveBall(i);
-		if (winner !== null)
-		{
-			winner.steps = winner.steps-1;
-			if (winner.steps <= 0)
-			{
-				//bubbles[winner.first].div.style.visibility = 'hidden';
-				bubbles[winner.first].div.parentElement.removeChild(bubbles[winner.first].div);
-				bubbles[winner.first] = null;
-				//bubbles[winner.second].div.style.visibility = 'hidden';
-				bubbles[winner.second].div.parentElement.removeChild(bubbles[winner.second].div);
-				bubbles[winner.second] = null;
-				winner = null;
-			}
-			if (winner !== null && (i === winner.first || i === winner.second))
-				drawSelected = true;
-		}
-		drawBubble(bubbles[i],drawSelected);
-	}
-
-	manageballs();
-
-
-	if (nbubbles==2*total && allDone)
-		gameDone();
-	else
-		reqID = requestAnimationFrame(draw);
-}
-
-var messages = ['Awesome','Great','Super','You rock','Unbelievable','Bravissimo'];
-function pickRandomMessage()
-{
-	return messages[random2(0,messages.length-1)] + '!!';
-}
-
-function timeSecs(ms)
-{
-	var secs = ms/1000;
-	return Math.round(secs);
-}
-
-function gameDone()
-{
-	gameStarted = false;
-	if (interval != null)
-		clearInterval(interval);
-	if (windinterval != null)
-		clearInterval(windinterval);
-	var newTime = new Date().getTime();
-	bravodiv.textContent = pickRandomMessage();
-	if (nMistakes === 0)
-		subheader.textContent = timeSecs(newTime-TOTALTIME) + ' seconds, no mistakes!';
-	else
-		subheader.textContent = timeSecs(newTime-TOTALTIME) + ' seconds, ' + nMistakes + ' mistakes';
-	centered.style.visibility = 'visible';
-	choices.style.visibility = 'visible';
-	//startgame.value = 'Go to Level ' + (LEVEL+1);
-	setType(operationType);
-}
-function random(n)
-{
-	return Math.round(n*Math.random());
-}
-
-
-function goodMatch(rect1,rect2)
-{
-	if (rect1.right < rect2.left)
-		return false;
-	if (rect1.left > rect2.right)
-		return false;
-	if (rect1.bottom < rect2.top)
-		return false;
-	if (rect1.top > rect2.bottom)
-		return false;
-	return true;
-}
-
-var winner = null;
-var WINNER_STEPS = 64;
-
-function play(audio) {
-  if (volumeOn)
-  {
-    audio.currentTime = 0;
-    audio.play();
-  }
-}
-
-function selectBubble(i,x,y)
-{
-	bubbles[i].div.style.zIndex = 2000;
-	deltax = x - bubbles[i].x;
-	deltay = y - bubbles[i].y;
-	bubbles[i].x = x - deltax;
-	bubbles[i].y = y - deltay;
-	bubbles[i].div.style.transition = 'none';
-	bubbles[i].hspeed = 0;
-	bubbles[i].vspeed = 0;
-	selectedAnswer = i;
-}
-
-
-function displayScoreLevel() {
-	milesdiv.textContent = miles + ' miles';
-	/*if (lives > 0)
-		livesdiv.textContent = '\uf005'.repeat(lives);
-	else*/
-		livesdiv.textContent = '';
-}
-
-function newGame(event)
-{
-	event.stopPropagation();
-	showBigImage(false);
-	questions = [];
-	nAnswered = 0;
-	nMistakes = 0;
-	centered.style.visibility = 'hidden';
-	choices.style.visibility = 'hidden';
-	canvas.innerHTML = '';
-	bubbles = new Array();
-	addBallStep = ADDBALLSTEPS;
-	var sum = 0;
-	//oldTime = new Date().getTime();
-	TOTALTIME = new Date().getTime();
-	//interval = setInterval(draw,DT);
-	reqID = requestAnimationFrame(draw);
-	//windinterval = setInterval(blow,WINDINTERVAL);
-	LEVEL+=1;
-	displayScoreLevel();
-	gameStarted = true;
-}
-
-function preload(callback)
-{
-	return callback();
-	var n = parks_names.length/parks_data_width + capitals_names.length/capitals_data_width;
-
-	for (var i=0;i<parks_names.length;i+=parks_data_width)
-	{
-		var link = 'popgeo/our-national-parks/' + parks_names[i+6] + '.jpg';
-		var img = new Image();
-		img.onload = function () {
-			n--;
-			if (n <= 0)
-				callback();
-		}
-		img.src = link;
-	}
-
-	for (var i=0;i<capitals_names.length;i+=capitals_data_width)
-	{
-		var link = 'popgeo/stamps-cropped/' + capitals_names[i+2] + '-stamp.jpg';
-		var img = new Image();
-		img.onload = function () {
-			n--;
-			if (n <= 0)
-				callback();
-		}
-		img.src = link;
-	}
-}
-
-var deltax = 0;
-var deltay = 0;
-
-function dragBubble(event)
-{
-	if (selectedAnswer === -1)
-		return;
-	event.stopPropagation();
-	var x = event.clientX;
-	var y = event.clientY;
-	bubbles[selectedAnswer].x = x - deltax;
-	bubbles[selectedAnswer].y = y - deltay;
-}
-
-var bigImageShown = false;
-
-function showBigImage(yes)
-{
-	bigImageShown = yes;
-	if (yes)
-	{
-		//bigImage.style.display = 'block';
-		if (bigImage.src.indexOf('stamps') !== -1)
-		{
-			bigImage.style.padding = '8px';
-		}
-		else
-		{
-			bigImage.style.padding = '0px';
-		}
-		bigImage.style.opacity = 1.0;
-		bigImage.style.pointerEvents = 'all';
-	}
-	else
-	{
-		bigImage.style.opacity = 0.0;
-		bigImage.style.pointerEvents = 'none';
-	}
-}
-
-function hideImage(e)
-{
-	if (bigImageShown)
-	{
-		e.stopPropagation();
-		showBigImage(false);
-	}		
-}
-
-function init()
-{
-	questions = [];
-	nAnswered = 0;
-	canvas.addEventListener('mousemove',dragBubble,false);
-	canvas.addEventListener('touchmove',dragBubble,false);
-	canvas.addEventListener('mouseup',upBubble,false);
-	canvas.addEventListener('touchend',upBubble,false);
-	canvas.addEventListener('click',hideImage,false);
-	canvas.addEventListener('touchstart',hideImage,false);
-	setType(operationType);
-	document.body.style.display = 'none';
-	preload(function () {
-		document.body.style.display = 'block';
-		//console.log('loaded');
-		w = canvas.offsetWidth;
-		h = canvas.offsetHeight;
-		nMistakes = 0;
-		bravodiv.textContent ='PopGeo USA Geography';
-		subheader.textContent = 'How far will you travel today?';
-		centered.style.visibility = 'visible';
-		choices.style.visibility = 'visible';
-		displayScoreLevel();
-	});
-}
 
 const FA_MARKER = '\uf041';
 const STAR_ICON = '\uf005'
@@ -1462,6 +778,693 @@ const nicknames = [
 "Equality","1890",""
 ];
 
+function blow()
+{
+	//console.log('blowing wind');
+	var nbubbles = bubbles.length;
+	for (var i=0;i<nbubbles;i++)
+	{
+		if (bubbles[i] == null)
+			continue;
+		if (bubbles[i].y < (3*h/4))
+			continue;
+		bubbles[i].vspeed -= WINDSPEED;
+		if (bubbles[i].vspeed < -speed_limit)
+			bubbles[i].vspeed = -speed_limit;
+	}
+}
+
+// http://www.silverlightexamples.net/post/Silverlight-8-Ball-Game.aspx
+function doCollide(a, b)
+{
+	// calculate some vectors 
+	var dx = a.x - b.x;
+	var dy = a.y - b.y;
+	var dvx = a.hspeed - b.hspeed;
+	var dvy = a.vspeed - b.vspeed;
+	var distance2 = dx * dx + dy * dy;
+
+	if (Math.abs(dx) > a.d || Math.abs(dy) > a.d)
+		return false;
+	if (distance2 > a.d2)
+		return false;
+
+	// make absolutely elastic collision
+	var mag = dvx * dx + dvy * dy;
+
+	// test that balls move towards each other	
+	if (mag > 0)
+		return false;
+
+	mag /= distance2;
+
+	var delta_vx = dx * mag;
+	var delta_vy = dy * mag;
+
+	a.hspeed -= delta_vx;
+	a.vspeed -= delta_vy;
+
+	b.hspeed += delta_vx;
+	b.vspeed += delta_vy;
+	return true;
+}
+
+function manageballs()
+{
+	var number_of_balls = bubbles.length;
+	for (var x=0; x<number_of_balls-1; x++) {
+		for (var y=x+1; y<number_of_balls; y++) {
+			if (bubbles[x] == null || bubbles[y] == null)
+				continue;
+			if (bubbles[x].popping || bubbles[y].popping)
+				continue;
+			if (x===selectedAnswer || y===selectedAnswer)
+				continue;
+			if (bubbles[x].collision==0 && bubbles[y].collision==0 && doCollide(bubbles[x],bubbles[y]))
+			{
+				bubbles[x].collision = 1;
+				bubbles[y].collision = 1;
+			}
+			else
+			{
+				bubbles[x].collision = 0;
+				bubbles[y].collision = 0;
+			}
+		}
+	}
+}
+
+function random2(min, max)
+{
+	var n = min+Math.round((max-min)*Math.random());
+	if (n>max)
+		n = max;
+	if (n<min)
+		n = min;
+	return n;
+}
+
+
+function overlaps(bubble,x,y,r)
+{
+	var distance_x = Math.abs(bubble.x-x);
+	var distance_y = Math.abs(bubble.y-y);
+	var distance = Math.sqrt(distance_x*distance_x+distance_y*distance_y);
+	if (distance > 4+r+bubble.r)
+		return false;
+	else
+		return true;
+}
+
+function initSpeed(r)
+{
+	return (r - random(2*r))*1.0;
+}
+
+function downBubble(event)
+{
+	event.stopPropagation();
+	event.preventDefault();
+	var pos = getPos(event);
+	selectBubble(+event.target.dataset.id,pos.x,pos.y);
+	return false;
+}
+
+function upBubble()
+{
+	event.stopPropagation();
+	event.preventDefault();
+	if (selectedAnswer !== -1)
+	{
+		var b = bubbles[selectedAnswer];
+		b.div.style.transition = 'transform 0.2s linear';
+		b.vspeed = initSpeed(b.d)
+		b.hspeed = initSpeed(b.d);
+		var answers = document.querySelectorAll('.answer');
+
+		var rect = b.div.getBoundingClientRect();
+		var found = false;
+		var badMatch = false;
+		for (var i=0;!found && i<answers.length;i++)
+		{
+			var a = answers[i];
+			if (a.dataset.found !== 'yes' && goodMatch(a.getBoundingClientRect(),rect))
+			{
+				if (a.dataset.question === b.div.dataset.question)
+				{
+					found = true;
+					a.dataset.found = 'yes';
+					popBubble(b);
+					var pin = a.querySelector('.pin');
+					pin.textContent = STAR_ICON;
+					pin.classList.add('wobble');
+					a.querySelector('.clue').textContent = a.dataset.answer;
+					nAnswered++;
+					if (nAnswered>=total)
+					{
+						gameDone();
+					}
+				}
+				else
+					badMatch = true;
+			}
+		}
+		if (!found && badMatch)
+		{
+			nMistakes += 1;
+			lives -= 1;
+			displayScoreLevel();
+			play(badSound);
+		}
+	}
+	selectedAnswer = -1;
+	return false;
+}
+
+function popBubble(b)
+{
+	var dcx = cities_coords[cities_coords.length-4];
+	var dcy = cities_coords[cities_coords.length-3];
+	var d = distance((b.x*480)/w,(b.y*320)/h,dcx,dcy);
+	d = ((d * 3000) / 300) | 0;
+	miles += d;
+	displayScoreLevel();
+	b.div.style.pointerEvents = 'none';
+	b.popping = true;
+	selectedAnswer = -1;
+	play(goodSound);
+}
+function distance(ax,ay,bx,by)
+{
+	var dx = bx - ax;
+	var dy = by - ay;
+	return Math.sqrt((dx * dx) + (dy * dy)) | 0;
+}
+
+var questions = [];
+var nAnswered = 0;
+
+function addQuestionNow(question)
+{
+	var added = false;
+	var n = 100;
+	var r = 120;
+	var type = 0;
+	var d = 120;
+	var d2 = d * d;
+	while (true)
+	{
+		n--;
+		var x = 0.0+random2(r,w-r);
+		var y = 0.0+random2(r,h-r);
+		var overlap = false;
+		for (var i=0;!overlap && i<bubbles.length;i++)
+		{
+			if (overlaps(bubbles[i],x,y,r))
+				overlap = true;
+		}
+		if (!overlap || n<=0)
+		{
+			//var div = document.createElement('div');
+			var div = document.createElement('button');
+			var id = bubbles.length;
+			div.addEventListener('touchstart',downBubble,{passive:false});
+			div.addEventListener('mousedown',downBubble,false);
+			div.addEventListener('touchend',upBubble,false);
+			div.addEventListener('mouseup',upBubble,false);
+			div.className = 'question';
+			div.dataset.id = id;
+			div.style.opacity = 0;
+			div.dataset.question = question;
+			canvas.appendChild(div);
+			div.textContent = question;
+			bubbles.push( { d:d, d2:d2, oldTime: new Date().getTime(), div:div, img: img, mass: 1, collision:0, vspeed:initSpeed(r), hspeed: initSpeed(r), x: x, y: y, r: r, value: question } );
+			setTimeout(function () { div.style.opacity = 1.0; },2000);
+			return;
+		}
+	}
+}
+
+function moveBall(i)
+{
+	if (bubbles[i] == null)
+		return;
+	if (i === selectedAnswer)
+		return;
+	var newTime = new Date().getTime();
+	var dt = newTime - bubbles[i].oldTime;
+	bubbles[i].oldTime = newTime;
+	//limitSpeed(i);
+	//dt = MS; //NOTIME
+	bubbles[i].x += (dt*bubbles[i].hspeed)/MS;
+	bubbles[i].y += (dt*bubbles[i].vspeed)/MS;
+	if (bubbles[i].y > h-bubbles[i].r || bubbles[i].y < bubbles[i].r)
+	{
+		bubbles[i].vspeed *= -1;
+		if (bubbles[i].y > h-bubbles[i].r)
+			bubbles[i].y = h-bubbles[i].r;
+		else
+			bubbles[i].y = bubbles[i].r;
+	}
+	if (bubbles[i].x < bubbles[i].r || bubbles[i].x > w-bubbles[i].r)
+	{
+		bubbles[i].hspeed *= -1;
+		if (bubbles[i].x < bubbles[i].r)
+			bubbles[i].x = bubbles[i].r;
+		else
+			bubbles[i].x = w-bubbles[i].r;
+	}
+	drawBubble(bubbles[i]);
+}
+
+function getNewIndex(n)
+{
+	while (true)
+	{
+		var idx = random2(0,n-1);
+		if (questions.indexOf(idx) === -1)
+		{
+			questions.push(idx);
+			return idx;
+		}
+	}
+}
+
+function getStateImage(state)
+{
+	return 'popgeo/stamps-cropped/' + state + '-stamp.jpg';
+}
+
+function toScreen(x,y)
+{
+	var x = ((x-11) * w)/480;
+	var y = ((y-74) * h)/320;
+	return {x:x|1,y:y|1}
+}
+
+function getValueText()
+{
+	switch (operationType)
+	{
+		case OP_STATES:
+			var idx = getNewIndex(ncapitals);
+			var stateName = capitals_names[idx * capitals_data_width + 1];
+			var state2 = capitals_names[idx * capitals_data_width + 2];
+			var x = capitals_coords[idx*2];
+			var y = capitals_coords[idx*2+1];
+			/*x -= 11;
+			y -= 74;
+			x = (x * w) / 480;
+			y = (y * h) / 320;*/
+			return {question:stateName,clue:'',answer:stateName,image:getStateImage(state2),x:x,y:y};
+			break;
+		case OP_CAPITALS:
+			var idx = getNewIndex(ncapitals);
+			var capitalName = capitals_names[idx * capitals_data_width + 0];
+			var stateName = capitals_names[idx * capitals_data_width + 1];
+			var state2 = capitals_names[idx * capitals_data_width + 2];
+			var x = capitals_coords[idx*2];
+			var y = capitals_coords[idx*2+1];
+			/*x -= 11;
+			y -= 74;
+			x = (x * w) / 480;
+			y = (y * h) / 320;*/
+			return {question:capitalName,clue:'',answer:capitalName + ',' + state2,image:getStateImage(state2),x:x,y:y};
+			break;
+		case OP_CITIES:
+			var idx = getNewIndex(ncities);
+			var cityName = cities_names[idx * cities_data_width + 0];
+			var stateName = cities_names[idx * cities_data_width + 1];
+			var state2 = cities_names[idx * cities_data_width + 2];
+			var x = cities_coords[idx*2];
+			var y = cities_coords[idx*2+1];
+			/*x -= 11;
+			y -= 74;
+			x = (x * w) / 480;
+			y = (y * h) / 320;*/
+			return {question:cityName,clue:'',answer:cityName + ',' + state2, image:getStateImage(state2), x:x,y:y};
+			break;
+		case OP_PARKS:
+			var idx = getNewIndex(nparks);
+			var parkName = parks_names[idx * parks_data_width + 0];
+			var stateName = parks_names[idx * parks_data_width + 2];
+			var state2 = parks_names[idx * parks_data_width + 1];
+			var parkimage = 'popgeo/our-national-parks/' + parks_names[idx * parks_data_width + 6] + '.jpg';
+			var x = parks_coords[idx*2];
+			var y = parks_coords[idx*2+1];
+			x += 11;
+			y += 74;
+			/*x = (x * w) / 480;
+			y = (y * h) / 320;*/
+			return {question:parkName,clue:'',answer:parkName + ',' + state2,image:parkimage,x:x,y:y};
+			break;
+		default:
+			return null;
+	}
+}
+
+function addBall()
+{
+	var res = getValueText();
+	if (!res)
+		return;
+
+	addAnswerNow(res.question,res.clue,res.answer,res.image,res.x,res.y);
+	addQuestionNow(res.question);
+}
+
+function addAnswerNow(question,clue,answer,image,x,y)
+{
+		var div = document.createElement('div');
+		div.className = 'answer';
+		div.dataset.question = question;
+		div.dataset.answer = answer;
+		div.dataset.x = x;
+		div.dataset.y = y;
+		div.dataset.image = image;
+		var size = (Math.min(w,h)/16)|0;
+		div.dataset.size = size;
+		div.innerHTML = '<div class="pin" style="font-size:' + size + 'px">' + FA_MARKER + '</div><div class="clue">' + clue + '</div';
+		var pos = toScreen(x,y);
+		div.style.left = (pos.x-size/2) + 'px';
+		div.style.top = (-size*2) + 'px';
+
+		canvas.appendChild(div);
+		div.querySelector('.pin').addEventListener('click',showImage,false);
+		div.querySelector('.pin').addEventListener('touchstart',showImage,{passive:false});
+		setTimeout(function () {
+			var dest = pos.y+size;//(y - size/2 + size);
+			div.style.transform = 'translateY(' + dest + 'px)';
+			play(downSound);
+		},300*document.querySelectorAll('.answer').length);
+}
+
+function showImage(event) {
+	event.stopPropagation();
+	event.preventDefault();
+	var elem = event.target;
+	if (!elem.classList.contains('wobble'))
+	{
+		return;
+	}
+	if (bigImageShown)
+		return showBigImage(false);
+	bigImage.src = elem.parentElement.dataset.image;
+	setTimeout(function(){
+		var imgw = bigImage.offsetWidth;
+		var imgh = bigImage.offsetHeight;
+		var pos = toScreen(+elem.parentElement.dataset.x,elem.parentElement.dataset.y);
+		var x = Math.min(w-16-imgw,Math.max(16,(pos.x-imgw/2)));
+		var y = Math.min(h-16-imgh,Math.max(16,(pos.y - imgh - 32)));
+		bigImage.style.left = x + 'px';
+		bigImage.style.top = y + 'px';
+		showBigImage(true);
+	},20);
+}
+
+function limitSpeed(i)
+{
+	if (bubbles[i].hspeed > speed_limit)
+		bubbles[i].hspeed = speed_limit;
+	if (bubbles[i].hspeed < -speed_limit)
+		bubbles[i].hspeed = -speed_limit;
+	if (bubbles[i].vspeed > speed_limit)
+		bubbles[i].vspeed = speed_limit;
+	if (bubbles[i].vspeed < -speed_limit)
+		bubbles[i].vspeed = -speed_limit;
+}
+
+var BLOW_STEPS = 0;
+
+function draw()
+{
+	if (BLOW_STEPS > 50)
+	{
+		BLOW_STEPS = 0;
+		blow();
+	}
+	BLOW_STEPS++;
+	addBallStep--;
+	if (bubbles.length < total && addBallStep<0)
+	{
+		addBallStep = ADDBALLSTEPS;
+		addBall();
+	}
+
+	var nbubbles = bubbles.length;
+	var allDone = true;
+	
+	for (var i=0;i<nbubbles;i++)
+	{
+		if (bubbles[i] == null)
+			continue;
+		allDone = false;
+		var r = bubbles[i].r;
+		
+		var drawSelected = i == selectedAnswer;
+		moveBall(i);
+		drawBubble(bubbles[i],drawSelected);
+	}
+
+	manageballs();
+
+
+	if (nbubbles==2*total && allDone)
+		gameDone();
+	else
+		reqID = requestAnimationFrame(draw);
+}
+
+var messages = ['Awesome','Great','Super','You rock','Unbelievable','Bravissimo'];
+function pickRandomMessage()
+{
+	return messages[random2(0,messages.length-1)] + '!!';
+}
+
+function timeSecs(ms)
+{
+	var secs = ms/1000;
+	return Math.round(secs);
+}
+
+function gameDone()
+{
+	gameStarted = false;
+	if (interval != null)
+		clearInterval(interval);
+	if (windinterval != null)
+		clearInterval(windinterval);
+	var newTime = new Date().getTime();
+	bravodiv.textContent = pickRandomMessage();
+	if (nMistakes === 0)
+		subheader.textContent = timeSecs(newTime-TOTALTIME) + ' seconds, no mistakes!';
+	else
+		subheader.textContent = timeSecs(newTime-TOTALTIME) + ' seconds, ' + nMistakes + ' mistakes';
+	centered.style.visibility = 'visible';
+	choices.style.visibility = 'visible';
+	//startgame.value = 'Go to Level ' + (LEVEL+1);
+	setType(operationType);
+}
+function random(n)
+{
+	return Math.round(n*Math.random());
+}
+
+
+function goodMatch(rect1,rect2)
+{
+	if (rect1.right < rect2.left)
+		return false;
+	if (rect1.left > rect2.right)
+		return false;
+	if (rect1.bottom < rect2.top)
+		return false;
+	if (rect1.top > rect2.bottom)
+		return false;
+	return true;
+}
+
+function play(audio) {
+  if (volumeOn)
+  {
+    audio.currentTime = 0;
+    audio.play();
+  }
+}
+
+function selectBubble(i,x,y)
+{
+	bubbles[i].div.style.zIndex = 2000;
+	deltax = x - bubbles[i].x;
+	deltay = y - bubbles[i].y;
+	bubbles[i].x = x - deltax;
+	bubbles[i].y = y - deltay;
+	bubbles[i].div.style.transition = 'none';
+	bubbles[i].hspeed = 0;
+	bubbles[i].vspeed = 0;
+	selectedAnswer = i;
+}
+
+
+function displayScoreLevel() {
+	milesdiv.textContent = miles + ' miles';
+	/*if (lives > 0)
+		livesdiv.textContent = '\uf005'.repeat(lives);
+	else*/
+		livesdiv.textContent = '';
+}
+
+function newGame(event)
+{
+	event.stopPropagation();
+	event.preventDefault();
+	showBigImage(false);
+	questions = [];
+	nAnswered = 0;
+	nMistakes = 0;
+	centered.style.visibility = 'hidden';
+	choices.style.visibility = 'hidden';
+	canvas.innerHTML = '';
+	bubbles = new Array();
+	addBallStep = ADDBALLSTEPS;
+	var sum = 0;
+	//oldTime = new Date().getTime();
+	TOTALTIME = new Date().getTime();
+	//interval = setInterval(draw,DT);
+	reqID = requestAnimationFrame(draw);
+	//windinterval = setInterval(blow,WINDINTERVAL);
+	LEVEL+=1;
+	displayScoreLevel();
+	gameStarted = true;
+}
+
+function preload(callback)
+{
+	return callback();
+	var n = parks_names.length/parks_data_width + capitals_names.length/capitals_data_width;
+
+	for (var i=0;i<parks_names.length;i+=parks_data_width)
+	{
+		var link = 'popgeo/our-national-parks/' + parks_names[i+6] + '.jpg';
+		var img = new Image();
+		img.onload = function () {
+			n--;
+			if (n <= 0)
+				callback();
+		}
+		img.src = link;
+	}
+
+	for (var i=0;i<capitals_names.length;i+=capitals_data_width)
+	{
+		var link = 'popgeo/stamps-cropped/' + capitals_names[i+2] + '-stamp.jpg';
+		var img = new Image();
+		img.onload = function () {
+			n--;
+			if (n <= 0)
+				callback();
+		}
+		img.src = link;
+	}
+}
+
+function getPos(event)
+{
+	if (event.touches)
+		return {x: event.touches[0].clientX, y: event.touches[0].clientY};
+	else
+		return {x:event.clientX,y:event.clientY};
+}
+
+function dragBubble(event)
+{
+	event.preventDefault();
+	event.stopPropagation();
+	var pos = getPos(event);
+	if (selectedAnswer === -1)
+		return false;
+	bubbles[selectedAnswer].x = pos.x - deltax;
+	bubbles[selectedAnswer].y = pos.y - deltay;
+}
+
+
+function showBigImage(yes)
+{
+	bigImageShown = yes;
+	if (yes)
+	{
+		//bigImage.style.display = 'block';
+		if (bigImage.src.indexOf('stamps') !== -1)
+		{
+			bigImage.style.padding = '8px';
+		}
+		else
+		{
+			bigImage.style.padding = '0px';
+		}
+		bigImage.style.opacity = 1.0;
+		bigImage.style.pointerEvents = 'all';
+	}
+	else
+	{
+		bigImage.style.opacity = 0.0;
+		bigImage.style.pointerEvents = 'none';
+	}
+}
+
+function hideImage(e)
+{
+	if (bigImageShown)
+	{
+		e.stopPropagation();
+		showBigImage(false);
+	}		
+}
+
+function init()
+{
+	window.addEventListener('resize', function(event) {
+    w = canvas.offsetWidth;
+    h = canvas.offsetHeight;
+    canvas.querySelectorAll('.answer').forEach(a => {
+    	var x = +a.dataset.x;
+    	var y = +a.dataset.y;
+    	var size = +a.dataset.size;
+    	var pos = toScreen(x,y);
+    	a.style.left = (pos.x-size/2) + 'px';
+			var dest = pos.y + size;
+			a.style.transition = 'transform 0s';
+			a.style.transform = 'translateY(' + dest + 'px)';
+    });
+	},false);
+	bigImage.addEventListener('click',hideImage,false);
+	bigImage.addEventListener('touchend',hideImage,false);
+	startgame.addEventListener('touchstart',newGame,{passive:false});
+	startgame.addEventListener('click',newGame,false);
+	questions = [];
+	nAnswered = 0;
+	canvas.addEventListener('touchmove',dragBubble,{ passive: false });
+	canvas.addEventListener('mousemove',dragBubble,false);
+	canvas.addEventListener('touchend',upBubble,false);
+	canvas.addEventListener('mouseup',upBubble,false);
+	canvas.addEventListener('touchstart',hideImage,{passive:false});
+	canvas.addEventListener('click',hideImage,false);
+	setType(operationType);
+	document.body.style.display = 'none';
+	preload(function () {
+		document.body.style.display = 'block';
+		//console.log('loaded');
+		w = canvas.offsetWidth;
+		h = canvas.offsetHeight;
+		nMistakes = 0;
+		bravodiv.textContent ='PopGeo USA Geography';
+		subheader.textContent = 'How far will you travel today?';
+		centered.style.visibility = 'visible';
+		choices.style.visibility = 'visible';
+		displayScoreLevel();
+	});
+}
+
 function setType(value)
 {
 	operationType = value;
@@ -1485,7 +1488,8 @@ function setType(value)
 	}
 }
 </script>
-</head><body onload="init()">
+</head>
+<body onload="init()">
 <div id='container'>
 	<img id='map' src='popgeo/popgeo_usa_480x320.png'>
 	<div id='canvas'></div>
@@ -1517,11 +1521,5 @@ function setType(value)
 			</label>
 	</div>
 </div>
-<script>
-bigImage.addEventListener('click',hideImage,false);
-bigImage.addEventListener('touchend',hideImage,false);
-startgame.addEventListener('touchstart',newGame,false);
-startgame.addEventListener('click',newGame,false);
-</script>
 </body>
 </html>
