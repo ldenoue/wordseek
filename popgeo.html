@@ -77,7 +77,7 @@ margin-left:auto;
 margin-right:auto;
 background-color:transparent;
 width:70%;
-left:calc(50% - 30%);
+left:calc(50% - 35%);
 top:calc(50% - 100px);
 z-index:3000;
 padding:16px;
@@ -393,7 +393,7 @@ function drawBubble(bubble, sel)
 var downSound = new Audio('popgeo/m_arrow.mp3');
 var goodSound = new Audio('popgeo/jackpoti.mp3');
 var badSound = new Audio('stretch.mp3');
-var volumeOn = true;
+var volumeOn = false;
 var fontOffset = [0,12,23,34,44,56,67,78,89,99,110];
 var fontW = 10;
 var fontH = 14;
@@ -884,8 +884,8 @@ function timeSecs(ms)
 function gameDone()
 {
 	gameStarted = false;
-	//if (interval != null)
-	//	clearInterval(interval);
+	if (interval != null)
+		clearInterval(interval);
 	if (windinterval != null)
 		clearInterval(windinterval);
 	var newTime = new Date().getTime();
@@ -1014,7 +1014,6 @@ function dragBubble(event)
 	event.stopPropagation();
 	var x = event.clientX;
 	var y = event.clientY;
-	//console.log(x,y);
 	bubbles[selectedAnswer].x = x - deltax;
 	bubbles[selectedAnswer].y = y - deltay;
 }
